@@ -1,31 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Endall AI — The AI Operating System for Your Business",
-  description: "CRM, email automation, task management, and AI agents — all in one platform. Built for SMBs who want enterprise tools without enterprise complexity.",
+  title: "Endall — The AI Operating System for Your Business",
+  description:
+    "CRM, email automation, task management, and AI agents — all in one platform. Built for SMBs who want enterprise tools without enterprise complexity.",
   openGraph: {
-    title: "Endall AI — The AI Operating System for Your Business",
-    description: "CRM, email automation, task management, and AI agents — all in one platform.",
+    title: "Endall — The AI Operating System for Your Business",
+    description:
+      "CRM, email automation, task management, and AI agents — all in one platform.",
     url: "https://endall.ai",
-    siteName: "Endall AI",
+    siteName: "Endall",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Endall AI",
-    description: "CRM, email automation, task management, and AI agents — all in one platform.",
+    title: "Endall",
+    description:
+      "CRM, email automation, task management, and AI agents — all in one platform.",
   },
 };
 
@@ -37,9 +42,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-inter)]">
+        {children}
+      </body>
     </html>
   );
 }
