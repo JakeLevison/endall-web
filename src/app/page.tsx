@@ -44,11 +44,11 @@ export default function Home() {
     <div className="min-h-screen bg-[#0A0A0B] text-zinc-300 selection:bg-zinc-700">
       {/* Nav */}
       <nav className="fixed top-0 z-50 w-full border-b border-white/[0.04] bg-[#0A0A0B]/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 py-3 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-5xl mx-auto">
           <Link href="/" className="text-[15px] font-medium tracking-[-0.01em] text-white">
             endall
           </Link>
-          <div className="hidden sm:flex items-center gap-7">
+          <div className="hidden md:flex items-center gap-7">
             <a href="#features" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors">
               Features
             </a>
@@ -59,7 +59,7 @@ export default function Home() {
               Pricing
             </a>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link href="/login" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors hidden sm:block">
               Log in
             </Link>
@@ -74,30 +74,30 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-36 pb-24 px-6">
+      <section className="pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-block mb-8 px-2.5 py-0.5 rounded-full border border-white/[0.06] text-[11px] tracking-wide text-zinc-500 uppercase">
+          <div className="inline-block mb-6 sm:mb-8 px-2.5 py-0.5 rounded-full border border-white/[0.06] text-[11px] tracking-wide text-zinc-500 uppercase">
             Early access
           </div>
-          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-semibold tracking-[-0.035em] leading-[1.05] text-white">
+          <h1 className="text-3xl sm:text-5xl lg:text-[4.5rem] font-semibold tracking-[-0.035em] leading-[1.1] text-white">
             The AI operating system
             <br />
             <span className="text-zinc-600">for your business</span>
           </h1>
-          <p className="mt-5 text-[17px] text-zinc-500 max-w-lg mx-auto leading-relaxed tracking-[-0.01em]">
+          <p className="mt-4 sm:mt-5 text-[15px] sm:text-[17px] text-zinc-500 max-w-lg mx-auto leading-relaxed tracking-[-0.01em] px-2">
             CRM, email sequences, workflow automation, task management, and AI
             agents. One platform.
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 justify-center px-4 sm:px-0">
             <Link
               href="/signup"
-              className="bg-white text-zinc-900 px-5 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors"
+              className="bg-white text-zinc-900 px-5 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors text-center"
             >
               Start for free
             </Link>
             <a
               href="#features"
-              className="border border-white/[0.08] text-zinc-400 px-5 py-2.5 rounded-md text-[13px] font-medium hover:border-white/[0.15] hover:text-zinc-300 transition-all"
+              className="border border-white/[0.08] text-zinc-400 px-5 py-2.5 rounded-md text-[13px] font-medium hover:border-white/[0.15] hover:text-zinc-300 transition-all text-center"
             >
               See what&apos;s inside
             </a>
@@ -109,7 +109,7 @@ export default function Home() {
       <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
 
       {/* Features */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 text-center mb-12">
             Platform
@@ -137,12 +137,12 @@ export default function Home() {
 
       {/* How it works */}
       <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section id="how-it-works" className="py-24 px-6">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 text-center mb-12">
             Getting started
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
             {[
               {
                 step: "01",
@@ -181,7 +181,7 @@ export default function Home() {
 
       {/* Pricing */}
       <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section id="pricing" className="py-24 px-6">
+      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 mb-12">
             Pricing
@@ -242,7 +242,7 @@ export default function Home() {
 
       {/* CTA */}
       <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-xl mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3">
             Stop duct-taping tools together.
@@ -260,7 +260,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.04] py-6 px-6">
+      <footer className="border-t border-white/[0.04] py-6 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-zinc-700">
           <span>Endall AI</span>
           <div className="flex gap-5">
