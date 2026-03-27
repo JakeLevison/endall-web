@@ -98,7 +98,7 @@ export default function HeroHeadline() {
           <span
             style={{
               display: "inline-block",
-              height: stepPx,
+              height: stepPx - 1,
               overflow: "hidden",
               verticalAlign: "bottom",
               position: "relative",
@@ -119,6 +119,9 @@ export default function HeroHeadline() {
                     height: stepPx,
                     lineHeight: `${stepPx}px`,
                     overflow: "hidden",
+                    clipPath: "inset(0)",
+                    padding: 0,
+                    margin: 0,
                     color: "#ffffff",
                   }}
                 >
