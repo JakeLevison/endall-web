@@ -8,7 +8,7 @@ export default function WorkflowsMock() {
   ];
 
   return (
-    <div style={{ background: "#111", borderRadius: 8, padding: 16, fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)" }}>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans, 'DM Sans', sans-serif)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
         {nodes.map((node, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, flex: 1 }}>

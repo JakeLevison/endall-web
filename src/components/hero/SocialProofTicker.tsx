@@ -13,7 +13,7 @@ const companies = [
 
 export default function SocialProofTicker() {
   return (
-    <section style={{ padding: "60px 0 40px", overflow: "hidden" }}>
+    <section style={{ padding: "80px 16px", overflow: "hidden" }}>
       <p
         style={{
           fontFamily: "var(--font-mono), monospace",

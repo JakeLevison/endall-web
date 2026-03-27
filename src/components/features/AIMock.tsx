@@ -2,7 +2,7 @@
 
 export default function AIMock() {
   return (
-    <div style={{ background: "#111", borderRadius: 8, padding: 16, fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)", display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans, 'DM Sans', sans-serif)", display: "flex", flexDirection: "column", gap: 10 }}>
       {/* User message */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <div

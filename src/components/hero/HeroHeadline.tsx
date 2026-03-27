@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-const words = ["CRM", "Sequences", "Workflows", "Tasks", "Reports"];
+const words = ["CRM", "Sequences", "Workflows", "Tasks", "Reports", "CRM"];
 
 export default function HeroHeadline() {
   return (
@@ -19,7 +19,7 @@ export default function HeroHeadline() {
         style={{
           fontFamily: "var(--font-serif), serif",
           fontWeight: 400,
-          color: "var(--text-muted)",
+          color: "var(--text-secondary)",
           lineHeight: 1.15,
           margin: "0 auto",
           maxWidth: "900px",
@@ -30,7 +30,7 @@ export default function HeroHeadline() {
         <span
           style={{
             display: "inline-block",
-            height: "1.15em",
+            height: "1.25em",
             overflow: "hidden",
             verticalAlign: "bottom",
             position: "relative",
@@ -40,15 +40,16 @@ export default function HeroHeadline() {
             style={{
               display: "flex",
               flexDirection: "column",
-              animation: "cycle-words 12.5s cubic-bezier(0.16, 1, 0.3, 1) infinite",
+              animation: "cycle-words 15s cubic-bezier(0.16, 1, 0.3, 1) infinite",
             }}
           >
-            {words.map((word) => (
+            {words.map((word, i) => (
               <span
-                key={word}
+                key={`${word}-${i}`}
                 style={{
                   display: "block",
-                  height: "1.15em",
+                  height: "1.25em",
+                  lineHeight: 1.25,
                   color: "#ffffff",
                 }}
               >

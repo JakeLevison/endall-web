@@ -38,7 +38,7 @@ export default function ScrollReveal({ delay = 0, className = "", children }: Sc
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(30px)",
         transition: `opacity 600ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 600ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
-        willChange: "opacity, transform",
+        willChange: visible ? "auto" : "opacity, transform",
       }}
     >
       {children}

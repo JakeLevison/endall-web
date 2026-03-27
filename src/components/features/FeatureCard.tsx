@@ -30,7 +30,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
         {/* Label */}
         <div
           style={{
-            fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.1em",
@@ -44,7 +44,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
         {/* Title */}
         <h3
           style={{
-            fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
             fontSize: 24,
             color: "#fff",
             marginBottom: 6,
@@ -57,7 +57,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
         {/* Description */}
         <p
           style={{
-            fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+            fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
             fontSize: 14,
             color: "#888",
             lineHeight: 1.5,

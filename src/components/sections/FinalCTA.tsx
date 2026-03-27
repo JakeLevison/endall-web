@@ -27,7 +27,7 @@ export default function FinalCTA() {
         {/* Main line */}
         <h2
           style={{
-            fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
             fontSize: 48,
             color: "#fff",
             fontWeight: 400,
@@ -44,7 +44,7 @@ export default function FinalCTA() {
         {/* Subtitle */}
         <p
           style={{
-            fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+            fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
             fontSize: 18,
             color: "#888",
             marginBottom: 32,
@@ -76,7 +76,7 @@ export default function FinalCTA() {
               fontSize: 14,
               fontWeight: 500,
               textDecoration: "none",
-              fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
             }}
           >
             Open App
@@ -84,13 +84,19 @@ export default function FinalCTA() {
         </div>
       </div>
 
-      <style jsx global>{`
+      <style jsx>{`
         .cta-pulse {
           animation: cta-pulse-anim 3s ease-in-out infinite;
+          transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .cta-pulse:hover {
+          animation-play-state: paused;
+          transform: scale(1.05);
+          background-color: #e5e5e5;
         }
         @keyframes cta-pulse-anim {
           0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.02); }
+          50% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255,255,255,0.1); }
         }
       `}</style>
     </section>

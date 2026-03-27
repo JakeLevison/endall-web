@@ -42,12 +42,12 @@ export default function HowItWorks() {
     <section
       ref={sectionRef}
       id="how-it-works"
-      style={{ padding: "64px 16px" }}
+      style={{ padding: "80px 16px" }}
     >
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <p
           style={{
-            fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.15em",
@@ -58,6 +58,17 @@ export default function HowItWorks() {
         >
           Getting started
         </p>
+
+        <h2 style={{
+          fontFamily: "var(--font-serif), serif",
+          fontSize: "36px",
+          fontWeight: 400,
+          color: "#ffffff",
+          textAlign: "center",
+          marginBottom: "48px",
+        }}>
+          Three steps to operational
+        </h2>
 
         {/* Desktop: horizontal layout */}
         <div className="hiw-grid">
@@ -96,7 +107,7 @@ export default function HowItWorks() {
               {/* Large faint step number */}
               <div
                 style={{
-                  fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'EB Garamond', serif)",
                   fontSize: 72,
                   color: "#1a1a1a",
                   lineHeight: 1,
@@ -108,7 +119,7 @@ export default function HowItWorks() {
               </div>
               <h3
                 style={{
-                  fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+                  fontFamily: "var(--font-serif, 'EB Garamond', serif)",
                   fontSize: 24,
                   color: "#fff",
                   fontWeight: 400,
@@ -119,7 +130,7 @@ export default function HowItWorks() {
               </h3>
               <p
                 style={{
-                  fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+                  fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
                   fontSize: 15,
                   color: "#888",
                   lineHeight: 1.5,

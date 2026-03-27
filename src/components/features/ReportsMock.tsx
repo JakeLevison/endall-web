@@ -10,7 +10,7 @@ export default function ReportsMock() {
   ];
 
   return (
-    <div style={{ background: "#111", borderRadius: 8, padding: 16, fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)" }}>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans, 'DM Sans', sans-serif)" }}>
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", height: 80, gap: 8, position: "relative" }}>
         {/* Trend line overlay using SVG */}
         <svg

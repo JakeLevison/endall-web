@@ -1,42 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
+function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
   const [value, setValue] = useState(0);
-  const [triggered, setTriggered] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !triggered) {
-          setTriggered(true);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [triggered]);
+    const timeout = setTimeout(() => {
+      const duration = 1200;
+      const start = performance.now();
+      const step = (now: number) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(eased * target));
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [target, delay]);
 
-  useEffect(() => {
-    if (!triggered) return;
-    const duration = 1200;
-    const start = performance.now();
-    const step = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [triggered, target]);
-
-  return <span ref={ref}>{value.toLocaleString()}{suffix}</span>;
+  return <span>{value.toLocaleString()}{suffix}</span>;
 }
 
 const tableData = [
@@ -62,6 +47,7 @@ export default function DashboardMock() {
           background: "var(--surface)",
           border: "1px solid var(--border)",
           borderRadius: "12px",
+          opacity: 0,
           overflow: "hidden",
           position: "relative",
           transform: "rotateX(8deg) rotateY(-4deg)",
@@ -169,7 +155,7 @@ export default function DashboardMock() {
                 color: "#ffffff",
               }}
             >
-              $<CountUp target={284} suffix="k" />
+              $<CountUp target={284} suffix="k" delay={1200} />
             </div>
             <div
               style={{
@@ -211,7 +197,7 @@ export default function DashboardMock() {
                 color: "#ffffff",
               }}
             >
-              <CountUp target={47} />
+              <CountUp target={47} delay={1200} />
             </div>
           </div>
 
@@ -244,7 +230,7 @@ export default function DashboardMock() {
                 color: "#ffffff",
               }}
             >
-              <CountUp target={3812} />
+              <CountUp target={3812} delay={1200} />
             </div>
           </div>
         </div>
@@ -285,6 +271,7 @@ export default function DashboardMock() {
                   key={row.company}
                   className={i >= 2 ? "hidden md:table-row" : ""}
                   style={{
+                    opacity: 0,
                     animation: `stagger-fadein 600ms cubic-bezier(0.16, 1, 0.3, 1) ${720 + i * 80}ms both`,
                   }}
                 >

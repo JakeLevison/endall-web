@@ -43,7 +43,7 @@ export default function CursorGlow() {
         position: "fixed",
         inset: 0,
         pointerEvents: "none",
-        zIndex: 1,
+        zIndex: 3,
       }}
     />
   );

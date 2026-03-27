@@ -12,13 +12,13 @@ export default function LogoEntrance({ onComplete }: LogoEntranceProps) {
   useEffect(() => {
     // Phase 1: fade in over 800ms
     const holdTimer = setTimeout(() => setPhase("hold"), 800);
-    // Phase 2: hold for 600ms, then shrink
-    const shrinkTimer = setTimeout(() => setPhase("shrink"), 1400);
+    // Phase 2: hold for 1200ms, then shrink
+    const shrinkTimer = setTimeout(() => setPhase("shrink"), 2000);
     // Phase 3: shrink animation takes 600ms, then done
     const doneTimer = setTimeout(() => {
       setPhase("done");
       onComplete();
-    }, 2000);
+    }, 2600);
 
     return () => {
       clearTimeout(holdTimer);

@@ -21,7 +21,7 @@ export default function Footer() {
         {/* Logo */}
         <span
           style={{
-            fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
             fontSize: 16,
             color: "#fff",
             fontWeight: 400,
@@ -41,7 +41,7 @@ export default function Footer() {
               key={link.label}
               href={link.href}
               style={{
-                fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+                fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
                 fontSize: 11,
                 color: "#666",
                 textDecoration: "none",
@@ -58,7 +58,7 @@ export default function Footer() {
         {/* Copyright */}
         <span
           style={{
-            fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
             fontSize: 11,
             color: "#666",
           }}

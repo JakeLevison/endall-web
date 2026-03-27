@@ -76,7 +76,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       {/* Plan name */}
       <div
         style={{
-          fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
           fontSize: 11,
           textTransform: "uppercase",
           letterSpacing: "0.1em",
@@ -90,7 +90,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       {/* Price */}
       <div
         style={{
-          fontFamily: "var(--font-eb-garamond, 'EB Garamond', serif)",
+          fontFamily: "var(--font-serif, 'EB Garamond', serif)",
           fontSize: 36,
           color: "#fff",
           fontWeight: 400,
@@ -101,7 +101,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
         {plan.period && (
           <span
             style={{
-              fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
               fontSize: 13,
               color: "#666",
               fontWeight: 400,
@@ -115,7 +115,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       {/* Subtitle */}
       <p
         style={{
-          fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+          fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
           fontSize: 12,
           color: "#666",
           marginBottom: 20,
@@ -130,7 +130,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
           <li
             key={f}
             style={{
-              fontFamily: "var(--font-dm-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
               fontSize: 13,
               color: "#888",
               padding: "4px 0",
@@ -189,11 +189,11 @@ export default function Pricing() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="pricing" style={{ padding: "64px 16px" }}>
+    <section ref={sectionRef} id="pricing" style={{ padding: "80px 16px" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <p
           style={{
-            fontFamily: "var(--font-jetbrains-mono, 'JetBrains Mono', monospace)",
+            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.15em",
