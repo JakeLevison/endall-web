@@ -6,7 +6,6 @@ import Navbar from "@/components/hero/Navbar";
 import HeroHeadline from "@/components/hero/HeroHeadline";
 import DashboardMock from "@/components/hero/DashboardMock";
 import SocialProofTicker from "@/components/hero/SocialProofTicker";
-import CursorGlow from "@/components/shared/CursorGlow";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import FeatureCard from "@/components/features/FeatureCard";
 import CRMMock from "@/components/features/CRMMock";
@@ -90,7 +89,6 @@ export default function Home() {
         }}
       >
         <Navbar />
-        <CursorGlow />
 
         <main style={{ position: "relative", zIndex: 2 }}>
           <HeroHeadline />
