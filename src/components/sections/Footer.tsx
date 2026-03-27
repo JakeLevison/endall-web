@@ -21,7 +21,7 @@ export default function Footer() {
         {/* Logo */}
         <span
           style={{
-            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: 16,
             color: "#fff",
             fontWeight: 400,

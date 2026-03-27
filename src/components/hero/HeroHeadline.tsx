@@ -69,9 +69,10 @@ export default function HeroHeadline() {
           position: "absolute",
           visibility: "hidden",
           pointerEvents: "none",
-          fontFamily: "var(--font-serif), serif",
-          fontWeight: 400,
-          lineHeight: 1.15,
+          fontFamily: "var(--font-sans), sans-serif",
+          fontWeight: 600,
+          lineHeight: 1.1,
+          letterSpacing: "-0.03em",
           display: "block",
           whiteSpace: "nowrap",
         }}
@@ -82,10 +83,11 @@ export default function HeroHeadline() {
 
       <h1
         style={{
-          fontFamily: "var(--font-serif), serif",
-          fontWeight: 400,
+          fontFamily: "var(--font-sans), sans-serif",
+          fontWeight: 600,
           color: "var(--text-secondary)",
-          lineHeight: 1.15,
+          lineHeight: 1.1,
+          letterSpacing: "-0.03em",
           margin: "0 auto",
           maxWidth: "900px",
         }}

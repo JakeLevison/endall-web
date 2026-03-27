@@ -43,11 +43,12 @@ export default function FeatureCard({ label, title, description, children }: Fea
         {/* Title */}
         <h3
           style={{
-            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: 24,
             color: "#fff",
             marginBottom: 6,
-            fontWeight: 400,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
           }}
         >
           {title}
@@ -56,7 +57,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
         {/* Description */}
         <p
           style={{
-            fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: 14,
             color: "#888",
             lineHeight: 1.5,

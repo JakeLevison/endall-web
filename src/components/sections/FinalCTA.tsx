@@ -27,11 +27,12 @@ export default function FinalCTA() {
         {/* Main line — staggered clip reveal per line */}
         <h2
           style={{
-            fontFamily: "var(--font-serif, 'EB Garamond', serif)",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: "clamp(32px, 6vw, 48px)",
             color: "#fff",
-            fontWeight: 400,
-            lineHeight: 1.15,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
             marginBottom: 12,
           }}
         >
@@ -59,7 +60,7 @@ export default function FinalCTA() {
         {/* Subtitle */}
         <p
           style={{
-            fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: 18,
             color: "#888",
             marginBottom: 32,
@@ -90,7 +91,7 @@ export default function FinalCTA() {
               fontSize: 14,
               fontWeight: 500,
               textDecoration: "none",
-              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans), sans-serif",
               transition: "background-color 0.2s ease",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}

@@ -110,10 +110,11 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       {/* Price */}
       <div
         style={{
-          fontFamily: "var(--font-serif, 'EB Garamond', serif)",
+          fontFamily: "var(--font-sans), sans-serif",
           fontSize: 36,
           color: "#fff",
-          fontWeight: 400,
+          fontWeight: 600,
+          letterSpacing: "-0.02em",
           marginBottom: 2,
         }}
       >
@@ -121,7 +122,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
         {plan.period && (
           <span
             style={{
-              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans), sans-serif",
               fontSize: 13,
               color: "#666",
               fontWeight: 400,
@@ -135,7 +136,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       {/* Subtitle */}
       <p
         style={{
-          fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+          fontFamily: "var(--font-sans), sans-serif",
           fontSize: 12,
           color: "#666",
           marginBottom: 20,
@@ -150,7 +151,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
           <li
             key={f}
             style={{
-              fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+              fontFamily: "var(--font-sans), sans-serif",
               fontSize: 13,
               color: "#888",
               padding: "4px 0",

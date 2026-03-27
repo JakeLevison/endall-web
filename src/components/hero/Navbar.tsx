@@ -41,11 +41,12 @@ export default function Navbar() {
         <Link
           href="/"
           style={{
-            fontFamily: "var(--font-serif), serif",
+            fontFamily: "var(--font-sans), sans-serif",
             fontSize: "18px",
             color: "#ffffff",
             textDecoration: "none",
-            fontWeight: 400,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
           }}
         >
           endall

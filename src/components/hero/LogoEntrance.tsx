@@ -57,8 +57,10 @@ export default function LogoEntrance({ onComplete }: LogoEntranceProps) {
     >
       <span
         style={{
-          fontFamily: "var(--font-serif), serif",
+          fontFamily: "var(--font-sans), sans-serif",
           fontSize: "48px",
+          fontWeight: 600,
+          letterSpacing: "-0.03em",
           color: "#ffffff",
           transition: "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1)",
           transform: phase === "fadein" ? "scale(0.96)" : "scale(1)",

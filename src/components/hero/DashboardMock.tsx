@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
   const [value, setValue] = useState(0);
@@ -32,55 +32,23 @@ const tableData = [
 ];
 
 export default function DashboardMock() {
-  const [isTouch, setIsTouch] = useState(false);
-  const [animDone, setAnimDone] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsTouch(window.matchMedia("(hover: none)").matches);
-  }, []);
-
-  // After entrance animation finishes (600ms anim + 400ms delay = 1000ms),
-  // remove the animation so the static CSS class + :hover can take effect.
-  // We use setTimeout instead of animationend because animationend bubbles
-  // from child elements (stagger-fadein on rows/cards) and fires too early.
-  useEffect(() => {
-    if (isTouch) return;
-    const timer = setTimeout(() => {
-      if (cardRef.current) {
-        cardRef.current.style.animation = "none";
-      }
-      setAnimDone(true);
-    }, 1100); // 400ms delay + 600ms duration + 100ms safety margin
-    return () => clearTimeout(timer);
-  }, [isTouch]);
-
   return (
     <div
       style={{
         maxWidth: "900px",
         margin: "0 auto",
         padding: "0 16px",
-        perspective: isTouch ? "none" : "1200px",
       }}
     >
       <div
-        ref={cardRef}
-        className={`dashboard-mock${isTouch ? " dashboard-mock--touch" : ""}`}
+        className="dashboard-mock"
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
           borderRadius: "12px",
           overflow: "hidden",
           position: "relative",
-          backfaceVisibility: "hidden",
-          WebkitFontSmoothing: "antialiased",
-          animation: isTouch
-            ? "dashboard-fadein-flat 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both"
-            : animDone
-              ? "none"
-              : "dashboard-fadein 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both",
-          willChange: animDone ? "auto" : "transform, opacity",
+          animation: "dashboard-fadein-flat 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both",
         }}
       >
         {/* Shimmer line */}
@@ -117,7 +85,7 @@ export default function DashboardMock() {
         >
           <span
             style={{
-              fontFamily: "var(--font-serif), serif",
+              fontFamily: "var(--font-sans), sans-serif",
               fontSize: "14px",
               color: "#ffffff",
             }}
@@ -367,16 +335,6 @@ export default function DashboardMock() {
       </div>
 
       <style jsx>{`
-        @keyframes dashboard-fadein {
-          from {
-            opacity: 0;
-            transform: translateY(40px) rotateX(3deg) rotateY(-1.5deg);
-          }
-          to {
-            opacity: 1;
-            transform: rotateX(3deg) rotateY(-1.5deg);
-          }
-        }
         @keyframes dashboard-fadein-flat {
           from {
             opacity: 0;
@@ -398,21 +356,16 @@ export default function DashboardMock() {
           }
         }
         .dashboard-mock {
-          transform: rotateX(3deg) rotateY(-1.5deg);
-          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .dashboard-mock:hover {
-          transform: rotateX(0deg) rotateY(0deg);
-        }
-        .dashboard-mock--touch {
-          transform: none !important;
+          transform: translateY(-4px);
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
         }
         @media (hover: none) {
-          .dashboard-mock {
-            transform: none !important;
-          }
           .dashboard-mock:hover {
-            transform: none !important;
+            transform: none;
+            box-shadow: none;
           }
         }
       `}</style>

@@ -20,7 +20,7 @@ export default function TasksMock() {
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans, 'DM Sans', sans-serif)" }}>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", gap: 8 }}>
         {columns.map((col) => (
           <div key={col.title} style={{ flex: 1, minWidth: 0 }}>

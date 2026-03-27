@@ -121,9 +121,10 @@ export default function Home() {
                 </p>
                 <h2
                   style={{
-                    fontFamily: "var(--font-serif), serif",
+                    fontFamily: "var(--font-sans), sans-serif",
                     fontSize: "36px",
-                    fontWeight: 400,
+                    fontWeight: 600,
+                    letterSpacing: "-0.02em",
                     color: "#ffffff",
                     textAlign: "center",
                     marginBottom: "48px",

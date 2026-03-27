@@ -8,7 +8,7 @@ export default function SequencesMock() {
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans, 'DM Sans', sans-serif)" }}>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ position: "relative", paddingLeft: 20 }}>
         {/* Vertical connecting line */}
         <div
