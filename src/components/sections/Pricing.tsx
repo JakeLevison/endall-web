@@ -91,7 +91,7 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
           border: `1px solid ${plan.highlighted ? "#333" : "rgba(255,255,255,0.08)"}`,
           borderRadius: 12,
           padding: 28,
-          transform: plan.highlighted ? "translateY(-8px)" : "none",
+          transform: "none",
           boxShadow: plan.highlighted ? "0 0 80px rgba(255,255,255,0.03)" : "none",
           transition: "border-color 0.3s ease",
         }}
@@ -236,7 +236,7 @@ export default function Pricing() {
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 16,
             alignItems: "start",
-            paddingTop: 16,
+            paddingTop: 20,
           }}
           className="pricing-grid"
         >

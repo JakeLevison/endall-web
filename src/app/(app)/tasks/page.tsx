@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, DragEvent } from "react";
+import { useState, useEffect, useRef, useCallback, DragEvent, TouchEvent as ReactTouchEvent } from "react";
 import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -103,6 +103,32 @@ function KanbanBoard({ tasks, onMove }: { tasks: Task[]; onMove: (taskId: string
     setDragOverStatus(null);
   };
 
+  // Touch drag support
+  const touchIdRef = useRef<string | null>(null);
+
+  const handleTouchStart = useCallback((taskId: string) => (e: ReactTouchEvent) => {
+    touchIdRef.current = taskId;
+    setDraggedId(taskId);
+  }, []);
+
+  const handleTouchMove = useCallback((e: ReactTouchEvent) => {
+    if (!touchIdRef.current) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const col = el?.closest<HTMLElement>("[data-status]");
+    setDragOverStatus(col?.dataset.status ?? null);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchIdRef.current && dragOverStatus) {
+      onMove(touchIdRef.current, dragOverStatus);
+    }
+    touchIdRef.current = null;
+    setDraggedId(null);
+    setDragOverStatus(null);
+  }, [dragOverStatus, onMove]);
+
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
       {statuses.map((status) => {
@@ -111,6 +137,7 @@ function KanbanBoard({ tasks, onMove }: { tasks: Task[]; onMove: (taskId: string
         return (
           <div
             key={status}
+            data-status={status}
             className={`min-w-[220px] w-[220px] shrink-0 rounded-lg transition-colors ${
               isOver ? "bg-white/[0.03]" : ""
             }`}
@@ -129,6 +156,9 @@ function KanbanBoard({ tasks, onMove }: { tasks: Task[]; onMove: (taskId: string
                   draggable
                   onDragStart={(e) => handleDragStart(e, task.id)}
                   onDragEnd={handleDragEnd}
+                  onTouchStart={handleTouchStart(task.id)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   className={`p-3 rounded-lg border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-grab active:cursor-grabbing select-none ${
                     draggedId === task.id ? "opacity-40 scale-95" : ""
                   }`}

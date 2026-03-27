@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, DragEvent } from "react";
+import { useState, useEffect, useRef, useCallback, DragEvent, TouchEvent as ReactTouchEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,33 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
     setDragOverStage(null);
   };
 
+  // Touch drag support
+  const touchIdRef = useRef<string | null>(null);
+
+  const handleTouchStart = useCallback((dealId: string) => (e: ReactTouchEvent) => {
+    // Long-press delay to avoid interfering with scroll
+    touchIdRef.current = dealId;
+    setDraggedId(dealId);
+  }, []);
+
+  const handleTouchMove = useCallback((e: ReactTouchEvent) => {
+    if (!touchIdRef.current) return;
+    e.preventDefault(); // prevent scroll while dragging
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const col = el?.closest<HTMLElement>("[data-stage]");
+    setDragOverStage(col?.dataset.stage ?? null);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchIdRef.current && dragOverStage) {
+      onMove(touchIdRef.current, dragOverStage);
+    }
+    touchIdRef.current = null;
+    setDraggedId(null);
+    setDragOverStage(null);
+  }, [dragOverStage, onMove]);
+
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
       {stages.map((stage) => {
@@ -112,6 +139,7 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
         return (
           <div
             key={stage}
+            data-stage={stage}
             className={`min-w-[220px] w-[220px] shrink-0 rounded-lg transition-colors ${
               isOver ? "bg-white/[0.03]" : ""
             }`}
@@ -130,6 +158,9 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
                   draggable
                   onDragStart={(e) => handleDragStart(e, deal.id)}
                   onDragEnd={handleDragEnd}
+                  onTouchStart={handleTouchStart(deal.id)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   onClick={() => { if (!draggedId) router.push(`/deals/${deal.id}`); }}
                   className={`p-3 rounded-lg border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-grab active:cursor-grabbing select-none ${
                     draggedId === deal.id ? "opacity-40 scale-95" : ""
