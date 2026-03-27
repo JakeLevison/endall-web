@@ -61,41 +61,18 @@ function AnimatedPrice({ target, label, isVisible }: { target: number; label: st
 }
 
 function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisible: boolean }) {
-  const card = (
-    <div style={{ position: "relative" }}>
-      {/* Most popular badge — positioned outside the card */}
-      {plan.highlighted && (
-        <div
-          style={{
-            position: "absolute",
-            top: -14,
-            left: 28,
-            zIndex: 1,
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: 10,
-            textTransform: "uppercase",
-            letterSpacing: "2px",
-            background: "#fff",
-            color: "#000",
-            padding: "4px 12px",
-            borderRadius: 4,
-            display: "inline-block",
-          }}
-        >
-          Most popular
-        </div>
-      )}
-      <div
-        style={{
-          background: "#111",
-          border: `1px solid ${plan.highlighted ? "#333" : "rgba(255,255,255,0.08)"}`,
-          borderRadius: 12,
-          padding: 28,
-          transform: "none",
-          boxShadow: plan.highlighted ? "0 0 80px rgba(255,255,255,0.03)" : "none",
-          transition: "border-color 0.3s ease",
-        }}
-      >
+  const innerCard = (
+    <div
+      className="pricing-card-inner"
+      style={{
+        background: "#111",
+        border: `1px solid ${plan.highlighted ? "#333" : "rgba(255,255,255,0.08)"}`,
+        borderRadius: 12,
+        padding: 28,
+        boxShadow: plan.highlighted ? "0 0 80px rgba(255,255,255,0.03)" : "none",
+        transition: "border-color 0.3s ease",
+      }}
+    >
       {/* Plan name */}
       <div
         style={{
@@ -184,15 +161,39 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
       >
         {plan.name === "Enterprise" ? "Contact Us" : "Get Started"}
       </Link>
-      </div>
     </div>
   );
 
   if (plan.highlighted) {
-    return <ShimmerBorder>{card}</ShimmerBorder>;
+    return (
+      <div style={{ position: "relative" }}>
+        {/* Badge centered above card */}
+        <div
+          style={{
+            position: "absolute",
+            top: -14,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 2,
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "2px",
+            background: "#fff",
+            color: "#000",
+            padding: "4px 12px",
+            borderRadius: 4,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Most popular
+        </div>
+        <ShimmerBorder>{innerCard}</ShimmerBorder>
+      </div>
+    );
   }
 
-  return card;
+  return innerCard;
 }
 
 export default function Pricing() {
