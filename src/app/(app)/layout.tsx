@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Home,
   Users,
@@ -89,6 +89,12 @@ function SidebarContent({ pathname }: { pathname: string }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   return (
     <div className="flex h-screen bg-[#0A0A0B] text-zinc-300">
@@ -103,7 +109,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="h-12 shrink-0 border-b border-white/[0.04] flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             {/* Mobile menu */}
-            <Sheet>
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
                 <button className="md:hidden text-zinc-500 hover:text-zinc-300">
                   <Menu className="size-5" />
