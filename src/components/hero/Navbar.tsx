@@ -53,12 +53,7 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "28px",
-          }}
-          className="hidden md:flex"
+          className="hidden md:flex items-center gap-7"
         >
           <a
             href="#features"
