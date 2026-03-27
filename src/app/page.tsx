@@ -90,7 +90,7 @@ export default function Home() {
               href="/dashboard"
               className="bg-white text-zinc-900 px-5 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors text-center"
             >
-              Open Dashboard
+              Open App
             </Link>
             <a
               href="#features"
@@ -251,7 +251,7 @@ export default function Home() {
             href="/dashboard"
             className="inline-block bg-white text-zinc-900 px-6 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors"
           >
-            Open Dashboard
+            Open App
           </Link>
         </div>
       </section>
