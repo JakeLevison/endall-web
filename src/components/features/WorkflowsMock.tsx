@@ -33,14 +33,15 @@ export default function WorkflowsMock() {
             {i < nodes.length - 1 && (
               <div style={{ flex: 1, height: 1, background: "#333", position: "relative", minWidth: 12 }}>
                 <div
-                  className="workflow-dot"
                   style={{
                     position: "absolute",
+                    right: 0,
                     top: -2,
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    background: "#fff",
+                    width: 0,
+                    height: 0,
+                    borderTop: "3px solid transparent",
+                    borderBottom: "3px solid transparent",
+                    borderLeft: "4px solid #555",
                   }}
                 />
               </div>
@@ -48,16 +49,6 @@ export default function WorkflowsMock() {
           </div>
         ))}
       </div>
-      <style jsx>{`
-        .workflow-dot {
-          animation: travel 2s ease-in-out infinite;
-        }
-        @keyframes travel {
-          0% { left: 0; }
-          50% { left: calc(100% - 5px); }
-          100% { left: 0; }
-        }
-      `}</style>
     </div>
   );
 }

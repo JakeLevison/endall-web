@@ -31,7 +31,7 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(20px)",
           border: "1px solid rgba(255, 255, 255, 0.08)",
           borderRadius: "16px",
-          padding: "12px 24px",
+          padding: "10px 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

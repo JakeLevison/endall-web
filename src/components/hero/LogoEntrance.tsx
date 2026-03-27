@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface LogoEntranceProps {
   onComplete: () => void;
@@ -8,36 +8,35 @@ interface LogoEntranceProps {
 
 export default function LogoEntrance({ onComplete }: LogoEntranceProps) {
   const [phase, setPhase] = useState<"fadein" | "hold" | "fadeout" | "done">("fadein");
-
-  const finish = useCallback(() => {
-    setPhase("done");
-    sessionStorage.setItem("endall-entrance-seen", "1");
-    onComplete();
-  }, [onComplete]);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     // Skip entrance for return visitors within the same session
     if (sessionStorage.getItem("endall-entrance-seen")) {
       setPhase("done");
-      onComplete();
+      onCompleteRef.current();
       return;
     }
 
-    // Phase 1 (0-800ms): Fade in center-screen
-    const holdTimer = setTimeout(() => setPhase("hold"), 800);
-    // Phase 2 (800-2200ms): Hold in center for 1400ms
-    const fadeoutTimer = setTimeout(() => setPhase("fadeout"), 2200);
-    // Phase 3 (2200-2800ms): Fade out in place over 600ms, then done
+    // Phase 1 (0ms): mount with fadein state, CSS transition handles the visual fade
+    // Phase 2 (50ms → hold): trigger the fade-in transition immediately after first paint
+    const holdTimer = setTimeout(() => setPhase("hold"), 50);
+    // Phase 3 (2000ms → fadeout): dissolve the overlay
+    const fadeoutTimer = setTimeout(() => setPhase("fadeout"), 2000);
+    // Phase 4 (2600ms → done): clean up
     const doneTimer = setTimeout(() => {
-      finish();
-    }, 2800);
+      setPhase("done");
+      sessionStorage.setItem("endall-entrance-seen", "1");
+      onCompleteRef.current();
+    }, 2600);
 
     return () => {
       clearTimeout(holdTimer);
       clearTimeout(fadeoutTimer);
       clearTimeout(doneTimer);
     };
-  }, [onComplete, finish]);
+  }, []); // stable — uses ref for callback
 
   if (phase === "done") return null;
 
@@ -61,9 +60,9 @@ export default function LogoEntrance({ onComplete }: LogoEntranceProps) {
           fontFamily: "var(--font-serif), serif",
           fontSize: "48px",
           color: "#ffffff",
-          transition: "opacity 800ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1)",
           transform: phase === "fadein" ? "scale(0.96)" : "scale(1)",
-          opacity: phase === "fadein" ? 0 : 1,
+          opacity: phase === "fadein" ? 0 : phase === "fadeout" ? 0 : 1,
         }}
       >
         endall

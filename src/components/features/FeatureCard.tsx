@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import ShimmerBorder from "@/components/shared/ShimmerBorder";
 
 interface FeatureCardProps {
   label: string;
@@ -12,7 +11,7 @@ interface FeatureCardProps {
 
 export default function FeatureCard({ label, title, description, children }: FeatureCardProps) {
   return (
-    <ShimmerBorder>
+    <div>
       <div
         className="feature-card"
         style={{
@@ -74,6 +73,6 @@ export default function FeatureCard({ label, title, description, children }: Fea
           }
         `}</style>
       </div>
-    </ShimmerBorder>
+    </div>
   );
 }

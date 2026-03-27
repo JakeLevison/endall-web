@@ -24,21 +24,36 @@ export default function FinalCTA() {
   return (
     <section ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, rgba(255,255,255,0.03), transparent)" }}>
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
-        {/* Main line */}
+        {/* Main line — staggered clip reveal per line */}
         <h2
           style={{
             fontFamily: "var(--font-serif, 'EB Garamond', serif)",
-            fontSize: 48,
+            fontSize: "clamp(32px, 6vw, 48px)",
             color: "#fff",
             fontWeight: 400,
             lineHeight: 1.15,
             marginBottom: 12,
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms",
           }}
         >
-          Stop duct-taping tools together.
+          {["Stop duct-taping", "tools together."].map((line, i) => (
+            <span
+              key={line}
+              style={{
+                display: "block",
+                overflow: "hidden",
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  transform: visible ? "translateY(0)" : "translateY(100%)",
+                  transition: `transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${i * 200}ms`,
+                }}
+              >
+                {line}
+              </span>
+            </span>
+          ))}
         </h2>
 
         {/* Subtitle */}
@@ -50,7 +65,7 @@ export default function FinalCTA() {
             marginBottom: 32,
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms",
           }}
         >
           One platform. Three minutes to operational.
@@ -61,12 +76,11 @@ export default function FinalCTA() {
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 400ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 400ms",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms",
           }}
         >
           <Link
             href="/dashboard"
-            className="cta-pulse"
             style={{
               display: "inline-block",
               background: "#fff",
@@ -77,34 +91,15 @@ export default function FinalCTA() {
               fontWeight: 500,
               textDecoration: "none",
               fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
+              transition: "background-color 0.2s ease",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
             Open App
           </Link>
         </div>
       </div>
-
-      <style jsx>{`
-        .cta-pulse {
-          animation: cta-pulse-anim 3s ease-in-out infinite;
-          transition: transform 0.2s ease, background-color 0.2s ease;
-        }
-        .cta-pulse:hover {
-          animation-play-state: paused;
-          transform: scale(1.05);
-          background-color: #e5e5e5;
-        }
-        .cta-pulse:focus-visible {
-          animation-play-state: paused;
-          transform: scale(1.05);
-          outline: 2px solid rgba(255, 255, 255, 0.5);
-          outline-offset: 2px;
-        }
-        @keyframes cta-pulse-anim {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-        }
-      `}</style>
     </section>
   );
 }

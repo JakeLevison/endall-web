@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 
 function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
   const [value, setValue] = useState(0);
@@ -33,10 +33,27 @@ const tableData = [
 
 export default function DashboardMock() {
   const [isTouch, setIsTouch] = useState(false);
+  const [animDone, setAnimDone] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsTouch(window.matchMedia("(hover: none)").matches);
   }, []);
+
+  // After entrance animation finishes (600ms anim + 400ms delay = 1000ms),
+  // remove the animation so the static CSS class + :hover can take effect.
+  // We use setTimeout instead of animationend because animationend bubbles
+  // from child elements (stagger-fadein on rows/cards) and fires too early.
+  useEffect(() => {
+    if (isTouch) return;
+    const timer = setTimeout(() => {
+      if (cardRef.current) {
+        cardRef.current.style.animation = "none";
+      }
+      setAnimDone(true);
+    }, 1100); // 400ms delay + 600ms duration + 100ms safety margin
+    return () => clearTimeout(timer);
+  }, [isTouch]);
 
   return (
     <div
@@ -48,6 +65,7 @@ export default function DashboardMock() {
       }}
     >
       <div
+        ref={cardRef}
         className={`dashboard-mock${isTouch ? " dashboard-mock--touch" : ""}`}
         style={{
           background: "var(--surface)",
@@ -55,8 +73,12 @@ export default function DashboardMock() {
           borderRadius: "12px",
           overflow: "hidden",
           position: "relative",
-          animation: `${isTouch ? "dashboard-fadein-flat" : "dashboard-fadein"} 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both`,
-          willChange: "transform, opacity",
+          animation: isTouch
+            ? "dashboard-fadein-flat 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both"
+            : animDone
+              ? "none"
+              : "dashboard-fadein 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both",
+          willChange: animDone ? "auto" : "transform, opacity",
         }}
       >
         {/* Shimmer line */}
@@ -375,7 +397,7 @@ export default function DashboardMock() {
         }
         .dashboard-mock {
           transform: rotateX(6deg) rotateY(-3deg);
-          transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .dashboard-mock:hover {
           transform: rotateX(0deg) rotateY(0deg);

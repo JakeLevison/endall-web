@@ -20,7 +20,7 @@ export default function CursorGlow() {
 
     const animate = () => {
       if (ref.current) {
-        ref.current.style.background = `radial-gradient(circle 300px at ${posRef.current.x}px ${posRef.current.y}px, rgba(255,255,255,0.06) 0%, transparent 70%)`;
+        ref.current.style.background = `radial-gradient(circle 300px at ${posRef.current.x}px ${posRef.current.y}px, rgba(255,255,255,0.04) 0%, transparent 70%)`;
       }
       rafRef.current = requestAnimationFrame(animate);
     };
