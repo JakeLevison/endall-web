@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
   const [value, setValue] = useState(0);
@@ -32,6 +32,16 @@ const tableData = [
 ];
 
 export default function DashboardMock() {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Clear animation fill-mode after entrance so :hover styles can take effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (cardRef.current) cardRef.current.style.animation = "none";
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div
       style={{
@@ -41,6 +51,7 @@ export default function DashboardMock() {
       }}
     >
       <div
+        ref={cardRef}
         className="dashboard-mock"
         style={{
           background: "var(--surface)",
