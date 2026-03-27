@@ -73,6 +73,8 @@ export default function DashboardMock() {
           borderRadius: "12px",
           overflow: "hidden",
           position: "relative",
+          backfaceVisibility: "hidden",
+          WebkitFontSmoothing: "antialiased",
           animation: isTouch
             ? "dashboard-fadein-flat 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both"
             : animDone
@@ -368,11 +370,11 @@ export default function DashboardMock() {
         @keyframes dashboard-fadein {
           from {
             opacity: 0;
-            transform: translateY(40px) rotateX(6deg) rotateY(-3deg);
+            transform: translateY(40px) rotateX(3deg) rotateY(-1.5deg);
           }
           to {
             opacity: 1;
-            transform: rotateX(6deg) rotateY(-3deg);
+            transform: rotateX(3deg) rotateY(-1.5deg);
           }
         }
         @keyframes dashboard-fadein-flat {
@@ -396,7 +398,7 @@ export default function DashboardMock() {
           }
         }
         .dashboard-mock {
-          transform: rotateX(6deg) rotateY(-3deg);
+          transform: rotateX(3deg) rotateY(-1.5deg);
           transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .dashboard-mock:hover {
