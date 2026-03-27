@@ -9,7 +9,7 @@ interface ShimmerBorderProps {
 
 export default function ShimmerBorder({ children, className }: ShimmerBorderProps) {
   return (
-    <div className={`shimmer-border-wrapper ${className ?? ""}`} style={{ position: "relative", overflow: "hidden" }}>
+    <div className={`shimmer-border-wrapper ${className ?? ""}`} style={{ position: "relative", overflow: "visible" }}>
       {children}
       <style jsx>{`
         .shimmer-border-wrapper::before,

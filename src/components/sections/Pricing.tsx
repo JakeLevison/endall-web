@@ -231,6 +231,7 @@ export default function Pricing() {
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 16,
             alignItems: "start",
+            paddingTop: 16,
           }}
           className="pricing-grid"
         >
