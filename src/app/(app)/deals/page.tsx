@@ -205,7 +205,6 @@ export default function DealsPage() {
   const [view, setView] = useState("board");
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Create dialog state
@@ -300,17 +299,15 @@ export default function DealsPage() {
       prev.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d))
     );
 
-    // Persist to Supabase if not using fallback data
-    if (!usingFallback) {
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("deals")
-          .update({ stage: newStage })
-          .eq("id", dealId);
-      } catch {
-        // Silently fail — optimistic update stays in place
-      }
+    // Persist to Supabase
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("deals")
+        .update({ stage: newStage })
+        .eq("id", dealId);
+    } catch {
+      // Silently fail — optimistic update stays in place
     }
   };
 

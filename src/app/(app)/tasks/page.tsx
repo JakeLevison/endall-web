@@ -49,17 +49,6 @@ const statuses = ["Backlog", "Todo", "In Progress", "Done"];
 
 const priorityOptions = ["urgent", "high", "medium", "low", "none"];
 
-const fallbackTasks: Task[] = [
-  { id: "1", title: "Design system audit", description: null, status: "In Progress", priority: "high", assignee: "Jake", project: "Endall Web", due_date: "2026-04-01", contact_name: null },
-  { id: "2", title: "Set up CI/CD pipeline", description: null, status: "Todo", priority: "urgent", assignee: "Jake", project: "Infrastructure", due_date: "2026-03-28", contact_name: null },
-  { id: "3", title: "Write API documentation", description: null, status: "Backlog", priority: "medium", assignee: null, project: "Endall Web", due_date: "2026-04-15", contact_name: null },
-  { id: "4", title: "Client onboarding flow", description: null, status: "Todo", priority: "high", assignee: "Jake", project: "CRM", due_date: "2026-04-05", contact_name: "Kunaal Anand" },
-  { id: "5", title: "Invoice template redesign", description: null, status: "Done", priority: "low", assignee: "Jake", project: "Billing", due_date: "2026-03-20", contact_name: null },
-  { id: "6", title: "Migrate database schema", description: null, status: "In Progress", priority: "urgent", assignee: "Jake", project: "Infrastructure", due_date: "2026-03-30", contact_name: null },
-  { id: "7", title: "Competitive analysis report", description: null, status: "Backlog", priority: "medium", assignee: null, project: "Research", due_date: null, contact_name: null },
-  { id: "8", title: "Follow up with lead", description: null, status: "Todo", priority: "low", assignee: "Jake", project: "Sales", due_date: "2026-04-02", contact_name: "Sarah Chen" },
-];
-
 const priorityColor = (priority: string) => {
   switch (priority) {
     case "urgent": return "bg-red-500/10 text-red-400 border-red-500/20";
@@ -399,7 +388,6 @@ export default function TasksPage() {
   const [view, setView] = useState("board");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -429,9 +417,8 @@ export default function TasksPage() {
           setTasks([]);
         }
       } catch {
-        // Supabase query failed (table may not exist yet) — use fallback data
-        setTasks(fallbackTasks);
-        setUsingFallback(true);
+        // Supabase query failed — show empty state
+        setTasks([]);
       } finally {
         setLoading(false);
       }
@@ -444,16 +431,15 @@ export default function TasksPage() {
       prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
     );
 
-    if (!usingFallback) {
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("tasks")
-          .update({ status: newStatus })
-          .eq("id", taskId);
-      } catch {
-        // Silently fail — optimistic update stays in place
-      }
+    // Persist to Supabase
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("tasks")
+        .update({ status: newStatus })
+        .eq("id", taskId);
+    } catch {
+      // Silently fail — optimistic update stays in place
     }
   };
 

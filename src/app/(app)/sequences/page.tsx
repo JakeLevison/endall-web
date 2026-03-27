@@ -34,15 +34,6 @@ type Sequence = {
   created_at: string;
 };
 
-const fallbackSequences: Sequence[] = [
-  { id: "1", name: "Cold Outreach - SaaS", status: "active", steps: 5, enrolled: 142, reply_rate: 18.3, created_at: "2026-03-10" },
-  { id: "2", name: "Post-Demo Follow-up", status: "active", steps: 3, enrolled: 67, reply_rate: 34.2, created_at: "2026-03-12" },
-  { id: "3", name: "Re-engagement Campaign", status: "draft", steps: 4, enrolled: 0, reply_rate: 0, created_at: "2026-03-20" },
-  { id: "4", name: "Inbound Lead Nurture", status: "paused", steps: 6, enrolled: 89, reply_rate: 22.1, created_at: "2026-02-28" },
-  { id: "5", name: "Conference Attendees", status: "archived", steps: 3, enrolled: 210, reply_rate: 12.5, created_at: "2026-01-15" },
-  { id: "6", name: "Partner Intro Sequence", status: "active", steps: 4, enrolled: 31, reply_rate: 41.9, created_at: "2026-03-18" },
-];
-
 const statusColor = (status: string) => {
   switch (status) {
     case "active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -60,7 +51,6 @@ export default function SequencesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
-  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -87,8 +77,8 @@ export default function SequencesPage() {
           setSequences([]);
         }
       } catch {
-        setSequences(fallbackSequences);
-        setUsingFallback(true);
+        // Supabase query failed — show empty state
+        setSequences([]);
       } finally {
         setLoading(false);
       }
@@ -100,44 +90,31 @@ export default function SequencesPage() {
     if (!newName.trim()) return;
     setCreating(true);
 
-    if (usingFallback) {
-      const newSeq: Sequence = {
-        id: String(Date.now()),
-        name: newName.trim(),
-        status: "draft",
-        steps: 0,
-        enrolled: 0,
-        reply_rate: 0,
-        created_at: new Date().toISOString().split("T")[0],
-      };
-      setSequences((prev) => [newSeq, ...prev]);
-    } else {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("sequences")
-          .insert({
-            name: newName.trim(),
-            status: "draft",
-            tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
-          })
-          .select()
-          .single();
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("sequences")
+        .insert({
+          name: newName.trim(),
+          status: "draft",
+          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        })
+        .select()
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        setSequences((prev) => [{
-          id: data.id,
-          name: data.name || "",
-          status: data.status || "draft",
-          steps: data.steps || 0,
-          enrolled: data.enrolled || 0,
-          reply_rate: data.reply_rate || 0,
-          created_at: data.created_at ? data.created_at.split("T")[0] : "",
-        }, ...prev]);
-      } catch {
-        // Silently fail
-      }
+      setSequences((prev) => [{
+        id: data.id,
+        name: data.name || "",
+        status: data.status || "draft",
+        steps: data.steps || 0,
+        enrolled: data.enrolled || 0,
+        reply_rate: data.reply_rate || 0,
+        created_at: data.created_at ? data.created_at.split("T")[0] : "",
+      }, ...prev]);
+    } catch {
+      // Silently fail
     }
 
     setNewName("");

@@ -54,15 +54,6 @@ const triggerLabel = (type: string) => {
   return triggerTypes.find((t) => t.value === type)?.label || type;
 };
 
-const fallbackWorkflows: Workflow[] = [
-  { id: "1", name: "New Lead Assignment", status: "active", trigger_type: "record_created", enrolled: 340, created_at: "2026-03-01" },
-  { id: "2", name: "Deal Stage Change Notification", status: "active", trigger_type: "record_updated", enrolled: 156, created_at: "2026-03-05" },
-  { id: "3", name: "Email Open Follow-up", status: "draft", trigger_type: "email_opened", enrolled: 0, created_at: "2026-03-22" },
-  { id: "4", name: "Form Submission Handler", status: "paused", trigger_type: "form_submitted", enrolled: 89, created_at: "2026-02-20" },
-  { id: "5", name: "Weekly Report Generator", status: "active", trigger_type: "schedule", enrolled: 52, created_at: "2026-02-10" },
-  { id: "6", name: "Webhook Sync Pipeline", status: "archived", trigger_type: "webhook", enrolled: 1200, created_at: "2026-01-05" },
-];
-
 const statusColor = (status: string) => {
   switch (status) {
     case "active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -81,7 +72,6 @@ export default function WorkflowsPage() {
   const [newName, setNewName] = useState("");
   const [newTrigger, setNewTrigger] = useState("record_created");
   const [creating, setCreating] = useState(false);
-  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -107,8 +97,8 @@ export default function WorkflowsPage() {
           setWorkflows([]);
         }
       } catch {
-        setWorkflows(fallbackWorkflows);
-        setUsingFallback(true);
+        // Supabase query failed — show empty state
+        setWorkflows([]);
       } finally {
         setLoading(false);
       }
@@ -120,43 +110,31 @@ export default function WorkflowsPage() {
     if (!newName.trim()) return;
     setCreating(true);
 
-    if (usingFallback) {
-      const newWf: Workflow = {
-        id: String(Date.now()),
-        name: newName.trim(),
-        status: "draft",
-        trigger_type: newTrigger,
-        enrolled: 0,
-        created_at: new Date().toISOString().split("T")[0],
-      };
-      setWorkflows((prev) => [newWf, ...prev]);
-    } else {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("workflows")
-          .insert({
-            name: newName.trim(),
-            status: "draft",
-            trigger_type: newTrigger,
-            tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
-          })
-          .select()
-          .single();
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("workflows")
+        .insert({
+          name: newName.trim(),
+          status: "draft",
+          trigger_type: newTrigger,
+          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        })
+        .select()
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        setWorkflows((prev) => [{
-          id: data.id,
-          name: data.name || "",
-          status: data.status || "draft",
-          trigger_type: data.trigger_type || "",
-          enrolled: data.enrolled || 0,
-          created_at: data.created_at ? data.created_at.split("T")[0] : "",
-        }, ...prev]);
-      } catch {
-        // Silently fail
-      }
+      setWorkflows((prev) => [{
+        id: data.id,
+        name: data.name || "",
+        status: data.status || "draft",
+        trigger_type: data.trigger_type || "",
+        enrolled: data.enrolled || 0,
+        created_at: data.created_at ? data.created_at.split("T")[0] : "",
+      }, ...prev]);
+    } catch {
+      // Silently fail
     }
 
     setNewName("");

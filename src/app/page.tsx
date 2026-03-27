@@ -60,11 +60,11 @@ export default function Home() {
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors hidden sm:block">
+            <Link href="/dashboard" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors hidden sm:block">
               Log in
             </Link>
             <Link
-              href="/signup"
+              href="/dashboard"
               className="text-[13px] font-medium text-zinc-900 bg-white px-3.5 py-1.5 rounded-md hover:bg-zinc-100 transition-colors"
             >
               Get started

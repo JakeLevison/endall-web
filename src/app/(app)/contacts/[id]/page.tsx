@@ -46,34 +46,6 @@ type AssociatedCompany = {
   name: string;
 };
 
-const fallbackContacts: Record<string, ContactDetail> = {
-  "1": { name: "Sarah Chen", email: "sarah@acmecorp.com", phone: "+1 (555) 123-4567", company: "Acme Corp", stage: "Customer", owner: "Jake", title: "VP of Operations" },
-  "2": { name: "Marcus Johnson", email: "marcus@techlabs.io", phone: "+1 (555) 234-5678", company: "TechLabs", stage: "Lead", owner: "Jake", title: "CTO" },
-  "3": { name: "Emily Rodriguez", email: "emily@brightpath.co", phone: "+1 (555) 345-6789", company: "BrightPath", stage: "Opportunity", owner: "Jake", title: "CEO" },
-  "4": { name: "David Kim", email: "david@novasoft.com", phone: "+1 (555) 456-7890", company: "NovaSoft", stage: "Customer", owner: "Jake", title: "Director of Engineering" },
-  "5": { name: "Lisa Thompson", email: "lisa@greenleaf.org", phone: "+1 (555) 567-8901", company: "GreenLeaf", stage: "Lead", owner: "Jake", title: "Founder" },
-  "6": { name: "James Wilson", email: "james@skylinedev.com", phone: "+1 (555) 678-9012", company: "Skyline Dev", stage: "Opportunity", owner: "Jake", title: "COO" },
-  "7": { name: "Anna Petrov", email: "anna@cloudnine.io", phone: "+1 (555) 789-0123", company: "CloudNine", stage: "Lead", owner: "Jake", title: "Head of Product" },
-  "8": { name: "Robert Chang", email: "robert@dataflow.com", phone: "+1 (555) 890-1234", company: "DataFlow", stage: "Customer", owner: "Jake", title: "VP of Sales" },
-};
-
-const fallbackActivities: Activity[] = [
-  { id: "a1", type: "email", title: "Follow-up email sent", description: "Sent proposal follow-up with updated pricing.", date: "2026-03-25" },
-  { id: "a2", type: "call", title: "Discovery call", description: "30 min call discussing requirements and timeline.", date: "2026-03-24" },
-  { id: "a3", type: "meeting", title: "Product demo", description: "Walked through platform features and integrations.", date: "2026-03-22" },
-  { id: "a4", type: "note", title: "Internal note", description: "Decision maker is the CFO. Need to loop them in on next call.", date: "2026-03-21" },
-  { id: "a5", type: "email", title: "Introduction email", description: "Initial outreach with case study attached.", date: "2026-03-19" },
-];
-
-const fallbackDeals: AssociatedDeal[] = [
-  { id: "d1", name: "Enterprise License", amount: "$48,000", stage: "Proposal Sent" },
-  { id: "d2", name: "Consulting Engagement", amount: "$12,000", stage: "Qualified" },
-];
-
-const fallbackCompanies: AssociatedCompany[] = [
-  { id: "c1", name: "Acme Corp" },
-];
-
 const activityIcon = (type: Activity["type"]) => {
   switch (type) {
     case "email": return <Mail className="size-3.5" />;
@@ -176,12 +148,11 @@ export default function ContactDetailPage({
           setDeals([]);
         }
       } catch {
-        // Supabase query failed — use fallback data
-        const fallback = fallbackContacts[id] || fallbackContacts["1"];
-        setContact(fallback);
-        setActivities(fallbackActivities);
-        setDeals(fallbackDeals);
-        setCompanies(fallbackCompanies);
+        // Supabase query failed — show empty state
+        setContact(null);
+        setActivities([]);
+        setDeals([]);
+        setCompanies([]);
       } finally {
         setLoading(false);
       }
