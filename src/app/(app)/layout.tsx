@@ -143,7 +143,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="flex items-center gap-2 text-[13px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
               <Search className="size-4" />
-              <span className="hidden sm:inline">Ask Endall...</span>
+              <span className="hidden sm:inline">ask endall...</span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] text-zinc-700 bg-white/[0.03] border border-white/[0.06] rounded">
                 <span className="text-xs">&#8984;</span>K
               </kbd>

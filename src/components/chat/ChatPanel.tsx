@@ -153,7 +153,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Sparkles size={16} style={{ color: "#fff" }} />
             <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
-              Ask Endall
+              ask endall
             </span>
           </div>
           <button
