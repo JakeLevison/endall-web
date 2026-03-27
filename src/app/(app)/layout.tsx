@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import ChatPanel from "@/components/chat/ChatPanel";
 import {
   Home,
   Users,
@@ -90,6 +91,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  // Cmd+K to open chat
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setChatOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Close mobile sidebar on navigation
   useEffect(() => {
@@ -123,13 +137,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
 
-            {/* Search */}
+            {/* Search / AI Chat trigger */}
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={() => setChatOpen(true)}
               className="flex items-center gap-2 text-[13px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
               <Search className="size-4" />
-              <span className="hidden sm:inline">Search...</span>
+              <span className="hidden sm:inline">Ask Endall...</span>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] text-zinc-700 bg-white/[0.03] border border-white/[0.06] rounded">
                 <span className="text-xs">&#8984;</span>K
               </kbd>
@@ -172,6 +186,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </React.Suspense>
         </main>
       </div>
+
+      {/* AI Chat Panel */}
+      <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
     </div>
   );
 }
