@@ -1,4 +1,24 @@
-import Link from "next/link";
+"use client";
+
+import { useState, useCallback } from "react";
+import LogoEntrance from "@/components/hero/LogoEntrance";
+import Navbar from "@/components/hero/Navbar";
+import HeroHeadline from "@/components/hero/HeroHeadline";
+import DashboardMock from "@/components/hero/DashboardMock";
+import SocialProofTicker from "@/components/hero/SocialProofTicker";
+import CursorGlow from "@/components/shared/CursorGlow";
+import ScrollReveal from "@/components/shared/ScrollReveal";
+import FeatureCard from "@/components/features/FeatureCard";
+import CRMMock from "@/components/features/CRMMock";
+import SequencesMock from "@/components/features/SequencesMock";
+import WorkflowsMock from "@/components/features/WorkflowsMock";
+import TasksMock from "@/components/features/TasksMock";
+import AIMock from "@/components/features/AIMock";
+import ReportsMock from "@/components/features/ReportsMock";
+import HowItWorks from "@/components/sections/HowItWorks";
+import Pricing from "@/components/sections/Pricing";
+import FinalCTA from "@/components/sections/FinalCTA";
+import Footer from "@/components/sections/Footer";
 
 const features = [
   {
@@ -6,273 +26,163 @@ const features = [
     title: "Every relationship, one view.",
     description:
       "Contacts, companies, deals, pipeline. Custom fields, activity timelines, automatic enrichment.",
+    mock: <CRMMock />,
   },
   {
     label: "Sequences",
     title: "Outreach on autopilot.",
     description:
       "Multi-step email cadences. Smart scheduling. Personalization tokens. Auto-unenroll on reply.",
+    mock: <SequencesMock />,
   },
   {
     label: "Workflows",
     title: "Automate any process.",
     description:
       "Trigger on any event. Branch on any condition. AI classification, summarization, and research built in.",
+    mock: <WorkflowsMock />,
   },
   {
     label: "Tasks",
     title: "Ship work, not updates.",
     description:
       "Issues, projects, boards, sprints. Prioritize, assign, and track without the meetings.",
+    mock: <TasksMock />,
   },
   {
     label: "AI",
     title: "Ask anything.",
     description:
       "Natural language across all your data. Meeting prep. Deal briefs. Follow-up drafts. Account research.",
+    mock: <AIMock />,
   },
   {
     label: "Reports",
     title: "Decisions, not dashboards.",
     description:
       "Pipeline analytics. Revenue metrics. Activity tracking. Real-time, always current.",
+    mock: <ReportsMock />,
   },
 ];
 
 export default function Home() {
+  const [entranceDone, setEntranceDone] = useState(false);
+
+  const handleEntranceComplete = useCallback(() => {
+    setEntranceDone(true);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-zinc-300 selection:bg-zinc-700">
-      {/* Nav */}
-      <nav className="fixed top-0 z-50 w-full border-b border-white/[0.04] bg-[#0A0A0B]/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-5xl mx-auto">
-          <Link href="/" className="text-[15px] font-medium tracking-[-0.01em] text-white">
-            endall
-          </Link>
-          <div className="hidden md:flex items-center gap-7">
-            <a href="#features" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors">
-              How it works
-            </a>
-            <a href="#pricing" className="text-[13px] text-zinc-500 hover:text-zinc-300 transition-colors">
-              Pricing
-            </a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-[13px] font-medium text-zinc-900 bg-white px-3.5 py-1.5 rounded-md hover:bg-zinc-100 transition-colors"
-            >
-              Open App
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--bg)",
+        color: "var(--text-secondary)",
+      }}
+    >
+      <LogoEntrance onComplete={handleEntranceComplete} />
 
-      {/* Hero */}
-      <section className="pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-block mb-6 sm:mb-8 px-2.5 py-0.5 rounded-full border border-white/[0.06] text-[11px] tracking-wide text-zinc-500 uppercase">
-            Early access
-          </div>
-          <h1 className="text-3xl sm:text-5xl lg:text-[4.5rem] font-semibold tracking-[-0.035em] leading-[1.1] text-white">
-            The AI operating system
-            <br />
-            <span className="text-zinc-600">for your business</span>
-          </h1>
-          <p className="mt-4 sm:mt-5 text-[15px] sm:text-[17px] text-zinc-500 max-w-lg mx-auto leading-relaxed tracking-[-0.01em] px-2">
-            CRM, email sequences, workflow automation, task management, and AI
-            agents. One platform.
-          </p>
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 justify-center px-4 sm:px-0">
-            <Link
-              href="/dashboard"
-              className="bg-white text-zinc-900 px-5 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors text-center"
-            >
-              Open App
-            </Link>
-            <a
-              href="#features"
-              className="border border-white/[0.08] text-zinc-400 px-5 py-2.5 rounded-md text-[13px] font-medium hover:border-white/[0.15] hover:text-zinc-300 transition-all text-center"
-            >
-              See what&apos;s inside
-            </a>
-          </div>
-        </div>
-      </section>
+      {entranceDone && (
+        <>
+          <Navbar />
+          <CursorGlow />
 
-      {/* Divider line */}
-      <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
+          <main style={{ position: "relative", zIndex: 2 }}>
+            <HeroHeadline />
+            <DashboardMock />
+            <SocialProofTicker />
 
-      {/* Features */}
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 text-center mb-12">
-            Platform
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-white/[0.03] rounded-lg overflow-hidden">
-            {features.map((feature) => (
+            {/* Features */}
+            <ScrollReveal>
               <div
-                key={feature.label}
-                className="bg-[#0A0A0B] p-7 hover:bg-white/[0.02] transition-colors"
-              >
-                <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-[0.1em] mb-3">
-                  {feature.label}
+                style={{
+                  maxWidth: "1100px",
+                  margin: "0 auto",
+                  borderTop: "1px solid var(--border)",
+                }}
+              />
+              <section id="features" style={{ padding: "80px 16px" }}>
+                <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-mono), monospace",
+                      fontSize: "10px",
+                      textTransform: "uppercase",
+                      letterSpacing: "3px",
+                      color: "var(--text-muted)",
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    Platform
+                  </p>
+                  <h2
+                    style={{
+                      fontFamily: "var(--font-serif), serif",
+                      fontSize: "36px",
+                      fontWeight: 400,
+                      color: "#ffffff",
+                      textAlign: "center",
+                      marginBottom: "48px",
+                    }}
+                  >
+                    Everything you need
+                  </h2>
+                  <div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    style={{ gap: "12px" }}
+                  >
+                    {features.map((feature, i) => (
+                      <ScrollReveal key={feature.label} delay={i * 80}>
+                        <FeatureCard
+                          label={feature.label}
+                          title={feature.title}
+                          description={feature.description}
+                        >
+                          {feature.mock}
+                        </FeatureCard>
+                      </ScrollReveal>
+                    ))}
+                  </div>
                 </div>
-                <h3 className="text-[15px] font-medium text-white tracking-[-0.01em] mb-1.5">
-                  {feature.title}
-                </h3>
-                <p className="text-[13px] text-zinc-500 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              </section>
+            </ScrollReveal>
 
-      {/* How it works */}
-      <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 text-center mb-12">
-            Getting started
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
-            {[
-              {
-                step: "01",
-                title: "Connect",
-                description:
-                  "Link email, calendar, and tools. Data syncs automatically.",
-              },
-              {
-                step: "02",
-                title: "Configure",
-                description:
-                  "Pipeline stages, sequences, workflows. Templates or custom.",
-              },
-              {
-                step: "03",
-                title: "Operate",
-                description:
-                  "AI handles the routine. You handle the relationships.",
-              },
-            ].map((item) => (
-              <div key={item.step}>
-                <div className="text-[11px] font-mono text-zinc-700 mb-2">
-                  {item.step}
-                </div>
-                <h3 className="text-[15px] font-medium text-white tracking-[-0.01em] mb-1.5">
-                  {item.title}
-                </h3>
-                <p className="text-[13px] text-zinc-500 leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            {/* How it works */}
+            <div
+              style={{
+                maxWidth: "1100px",
+                margin: "0 auto",
+                borderTop: "1px solid var(--border)",
+              }}
+            />
+            <HowItWorks />
 
-      {/* Pricing */}
-      <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-[11px] uppercase tracking-[0.15em] text-zinc-600 mb-12">
-            Pricing
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-white/[0.03] rounded-lg overflow-hidden">
-            {[
-              {
-                name: "Starter",
-                price: "Free",
-                sub: "For individuals",
-                features: ["500 contacts", "Basic sequences", "AI assistant", "Email sync"],
-              },
-              {
-                name: "Pro",
-                price: "$49",
-                period: "/user/mo",
-                sub: "For teams",
-                features: ["Unlimited contacts", "Advanced workflows", "Full automation", "Priority support"],
-                highlighted: true,
-              },
-              {
-                name: "Enterprise",
-                price: "Custom",
-                sub: "For organizations",
-                features: ["Unlimited everything", "Dedicated instance", "Custom integrations", "SLA"],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={`p-7 text-left ${plan.highlighted ? "bg-white/[0.02]" : "bg-[#0A0A0B]"}`}
-              >
-                <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-[0.1em] mb-4">
-                  {plan.name}
-                </div>
-                <div className="text-2xl font-semibold text-white tracking-[-0.02em]">
-                  {plan.price}
-                  {plan.period && (
-                    <span className="text-[13px] font-normal text-zinc-600">
-                      {plan.period}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[12px] text-zinc-600 mt-0.5 mb-5">
-                  {plan.sub}
-                </p>
-                <ul className="space-y-1.5">
-                  {plan.features.map((f) => (
-                    <li key={f} className="text-[13px] text-zinc-500">
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            {/* Pricing */}
+            <div
+              style={{
+                maxWidth: "1100px",
+                margin: "0 auto",
+                borderTop: "1px solid var(--border)",
+              }}
+            />
+            <Pricing />
 
-      {/* CTA */}
-      <div className="max-w-5xl mx-auto border-t border-white/[0.04]" />
-      <section className="py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white mb-3">
-            Stop duct-taping tools together.
-          </h2>
-          <p className="text-[15px] text-zinc-500 mb-8">
-            One platform. Three minutes to operational.
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-block bg-white text-zinc-900 px-6 py-2.5 rounded-md text-[13px] font-medium hover:bg-zinc-100 transition-colors"
-          >
-            Open App
-          </Link>
-        </div>
-      </section>
+            {/* Final CTA */}
+            <div
+              style={{
+                maxWidth: "1100px",
+                margin: "0 auto",
+                borderTop: "1px solid var(--border)",
+              }}
+            />
+            <FinalCTA />
 
-      {/* Footer */}
-      <footer className="border-t border-white/[0.04] py-6 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-[11px] text-zinc-700">
-          <span>Endall AI</span>
-          <div className="flex gap-5">
-            <a href="mailto:jake@endall.ai" className="hover:text-zinc-500 transition-colors">
-              Contact
-            </a>
-            <a href="#" className="hover:text-zinc-500 transition-colors">
-              Privacy
-            </a>
-            <a href="#" className="hover:text-zinc-500 transition-colors">
-              Terms
-            </a>
-          </div>
-        </div>
-      </footer>
+            {/* Footer */}
+            <Footer />
+          </main>
+        </>
+      )}
     </div>
   );
 }
