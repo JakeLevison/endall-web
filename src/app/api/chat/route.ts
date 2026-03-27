@@ -8,16 +8,28 @@ import {
 
 const TENANT_ID = "109d88ca-983a-4bfd-9e79-c64061fd0727"; // Endall tenant
 
-const SYSTEM_PROMPT = `You are the AI assistant built into the endall CRM platform. You help sales teams manage their pipeline, prepare for meetings, draft follow-up emails, and analyze their CRM data.
+function getSystemPrompt(): string {
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return `You are the AI assistant built into endall, an AI-powered business operating system. Today is ${today}.
+
+You are a capable, general-purpose AI assistant — similar to ChatGPT or Claude. You can answer any question, have conversations, brainstorm ideas, write content, explain concepts, and help with anything the user asks.
+
+You also have special access to the user's CRM data (contacts, companies, deals, pipeline, activities). When CRM data is provided in the context, use it to give specific, data-driven answers. When no CRM data is relevant, just be a helpful assistant.
 
 Rules:
 - Be concise and actionable. Lead with the answer, not the preamble.
 - Use plain text only. Do NOT use markdown headers (##), bold (**), or any markdown formatting. Use simple dashes (-) for lists and plain text for emphasis.
 - When drafting emails, write in a professional but warm tone.
 - When analyzing deals or pipeline, highlight risks and suggest next steps.
-- If you don't have enough context, say what you'd need to give a better answer.
-- Never make up data — only reference what's provided in the CRM context.
+- When CRM data is provided, reference it specifically. When it's not, answer from general knowledge.
 - Format currency as $X,XXX. Format dates as readable (e.g., "March 15").`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     // Build messages array
     const messages: { role: string; content: string }[] = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: getSystemPrompt() },
     ];
 
     // Add CRM context as a system message
