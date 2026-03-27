@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, ArrowUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -20,6 +21,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { createClient } from "@/lib/supabase/client";
+import type { Contact as DBContact } from "@/lib/types";
 
 type Contact = {
   id: string;
@@ -31,28 +48,109 @@ type Contact = {
   owner: string;
 };
 
-const mockContacts: Contact[] = [
-  { id: "1", name: "Sarah Chen", email: "sarah@acmecorp.com", company: "Acme Corp", stage: "Customer", lastActivity: "2026-03-25", owner: "Jake" },
-  { id: "2", name: "Marcus Johnson", email: "marcus@techlabs.io", company: "TechLabs", stage: "Lead", lastActivity: "2026-03-24", owner: "Jake" },
-  { id: "3", name: "Emily Rodriguez", email: "emily@brightpath.co", company: "BrightPath", stage: "Opportunity", lastActivity: "2026-03-23", owner: "Jake" },
-  { id: "4", name: "David Kim", email: "david@novasoft.com", company: "NovaSoft", stage: "Customer", lastActivity: "2026-03-22", owner: "Jake" },
-  { id: "5", name: "Lisa Thompson", email: "lisa@greenleaf.org", company: "GreenLeaf", stage: "Lead", lastActivity: "2026-03-21", owner: "Jake" },
-  { id: "6", name: "James Wilson", email: "james@skylinedev.com", company: "Skyline Dev", stage: "Opportunity", lastActivity: "2026-03-20", owner: "Jake" },
-  { id: "7", name: "Anna Petrov", email: "anna@cloudnine.io", company: "CloudNine", stage: "Lead", lastActivity: "2026-03-19", owner: "Jake" },
-  { id: "8", name: "Robert Chang", email: "robert@dataflow.com", company: "DataFlow", stage: "Customer", lastActivity: "2026-03-18", owner: "Jake" },
-];
-
 const stages = ["All", "Lead", "Opportunity", "Customer"];
 
 type SortKey = keyof Contact;
 type SortDir = "asc" | "desc";
 
+const lifecycleStages = ["subscriber", "lead", "mql", "sql", "opportunity", "customer"];
+
 export default function ContactsPage() {
   const router = useRouter();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("All");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Create dialog state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newFirstName, setNewFirstName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newCompanyId, setNewCompanyId] = useState("");
+  const [newLifecycleStage, setNewLifecycleStage] = useState("");
+  const [companiesList, setCompaniesList] = useState<{ id: string; name: string }[]>([]);
+
+  // Fetch companies for dropdown
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from("companies").select("id, name").then(({ data }) => {
+      if (data) setCompaniesList(data);
+    });
+  }, []);
+
+  async function handleCreateContact() {
+    setCreating(true);
+    try {
+      const supabase = createClient();
+      const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
+      const { error } = await supabase.from("contacts").insert({
+        first_name: newFirstName,
+        last_name: newLastName,
+        email: newEmail || null,
+        phone: newPhone || null,
+        company_id: newCompanyId || null,
+        lifecycle_stage: newLifecycleStage || "lead",
+        tenant_id: tenantId,
+      });
+      if (error) throw error;
+      setCreateOpen(false);
+      setNewFirstName("");
+      setNewLastName("");
+      setNewEmail("");
+      setNewPhone("");
+      setNewCompanyId("");
+      setNewLifecycleStage("");
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      console.error("Failed to create contact:", err);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  useEffect(() => {
+    const supabase = createClient();
+    async function fetchContacts() {
+      try {
+        const { data, error } = await supabase
+          .from("contacts")
+          .select("*, companies(name)");
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const mapped: Contact[] = (data as DBContact[]).map((c) => ({
+            id: c.id,
+            name: `${c.first_name} ${c.last_name}`.trim(),
+            email: c.email || "",
+            company: c.companies?.name || "",
+            stage: c.lifecycle_stage || "Lead",
+            lastActivity: c.updated_at ? c.updated_at.split("T")[0] : "",
+            owner: c.owner || "",
+          }));
+          setContacts(mapped);
+          setTotalCount(mapped.length);
+        } else {
+          setContacts([]);
+          setTotalCount(0);
+        }
+      } catch {
+        // Supabase query failed — show empty state
+        setContacts([]);
+        setTotalCount(0);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchContacts();
+  }, [refreshKey]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -64,7 +162,7 @@ export default function ContactsPage() {
   }
 
   const filtered = useMemo(() => {
-    let list = mockContacts;
+    let list = contacts;
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -84,7 +182,7 @@ export default function ContactsPage() {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return list;
-  }, [search, stageFilter, sortKey, sortDir]);
+  }, [contacts, search, stageFilter, sortKey, sortDir]);
 
   const stageBadgeColor = (stage: string) => {
     switch (stage) {
@@ -109,12 +207,21 @@ export default function ContactsPage() {
     </button>
   );
 
+  if (loading) {
+    return (
+      <div className="p-6">
+        <p className="text-[13px] text-zinc-500">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[15px] font-medium text-white">Contacts</h1>
         <Button
+          onClick={() => setCreateOpen(true)}
           className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
         >
           <Plus className="size-4 mr-1" />
@@ -228,7 +335,7 @@ export default function ContactsPage() {
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4">
         <p className="text-[11px] text-zinc-600">
-          {filtered.length} of {mockContacts.length} contacts
+          {filtered.length} of {totalCount} contacts
         </p>
         <div className="flex gap-2">
           <Button
@@ -249,6 +356,106 @@ export default function ContactsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Create Contact Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="bg-[#111113] border-white/[0.06] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] text-white">Add contact</DialogTitle>
+            <DialogDescription className="text-[13px] text-zinc-500">
+              Create a new contact record.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-[11px] text-zinc-600">First name</Label>
+                <Input
+                  value={newFirstName}
+                  onChange={(e) => setNewFirstName(e.target.value)}
+                  placeholder="First name"
+                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[11px] text-zinc-600">Last name</Label>
+                <Input
+                  value={newLastName}
+                  onChange={(e) => setNewLastName(e.target.value)}
+                  placeholder="Last name"
+                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-zinc-600">Email</Label>
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-zinc-600">Phone</Label>
+              <Input
+                type="tel"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="+1 (555) 000-0000"
+                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-zinc-600">Company</Label>
+              <Select value={newCompanyId} onValueChange={setNewCompanyId}>
+                <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  {companiesList.map((c) => (
+                    <SelectItem key={c.id} value={c.id} className="text-[13px] text-zinc-300">
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-zinc-600">Lifecycle stage</Label>
+              <Select value={newLifecycleStage} onValueChange={setNewLifecycleStage}>
+                <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectValue placeholder="Select stage" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  {lifecycleStages.map((s) => (
+                    <SelectItem key={s} value={s} className="text-[13px] text-zinc-300 capitalize">
+                      {s.toUpperCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              className="h-8 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateContact}
+              disabled={creating || !newFirstName.trim()}
+              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+            >
+              {creating ? "Creating..." : "Create contact"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

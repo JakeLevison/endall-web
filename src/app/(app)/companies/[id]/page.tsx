@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ChevronRight, Mail, Phone, Building2, MoreHorizontal } from "lucide-react";
+import { ChevronRight, Building2, Mail, Phone, MoreHorizontal, Globe, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
-import type { Contact as DBContact, Activity as DBActivity, Deal as DBDeal } from "@/lib/types";
+import type { Company as DBCompany, Activity as DBActivity, Contact as DBContact, Deal as DBDeal } from "@/lib/types";
 
-type ContactDetail = {
+type CompanyDetail = {
   name: string;
-  email: string;
-  phone: string;
-  company: string;
-  stage: string;
+  domain: string;
+  industry: string;
+  size: string;
+  city: string;
+  state: string;
+  country: string;
   owner: string;
-  title: string;
 };
 
 type Activity = {
@@ -34,6 +35,12 @@ type Activity = {
   date: string;
 };
 
+type AssociatedContact = {
+  id: string;
+  name: string;
+  email: string;
+};
+
 type AssociatedDeal = {
   id: string;
   name: string;
@@ -41,37 +48,32 @@ type AssociatedDeal = {
   stage: string;
 };
 
-type AssociatedCompany = {
-  id: string;
-  name: string;
-};
-
-const fallbackContacts: Record<string, ContactDetail> = {
-  "1": { name: "Sarah Chen", email: "sarah@acmecorp.com", phone: "+1 (555) 123-4567", company: "Acme Corp", stage: "Customer", owner: "Jake", title: "VP of Operations" },
-  "2": { name: "Marcus Johnson", email: "marcus@techlabs.io", phone: "+1 (555) 234-5678", company: "TechLabs", stage: "Lead", owner: "Jake", title: "CTO" },
-  "3": { name: "Emily Rodriguez", email: "emily@brightpath.co", phone: "+1 (555) 345-6789", company: "BrightPath", stage: "Opportunity", owner: "Jake", title: "CEO" },
-  "4": { name: "David Kim", email: "david@novasoft.com", phone: "+1 (555) 456-7890", company: "NovaSoft", stage: "Customer", owner: "Jake", title: "Director of Engineering" },
-  "5": { name: "Lisa Thompson", email: "lisa@greenleaf.org", phone: "+1 (555) 567-8901", company: "GreenLeaf", stage: "Lead", owner: "Jake", title: "Founder" },
-  "6": { name: "James Wilson", email: "james@skylinedev.com", phone: "+1 (555) 678-9012", company: "Skyline Dev", stage: "Opportunity", owner: "Jake", title: "COO" },
-  "7": { name: "Anna Petrov", email: "anna@cloudnine.io", phone: "+1 (555) 789-0123", company: "CloudNine", stage: "Lead", owner: "Jake", title: "Head of Product" },
-  "8": { name: "Robert Chang", email: "robert@dataflow.com", phone: "+1 (555) 890-1234", company: "DataFlow", stage: "Customer", owner: "Jake", title: "VP of Sales" },
+const fallbackCompanies: Record<string, CompanyDetail> = {
+  "1": { name: "Acme Corp", domain: "acmecorp.com", industry: "Technology", size: "51-200", city: "San Francisco", state: "CA", country: "US", owner: "Jake" },
+  "2": { name: "TechLabs", domain: "techlabs.io", industry: "SaaS", size: "11-50", city: "Austin", state: "TX", country: "US", owner: "Jake" },
+  "3": { name: "BrightPath", domain: "brightpath.co", industry: "Consulting", size: "1-10", city: "New York", state: "NY", country: "US", owner: "Jake" },
+  "4": { name: "NovaSoft", domain: "novasoft.com", industry: "Technology", size: "201-500", city: "Seattle", state: "WA", country: "US", owner: "Jake" },
+  "5": { name: "GreenLeaf", domain: "greenleaf.org", industry: "Non-Profit", size: "11-50", city: "Portland", state: "OR", country: "US", owner: "Jake" },
+  "6": { name: "Skyline Dev", domain: "skylinedev.com", industry: "Development", size: "11-50", city: "Denver", state: "CO", country: "US", owner: "Jake" },
+  "7": { name: "CloudNine", domain: "cloudnine.io", industry: "Cloud Services", size: "51-200", city: "Chicago", state: "IL", country: "US", owner: "Jake" },
+  "8": { name: "DataFlow", domain: "dataflow.com", industry: "Data Analytics", size: "51-200", city: "Boston", state: "MA", country: "US", owner: "Jake" },
 };
 
 const fallbackActivities: Activity[] = [
-  { id: "a1", type: "email", title: "Follow-up email sent", description: "Sent proposal follow-up with updated pricing.", date: "2026-03-25" },
-  { id: "a2", type: "call", title: "Discovery call", description: "30 min call discussing requirements and timeline.", date: "2026-03-24" },
-  { id: "a3", type: "meeting", title: "Product demo", description: "Walked through platform features and integrations.", date: "2026-03-22" },
-  { id: "a4", type: "note", title: "Internal note", description: "Decision maker is the CFO. Need to loop them in on next call.", date: "2026-03-21" },
-  { id: "a5", type: "email", title: "Introduction email", description: "Initial outreach with case study attached.", date: "2026-03-19" },
+  { id: "a1", type: "email", title: "Partnership proposal sent", description: "Sent updated partnership terms and pricing structure.", date: "2026-03-25" },
+  { id: "a2", type: "call", title: "Quarterly review call", description: "Discussed Q1 results and expansion plans.", date: "2026-03-23" },
+  { id: "a3", type: "meeting", title: "Strategy session", description: "On-site meeting to align on product roadmap.", date: "2026-03-20" },
+  { id: "a4", type: "note", title: "Internal note", description: "Key stakeholder is transitioning roles. Monitor for impact.", date: "2026-03-18" },
+];
+
+const fallbackContacts: AssociatedContact[] = [
+  { id: "c1", name: "Sarah Chen", email: "sarah@acmecorp.com" },
+  { id: "c2", name: "David Kim", email: "david@acmecorp.com" },
 ];
 
 const fallbackDeals: AssociatedDeal[] = [
   { id: "d1", name: "Enterprise License", amount: "$48,000", stage: "Proposal Sent" },
   { id: "d2", name: "Consulting Engagement", amount: "$12,000", stage: "Qualified" },
-];
-
-const fallbackCompanies: AssociatedCompany[] = [
-  { id: "c1", name: "Acme Corp" },
 ];
 
 const activityIcon = (type: Activity["type"]) => {
@@ -97,54 +99,48 @@ function mapActivityType(type: string): Activity["type"] {
   return "note";
 }
 
-export default function ContactDetailPage({
+export default function CompanyDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [contact, setContact] = useState<ContactDetail | null>(null);
+  const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [contacts, setContacts] = useState<AssociatedContact[]>([]);
   const [deals, setDeals] = useState<AssociatedDeal[]>([]);
-  const [companies, setCompanies] = useState<AssociatedCompany[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
     async function fetchData() {
       try {
-        // Fetch contact
-        const { data: contactData, error: contactError } = await supabase
-          .from("contacts")
-          .select("*, companies(id, name)")
+        // Fetch company
+        const { data: companyData, error: companyError } = await supabase
+          .from("companies")
+          .select("*")
           .eq("id", id)
           .single();
 
-        if (contactError) throw contactError;
+        if (companyError) throw companyError;
 
-        const c = contactData as DBContact & { companies?: { id: string; name: string } | null };
-        setContact({
-          name: `${c.first_name} ${c.last_name}`.trim(),
-          email: c.email || "",
-          phone: c.phone || "",
-          company: c.companies?.name || "",
-          stage: c.lifecycle_stage || "Lead",
+        const c = companyData as DBCompany;
+        setCompany({
+          name: c.name || "",
+          domain: c.domain || "",
+          industry: c.industry || "",
+          size: c.size || "",
+          city: c.city || "",
+          state: c.state || "",
+          country: c.country || "",
           owner: c.owner || "",
-          title: "", // title not in schema, leave blank
         });
 
-        // Set associated company
-        if (c.companies) {
-          setCompanies([{ id: c.companies.id, name: c.companies.name }]);
-        } else {
-          setCompanies([]);
-        }
-
-        // Fetch activities for this contact
+        // Fetch activities for this company
         const { data: activityData } = await supabase
           .from("activities")
           .select("*")
-          .eq("contact_id", id)
+          .eq("company_id", id)
           .order("created_at", { ascending: false });
 
         if (activityData && activityData.length > 0) {
@@ -159,11 +155,27 @@ export default function ContactDetailPage({
           setActivities([]);
         }
 
-        // Fetch deals for this contact
+        // Fetch contacts for this company
+        const { data: contactData } = await supabase
+          .from("contacts")
+          .select("*")
+          .eq("company_id", id);
+
+        if (contactData && contactData.length > 0) {
+          setContacts((contactData as DBContact[]).map((ct) => ({
+            id: ct.id,
+            name: `${ct.first_name} ${ct.last_name}`.trim(),
+            email: ct.email || "",
+          })));
+        } else {
+          setContacts([]);
+        }
+
+        // Fetch deals for this company
         const { data: dealData } = await supabase
           .from("deals")
           .select("*")
-          .eq("contact_id", id);
+          .eq("company_id", id);
 
         if (dealData && dealData.length > 0) {
           setDeals((dealData as DBDeal[]).map((d) => ({
@@ -177,11 +189,11 @@ export default function ContactDetailPage({
         }
       } catch {
         // Supabase query failed — use fallback data
-        const fallback = fallbackContacts[id] || fallbackContacts["1"];
-        setContact(fallback);
+        const fallback = fallbackCompanies[id] || fallbackCompanies["1"];
+        setCompany(fallback);
         setActivities(fallbackActivities);
+        setContacts(fallbackContacts);
         setDeals(fallbackDeals);
-        setCompanies(fallbackCompanies);
       } finally {
         setLoading(false);
       }
@@ -189,16 +201,7 @@ export default function ContactDetailPage({
     fetchData();
   }, [id]);
 
-  const stageBadgeColor = (stage: string) => {
-    switch (stage) {
-      case "Customer": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-      case "Opportunity": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-      case "Lead": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-      default: return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
-    }
-  };
-
-  if (loading || !contact) {
+  if (loading || !company) {
     return (
       <div className="p-6">
         <p className="text-[13px] text-zinc-500">Loading...</p>
@@ -206,16 +209,18 @@ export default function ContactDetailPage({
     );
   }
 
+  const location = [company.city, company.state, company.country].filter(Boolean).join(", ");
+
   return (
     <div className="h-full flex flex-col">
       {/* Breadcrumb + Actions */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.04]">
         <div className="flex items-center gap-1.5 text-[13px]">
-          <Link href="/contacts" className="text-zinc-500 hover:text-zinc-300 transition-colors">
-            Contacts
+          <Link href="/companies" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+            Companies
           </Link>
           <ChevronRight className="size-3 text-zinc-700" />
-          <span className="text-white">{contact.name}</span>
+          <span className="text-white">{company.name}</span>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -230,7 +235,6 @@ export default function ContactDetailPage({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-[#111113] border-white/[0.06]">
             <DropdownMenuItem className="text-[13px] text-zinc-400">Edit</DropdownMenuItem>
-            <DropdownMenuItem className="text-[13px] text-zinc-400">Enroll in Sequence</DropdownMenuItem>
             <DropdownMenuItem className="text-[13px] text-red-400">Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -238,17 +242,17 @@ export default function ContactDetailPage({
 
       {/* 3-column layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left column — Contact info */}
+        {/* Left column — Company info */}
         <div className="w-80 shrink-0 border-r border-white/[0.04] overflow-y-auto p-5">
           <div className="flex items-center gap-3 mb-5">
             <Avatar className="size-10">
               <AvatarFallback className="bg-white/[0.06] text-[13px] text-zinc-400">
-                {contact.name.split(" ").map((n) => n[0]).join("")}
+                {company.name.split(" ").map((n) => n[0]).join("")}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-[15px] font-medium text-white">{contact.name}</h2>
-              {contact.title && <p className="text-[13px] text-zinc-500">{contact.title}</p>}
+              <h2 className="text-[15px] font-medium text-white">{company.name}</h2>
+              {company.domain && <p className="text-[13px] text-zinc-500">{company.domain}</p>}
             </div>
           </div>
 
@@ -256,26 +260,24 @@ export default function ContactDetailPage({
 
           <div className="space-y-3">
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Email</p>
-              <p className="text-[13px] text-zinc-300">{contact.email}</p>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Domain</p>
+              <p className="text-[13px] text-zinc-300">{company.domain || "---"}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Phone</p>
-              <p className="text-[13px] text-zinc-300">{contact.phone}</p>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Industry</p>
+              <p className="text-[13px] text-zinc-300">{company.industry || "---"}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Company</p>
-              <p className="text-[13px] text-zinc-300">{contact.company}</p>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Size</p>
+              <p className="text-[13px] text-zinc-300">{company.size || "---"}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Stage</p>
-              <Badge variant="outline" className={`text-[11px] font-normal ${stageBadgeColor(contact.stage)}`}>
-                {contact.stage}
-              </Badge>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Location</p>
+              <p className="text-[13px] text-zinc-300">{location || "---"}</p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Owner</p>
-              <p className="text-[13px] text-zinc-300">{contact.owner}</p>
+              <p className="text-[13px] text-zinc-300">{company.owner || "---"}</p>
             </div>
           </div>
         </div>
@@ -311,18 +313,21 @@ export default function ContactDetailPage({
         {/* Right column — Associated records */}
         <div className="w-72 shrink-0 border-l border-white/[0.04] overflow-y-auto p-5 hidden lg:block">
           <div className="mb-6">
-            <h3 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-3">Companies</h3>
-            {companies.length === 0 ? (
-              <p className="text-[13px] text-zinc-600">No associated companies.</p>
+            <h3 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-3">Contacts</h3>
+            {contacts.length === 0 ? (
+              <p className="text-[13px] text-zinc-600">No associated contacts.</p>
             ) : (
-              companies.map((company) => (
+              contacts.map((contact) => (
                 <Link
-                  key={company.id}
-                  href={`/companies/${company.id}`}
+                  key={contact.id}
+                  href={`/contacts/${contact.id}`}
                   className="flex items-center gap-2 p-2 rounded-md hover:bg-white/[0.02] transition-colors"
                 >
-                  <Building2 className="size-4 text-zinc-500" />
-                  <span className="text-[13px] text-zinc-300">{company.name}</span>
+                  <Users className="size-4 text-zinc-500" />
+                  <div className="min-w-0">
+                    <span className="text-[13px] text-zinc-300 block">{contact.name}</span>
+                    <span className="text-[11px] text-zinc-600 block truncate">{contact.email}</span>
+                  </div>
                 </Link>
               ))
             )}
