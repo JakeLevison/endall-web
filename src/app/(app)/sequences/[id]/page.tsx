@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ChevronRight, Mail, Clock, CheckSquare, Plus } from "lucide-react";
+import { ChevronRight, Mail, Clock, CheckSquare, Plus, Share2, Users, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ type Sequence = {
 type Step = {
   id: string;
   step_order: number;
-  type: "email" | "delay" | "task";
+  type: "email" | "delay" | "task" | "linkedin_task";
   subject: string;
   body: string;
   delay_days: number;
@@ -72,6 +72,7 @@ const stepIcon = (type: Step["type"]) => {
     case "email": return <Mail className="size-4" />;
     case "delay": return <Clock className="size-4" />;
     case "task": return <CheckSquare className="size-4" />;
+    case "linkedin_task": return <Share2 className="size-4" />;
   }
 };
 
@@ -80,8 +81,20 @@ const stepIconColor = (type: Step["type"]) => {
     case "email": return "bg-blue-500/10 text-blue-400";
     case "delay": return "bg-zinc-500/10 text-zinc-400";
     case "task": return "bg-purple-500/10 text-purple-400";
+    case "linkedin_task": return "bg-sky-500/10 text-sky-400";
   }
 };
+
+const MERGE_TAGS = [
+  { token: "{{contact.first_name}}", label: "First Name" },
+  { token: "{{contact.last_name}}", label: "Last Name" },
+  { token: "{{contact.email}}", label: "Email" },
+  { token: "{{contact.company.name}}", label: "Company" },
+  { token: "{{contact.company.industry}}", label: "Industry" },
+  { token: "{{deal.name}}", label: "Deal Name" },
+  { token: "{{deal.amount}}", label: "Deal Amount" },
+  { token: "{{owner.full_name}}", label: "Sender Name" },
+];
 
 const stepDescription = (step: Step) => {
   switch (step.type) {
@@ -107,6 +120,10 @@ export default function SequenceDetailPage({
   const [newBody, setNewBody] = useState("");
   const [newDelayDays, setNewDelayDays] = useState("3");
   const [creating, setCreating] = useState(false);
+  const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
+  const [contacts, setContacts] = useState<{ id: string; first_name: string; last_name: string; email: string }[]>([]);
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
+  const [enrolling, setEnrolling] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -229,6 +246,53 @@ export default function SequenceDetailPage({
     setNewDelayDays("3");
     setDialogOpen(false);
     setCreating(false);
+  };
+
+  const handleDeleteStep = async (stepId: string) => {
+    setSteps((prev) => prev.filter((s) => s.id !== stepId));
+    if (!usingFallback) {
+      try {
+        const supabase = createClient();
+        await supabase.from("sequence_steps").delete().eq("id", stepId);
+      } catch { /* silent */ }
+    }
+  };
+
+  const handleEnroll = async () => {
+    if (selectedContacts.size === 0) return;
+    setEnrolling(true);
+    try {
+      const supabase = createClient();
+      const enrollments = Array.from(selectedContacts).map((contactId) => ({
+        tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        sequence_id: id,
+        contact_id: contactId,
+        status: "active",
+        current_step: 1,
+      }));
+      await supabase.from("sequence_enrollments").insert(enrollments);
+      setSequence((prev) => prev ? { ...prev, enrolled: prev.enrolled + selectedContacts.size } : prev);
+    } catch { /* silent */ }
+    setSelectedContacts(new Set());
+    setEnrollDialogOpen(false);
+    setEnrolling(false);
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("contacts")
+        .select("id, first_name, last_name, email")
+        .is("merged_into", null)
+        .order("first_name")
+        .limit(100);
+      setContacts(data || []);
+    } catch { /* silent */ }
+  };
+
+  const insertMergeTag = (tag: string) => {
+    setNewBody((prev) => prev + tag);
   };
 
   if (loading || !sequence) {
@@ -354,7 +418,9 @@ export default function SequenceDetailPage({
           <Button
             variant="outline"
             className="w-full text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+            onClick={() => { fetchContacts(); setEnrollDialogOpen(true); }}
           >
+            <Users className="size-3.5 mr-1.5" />
             Enroll contacts
           </Button>
         </div>
@@ -377,6 +443,7 @@ export default function SequenceDetailPage({
                   <SelectItem value="email" className="text-[13px] text-zinc-300">Email</SelectItem>
                   <SelectItem value="delay" className="text-[13px] text-zinc-300">Delay</SelectItem>
                   <SelectItem value="task" className="text-[13px] text-zinc-300">Task</SelectItem>
+                  <SelectItem value="linkedin_task" className="text-[13px] text-zinc-300">LinkedIn Task</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -402,6 +469,19 @@ export default function SequenceDetailPage({
                   placeholder="Email body content..."
                   className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 min-h-[80px]"
                 />
+                <div className="flex flex-wrap gap-1 mt-2">
+                  <span className="text-[10px] text-zinc-600 mr-1 self-center">Insert:</span>
+                  {MERGE_TAGS.map((tag) => (
+                    <button
+                      key={tag.token}
+                      type="button"
+                      onClick={() => insertMergeTag(tag.token)}
+                      className="text-[10px] text-zinc-500 bg-white/[0.03] border border-white/[0.06] rounded px-1.5 py-0.5 hover:bg-white/[0.06] hover:text-zinc-300 transition-colors"
+                    >
+                      {tag.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -444,6 +524,61 @@ export default function SequenceDetailPage({
               disabled={creating || (newType !== "delay" && !newSubject.trim())}
             >
               {creating ? "Adding..." : "Add step"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enroll contacts dialog */}
+      <Dialog open={enrollDialogOpen} onOpenChange={setEnrollDialogOpen}>
+        <DialogContent className="bg-[#111113] border-white/[0.06] max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] text-white">Enroll contacts</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[300px] overflow-y-auto space-y-1">
+            {contacts.length === 0 ? (
+              <p className="text-[13px] text-zinc-500 py-4 text-center">No contacts found</p>
+            ) : (
+              contacts.map((c) => (
+                <label
+                  key={c.id}
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-white/[0.02] cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedContacts.has(c.id)}
+                    onChange={() => {
+                      setSelectedContacts((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(c.id)) next.delete(c.id);
+                        else next.add(c.id);
+                        return next;
+                      });
+                    }}
+                    className="rounded border-white/[0.1]"
+                  />
+                  <div>
+                    <p className="text-[13px] text-white">{c.first_name} {c.last_name}</p>
+                    <p className="text-[11px] text-zinc-500">{c.email}</p>
+                  </div>
+                </label>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+              onClick={() => setEnrollDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+              onClick={handleEnroll}
+              disabled={selectedContacts.size === 0 || enrolling}
+            >
+              {enrolling ? "Enrolling..." : `Enroll ${selectedContacts.size} contact${selectedContacts.size !== 1 ? "s" : ""}`}
             </Button>
           </DialogFooter>
         </DialogContent>
