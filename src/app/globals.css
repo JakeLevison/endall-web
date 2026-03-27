@@ -144,6 +144,8 @@
   100% { transform: translateX(400%); }
 }
 
+/* Ensure stagger-fadein has fill mode */
+
 /* Social proof ticker */
 @keyframes ticker-scroll {
   0% { transform: translateX(0); }

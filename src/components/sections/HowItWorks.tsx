@@ -32,7 +32,7 @@ export default function HowItWorks() {
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.15 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
@@ -78,7 +78,7 @@ export default function HowItWorks() {
               className="hiw-dot"
               style={{
                 opacity: visible ? 1 : 0,
-                animation: visible ? "dot-travel-h 3s ease-in-out infinite" : "none",
+                animation: visible ? "dot-travel-h 1.5s ease-in-out forwards" : "none",
               }}
             />
           </div>
@@ -89,7 +89,7 @@ export default function HowItWorks() {
               className="hiw-dot-v"
               style={{
                 opacity: visible ? 1 : 0,
-                animation: visible ? "dot-travel-v 3s ease-in-out infinite" : "none",
+                animation: visible ? "dot-travel-v 1.5s ease-in-out forwards" : "none",
               }}
             />
           </div>
@@ -159,36 +159,40 @@ export default function HowItWorks() {
           right: 15%;
           height: 1px;
           background: #222;
+          container-type: inline-size;
         }
         .hiw-line-v {
           display: none;
+          container-type: size;
         }
         .hiw-dot {
           position: absolute;
           top: -3px;
-          width: 7px;
-          height: 7px;
+          left: 0;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
           background: #fff;
+          will-change: transform;
         }
         .hiw-dot-v {
           position: absolute;
           left: -3px;
-          width: 7px;
-          height: 7px;
+          top: 0;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
           background: #fff;
+          will-change: transform;
         }
 
         @keyframes dot-travel-h {
-          0% { left: 0; }
-          50% { left: calc(100% - 7px); }
-          100% { left: 0; }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(100cqi - 6px)); }
         }
         @keyframes dot-travel-v {
-          0% { top: 0; }
-          50% { top: calc(100% - 7px); }
-          100% { top: 0; }
+          0% { transform: translateY(0); }
+          100% { transform: translateY(calc(100cqb - 6px)); }
         }
 
         @media (max-width: 768px) {
@@ -208,6 +212,7 @@ export default function HowItWorks() {
             bottom: 36px;
             width: 1px;
             background: #222;
+            container-type: size;
           }
         }
       `}</style>

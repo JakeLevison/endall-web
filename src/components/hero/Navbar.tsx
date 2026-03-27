@@ -119,7 +119,8 @@ export default function Navbar() {
               fontWeight: 500,
               color: "#000000",
               backgroundColor: "#ffffff",
-              padding: "8px 16px",
+              padding: "10px 16px",
+              minHeight: "44px",
               borderRadius: "8px",
               textDecoration: "none",
               transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -141,10 +142,14 @@ export default function Navbar() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "4px",
+              padding: "12px",
+              minWidth: "44px",
+              minHeight: "44px",
               display: "flex",
               flexDirection: "column",
               gap: "4px",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <span
@@ -210,6 +215,9 @@ export default function Navbar() {
               fontSize: "15px",
               color: "var(--text-secondary)",
               textDecoration: "none",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             Features
@@ -222,6 +230,9 @@ export default function Navbar() {
               fontSize: "15px",
               color: "var(--text-secondary)",
               textDecoration: "none",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             How it Works
@@ -234,6 +245,9 @@ export default function Navbar() {
               fontSize: "15px",
               color: "var(--text-secondary)",
               textDecoration: "none",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             Pricing

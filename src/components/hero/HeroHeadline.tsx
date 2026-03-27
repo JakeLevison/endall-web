@@ -41,6 +41,7 @@ export default function HeroHeadline() {
               display: "flex",
               flexDirection: "column",
               animation: "cycle-words 15s cubic-bezier(0.16, 1, 0.3, 1) infinite",
+              willChange: "transform",
             }}
           >
             {words.map((word, i) => (
@@ -63,7 +64,7 @@ export default function HeroHeadline() {
       <p
         style={{
           fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "18px",
+          fontSize: "clamp(15px, 3vw, 18px)",
           color: "var(--text-tertiary)",
           maxWidth: "560px",
           margin: "24px auto 0",
@@ -86,7 +87,7 @@ export default function HeroHeadline() {
             padding: "12px 24px",
             borderRadius: "6px",
             textDecoration: "none",
-            transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: "background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}

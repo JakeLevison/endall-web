@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 function CountUp({ target, suffix = "", delay = 0 }: { target: number; suffix?: string; delay?: number }) {
   const [value, setValue] = useState(0);
@@ -32,33 +32,31 @@ const tableData = [
 ];
 
 export default function DashboardMock() {
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(hover: none)").matches);
+  }, []);
+
   return (
     <div
       style={{
         maxWidth: "900px",
         margin: "0 auto",
         padding: "0 16px",
-        perspective: "1200px",
+        perspective: isTouch ? "none" : "1200px",
       }}
     >
       <div
-        className="dashboard-mock"
+        className={`dashboard-mock${isTouch ? " dashboard-mock--touch" : ""}`}
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
           borderRadius: "12px",
-          opacity: 0,
           overflow: "hidden",
           position: "relative",
-          transform: "rotateX(8deg) rotateY(-4deg)",
-          transition: "transform 600ms cubic-bezier(0.16, 1, 0.3, 1)",
-          animation: "dashboard-fadein 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "rotateX(0deg) rotateY(0deg)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "rotateX(8deg) rotateY(-4deg)";
+          animation: `${isTouch ? "dashboard-fadein-flat" : "dashboard-fadein"} 600ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both`,
+          willChange: "transform, opacity",
         }}
       >
         {/* Shimmer line */}
@@ -348,11 +346,21 @@ export default function DashboardMock() {
         @keyframes dashboard-fadein {
           from {
             opacity: 0;
-            transform: translateY(40px) rotateX(8deg) rotateY(-4deg);
+            transform: translateY(40px) rotateX(6deg) rotateY(-3deg);
           }
           to {
             opacity: 1;
-            transform: translateY(0) rotateX(8deg) rotateY(-4deg);
+            transform: rotateX(6deg) rotateY(-3deg);
+          }
+        }
+        @keyframes dashboard-fadein-flat {
+          from {
+            opacity: 0;
+            transform: translateY(40px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
           }
         }
         @keyframes stagger-fadein {
@@ -363,6 +371,24 @@ export default function DashboardMock() {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+        .dashboard-mock {
+          transform: rotateX(6deg) rotateY(-3deg);
+          transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .dashboard-mock:hover {
+          transform: rotateX(0deg) rotateY(0deg);
+        }
+        .dashboard-mock--touch {
+          transform: none !important;
+        }
+        @media (hover: none) {
+          .dashboard-mock {
+            transform: none !important;
+          }
+          .dashboard-mock:hover {
+            transform: none !important;
           }
         }
       `}</style>

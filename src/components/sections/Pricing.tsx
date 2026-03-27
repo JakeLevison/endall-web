@@ -69,10 +69,30 @@ function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisibl
         borderRadius: 12,
         padding: 28,
         transform: plan.highlighted ? "translateY(-8px)" : "none",
-        boxShadow: plan.highlighted ? "0 0 40px rgba(255,255,255,0.04)" : "none",
+        boxShadow: plan.highlighted ? "0 0 80px rgba(255,255,255,0.03)" : "none",
         transition: "border-color 0.3s ease",
       }}
     >
+      {/* Most popular badge */}
+      {plan.highlighted && (
+        <div
+          style={{
+            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "2px",
+            background: "#fff",
+            color: "#000",
+            padding: "4px 12px",
+            borderRadius: 4,
+            display: "inline-block",
+            marginBottom: 12,
+          }}
+        >
+          Most popular
+        </div>
+      )}
+
       {/* Plan name */}
       <div
         style={{
@@ -215,7 +235,9 @@ export default function Pricing() {
           className="pricing-grid"
         >
           {plans.map((plan) => (
-            <PricingCard key={plan.name} plan={plan} isVisible={isVisible} />
+            <div key={plan.name} className={plan.highlighted ? "pricing-highlighted" : ""}>
+              <PricingCard plan={plan} isVisible={isVisible} />
+            </div>
           ))}
         </div>
       </div>
@@ -226,6 +248,9 @@ export default function Pricing() {
             grid-template-columns: 1fr !important;
             max-width: 400px;
             margin: 0 auto;
+          }
+          .pricing-highlighted {
+            order: -1;
           }
         }
       `}</style>

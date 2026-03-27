@@ -82,107 +82,111 @@ export default function Home() {
     >
       <LogoEntrance onComplete={handleEntranceComplete} />
 
-      {entranceDone && (
-        <>
-          <Navbar />
-          <CursorGlow />
+      <div
+        style={{
+          opacity: entranceDone ? 1 : 0,
+          transition: "opacity 800ms cubic-bezier(0.16, 1, 0.3, 1)",
+          pointerEvents: entranceDone ? "auto" : "none",
+        }}
+      >
+        <Navbar />
+        <CursorGlow />
 
-          <main style={{ position: "relative", zIndex: 2 }}>
-            <HeroHeadline />
-            <DashboardMock />
-            <SocialProofTicker />
+        <main style={{ position: "relative", zIndex: 2 }}>
+          <HeroHeadline />
+          <DashboardMock />
+          <SocialProofTicker />
 
-            {/* Features */}
-            <ScrollReveal>
-              <div
-                style={{
-                  maxWidth: "1100px",
-                  margin: "0 auto",
-                  borderTop: "1px solid var(--border)",
-                }}
-              />
-              <section id="features" style={{ padding: "80px 16px" }}>
-                <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-mono), monospace",
-                      fontSize: "10px",
-                      textTransform: "uppercase",
-                      letterSpacing: "3px",
-                      color: "var(--text-muted)",
-                      textAlign: "center",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    Platform
-                  </p>
-                  <h2
-                    style={{
-                      fontFamily: "var(--font-serif), serif",
-                      fontSize: "36px",
-                      fontWeight: 400,
-                      color: "#ffffff",
-                      textAlign: "center",
-                      marginBottom: "48px",
-                    }}
-                  >
-                    Everything you need
-                  </h2>
-                  <div
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    style={{ gap: "12px" }}
-                  >
-                    {features.map((feature, i) => (
-                      <ScrollReveal key={feature.label} delay={i * 80}>
-                        <FeatureCard
-                          label={feature.label}
-                          title={feature.title}
-                          description={feature.description}
-                        >
-                          {feature.mock}
-                        </FeatureCard>
-                      </ScrollReveal>
-                    ))}
-                  </div>
+          {/* Features */}
+          <ScrollReveal>
+            <div
+              style={{
+                maxWidth: "1100px",
+                margin: "0 auto",
+                borderTop: "1px solid var(--border)",
+              }}
+            />
+            <section id="features" style={{ padding: "80px 16px" }}>
+              <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: "10px",
+                    textTransform: "uppercase",
+                    letterSpacing: "3px",
+                    color: "var(--text-muted)",
+                    textAlign: "center",
+                    marginBottom: "16px",
+                  }}
+                >
+                  Platform
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-serif), serif",
+                    fontSize: "36px",
+                    fontWeight: 400,
+                    color: "#ffffff",
+                    textAlign: "center",
+                    marginBottom: "48px",
+                  }}
+                >
+                  Everything you need
+                </h2>
+                <div
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  style={{ gap: "12px" }}
+                >
+                  {features.map((feature, i) => (
+                    <ScrollReveal key={feature.label} delay={i * 80}>
+                      <FeatureCard
+                        label={feature.label}
+                        title={feature.title}
+                        description={feature.description}
+                      >
+                        {feature.mock}
+                      </FeatureCard>
+                    </ScrollReveal>
+                  ))}
                 </div>
-              </section>
-            </ScrollReveal>
+              </div>
+            </section>
+          </ScrollReveal>
 
-            {/* How it works */}
-            <div
-              style={{
-                maxWidth: "1100px",
-                margin: "0 auto",
-                borderTop: "1px solid var(--border)",
-              }}
-            />
-            <HowItWorks />
+          {/* How it works */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <HowItWorks />
 
-            {/* Pricing */}
-            <div
-              style={{
-                maxWidth: "1100px",
-                margin: "0 auto",
-                borderTop: "1px solid var(--border)",
-              }}
-            />
-            <Pricing />
+          {/* Pricing */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <Pricing />
 
-            {/* Final CTA */}
-            <div
-              style={{
-                maxWidth: "1100px",
-                margin: "0 auto",
-                borderTop: "1px solid var(--border)",
-              }}
-            />
-            <FinalCTA />
+          {/* Final CTA */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <FinalCTA />
 
-            {/* Footer */}
-            <Footer />
-          </main>
-        </>
-      )}
+          {/* Footer */}
+          <Footer />
+        </main>
+      </div>
     </div>
   );
 }

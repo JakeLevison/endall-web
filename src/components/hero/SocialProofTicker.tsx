@@ -29,10 +29,10 @@ export default function SocialProofTicker() {
       </p>
       <div style={{ position: "relative", overflow: "hidden" }}>
         <div
+          className="ticker-track"
           style={{
             display: "flex",
             width: "max-content",
-            animation: "ticker-scroll 40s linear infinite",
           }}
         >
           {[...teams, ...teams].map((name, i) => (
@@ -56,6 +56,16 @@ export default function SocialProofTicker() {
           ))}
         </div>
       </div>
+      <style jsx>{`
+        .ticker-track {
+          animation: ticker-scroll 40s linear infinite;
+        }
+        @media (max-width: 768px) {
+          .ticker-track {
+            animation-duration: 80s;
+          }
+        }
+      `}</style>
     </section>
   );
 }
