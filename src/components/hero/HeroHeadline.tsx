@@ -90,6 +90,8 @@ export default function HeroHeadline() {
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+          onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+          onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
         >
           Open App
         </Link>

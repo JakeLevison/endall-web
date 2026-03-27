@@ -208,7 +208,7 @@ export default function Pricing() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 16,
             alignItems: "start",
           }}

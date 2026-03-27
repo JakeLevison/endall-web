@@ -71,6 +71,8 @@ export default function Navbar() {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             Features
           </a>
@@ -85,6 +87,8 @@ export default function Navbar() {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             How it Works
           </a>
@@ -99,6 +103,8 @@ export default function Navbar() {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             Pricing
           </a>
@@ -120,6 +126,8 @@ export default function Navbar() {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
             Open App
           </Link>
@@ -146,7 +154,7 @@ export default function Navbar() {
                 height: "1.5px",
                 backgroundColor: "#ffffff",
                 transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                transform: menuOpen ? "rotate(45deg) translate(2px, 2px)" : "none",
+                transform: menuOpen ? "translateY(5.5px) rotate(45deg)" : "none",
               }}
             />
             <span
@@ -166,7 +174,7 @@ export default function Navbar() {
                 height: "1.5px",
                 backgroundColor: "#ffffff",
                 transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-                transform: menuOpen ? "rotate(-45deg) translate(2px, -2px)" : "none",
+                transform: menuOpen ? "translateY(-5.5px) rotate(-45deg)" : "none",
               }}
             />
           </button>

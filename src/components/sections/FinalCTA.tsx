@@ -94,6 +94,12 @@ export default function FinalCTA() {
           transform: scale(1.05);
           background-color: #e5e5e5;
         }
+        .cta-pulse:focus-visible {
+          animation-play-state: paused;
+          transform: scale(1.05);
+          outline: 2px solid rgba(255, 255, 255, 0.5);
+          outline-offset: 2px;
+        }
         @keyframes cta-pulse-anim {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255,255,255,0.1); }

@@ -49,6 +49,8 @@ export default function Footer() {
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#666")}
+              onFocus={(e) => (e.currentTarget.style.color = "#888")}
+              onBlur={(e) => (e.currentTarget.style.color = "#666")}
             >
               {link.label}
             </a>

@@ -1,14 +1,14 @@
 "use client";
 
-const companies = [
-  "Acme Corp",
-  "TechFlow",
-  "Meridian Labs",
-  "Apex Digital",
-  "NovaStar",
-  "Quantum Systems",
-  "Atlas Group",
-  "Cipher Inc",
+const teams = [
+  "Series A Startups",
+  "Consulting Firms",
+  "SaaS Companies",
+  "Real Estate Teams",
+  "Financial Services",
+  "Marketing Agencies",
+  "Professional Services",
+  "Growth-Stage Companies",
 ];
 
 export default function SocialProofTicker() {
@@ -25,7 +25,7 @@ export default function SocialProofTicker() {
           marginBottom: "24px",
         }}
       >
-        Trusted by teams at
+        Built for teams like yours
       </p>
       <div style={{ position: "relative", overflow: "hidden" }}>
         <div
@@ -35,7 +35,7 @@ export default function SocialProofTicker() {
             animation: "ticker-scroll 40s linear infinite",
           }}
         >
-          {[...companies, ...companies].map((name, i) => (
+          {[...teams, ...teams].map((name, i) => (
             <span
               key={`${name}-${i}`}
               style={{
