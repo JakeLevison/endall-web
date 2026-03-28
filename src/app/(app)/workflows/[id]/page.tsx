@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ChevronRight, Zap, GitBranch, Play, Clock, Plus } from "lucide-react";
+import { ChevronRight, Zap, GitBranch, Play, Clock, Plus, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ type Workflow = {
 
 type WorkflowNode = {
   id: string;
-  node_type: "trigger" | "condition" | "action" | "delay";
+  node_type: "trigger" | "condition" | "action" | "delay" | "ai_action";
   node_order: number;
   config: Record<string, string>;
 };
@@ -81,6 +81,7 @@ const nodeIcon = (type: WorkflowNode["node_type"]) => {
     case "condition": return <GitBranch className="size-4" />;
     case "action": return <Play className="size-4" />;
     case "delay": return <Clock className="size-4" />;
+    case "ai_action": return <Sparkles className="size-4" />;
   }
 };
 
@@ -90,6 +91,7 @@ const nodeBorderColor = (type: WorkflowNode["node_type"]) => {
     case "condition": return "border-l-amber-500";
     case "action": return "border-l-emerald-500";
     case "delay": return "border-l-zinc-500";
+    case "ai_action": return "border-l-purple-500";
   }
 };
 
@@ -99,6 +101,7 @@ const nodeIconBg = (type: WorkflowNode["node_type"]) => {
     case "condition": return "bg-amber-500/10 text-amber-400";
     case "action": return "bg-emerald-500/10 text-emerald-400";
     case "delay": return "bg-zinc-500/10 text-zinc-400";
+    case "ai_action": return "bg-purple-500/10 text-purple-400";
   }
 };
 
@@ -108,6 +111,7 @@ const nodeTypeLabel = (type: WorkflowNode["node_type"]) => {
     case "condition": return "Condition";
     case "action": return "Action";
     case "delay": return "Delay";
+    case "ai_action": return "AI Action";
   }
 };
 
@@ -251,6 +255,16 @@ export default function WorkflowDetailPage({
     setCreating(false);
   };
 
+  const handleDeleteNode = async (nodeId: string) => {
+    setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+    if (!usingFallback) {
+      try {
+        const supabase = createClient();
+        await supabase.from("workflow_nodes").delete().eq("id", nodeId);
+      } catch { /* silent */ }
+    }
+  };
+
   if (loading || !workflow) {
     return (
       <div className="p-6">
@@ -304,13 +318,21 @@ export default function WorkflowDetailPage({
                         {nodeIcon(node.node_type)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
                           <span className="text-[11px] uppercase tracking-wide text-zinc-600">{nodeTypeLabel(node.node_type)}</span>
                           {node.node_type === "trigger" && (
                             <Badge variant="outline" className="text-[11px] font-normal bg-blue-500/10 text-blue-400 border-blue-500/20">
                               {triggerLabels[node.config.trigger_type || workflow.trigger_type] || node.config.trigger_type || workflow.trigger_type}
                             </Badge>
                           )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteNode(node.id); }}
+                            className="text-zinc-700 hover:text-red-400 transition-colors p-1"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
                         <p className="text-[13px] text-white">{node.config.description || "No description"}</p>
                         {node.config.value && node.node_type !== "delay" && (
@@ -376,6 +398,7 @@ export default function WorkflowDetailPage({
                   <SelectItem value="trigger" className="text-[13px] text-zinc-300">Trigger</SelectItem>
                   <SelectItem value="condition" className="text-[13px] text-zinc-300">Condition</SelectItem>
                   <SelectItem value="action" className="text-[13px] text-zinc-300">Action</SelectItem>
+                  <SelectItem value="ai_action" className="text-[13px] text-zinc-300">AI Action</SelectItem>
                   <SelectItem value="delay" className="text-[13px] text-zinc-300">Delay</SelectItem>
                 </SelectContent>
               </Select>
@@ -405,13 +428,13 @@ export default function WorkflowDetailPage({
               </div>
             )}
 
-            {(newNodeType === "condition" || newNodeType === "action") && (
+            {(newNodeType === "condition" || newNodeType === "action" || newNodeType === "ai_action") && (
               <div>
                 <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Configuration</Label>
                 <Input
                   value={newConfig}
                   onChange={(e) => setNewConfig(e.target.value)}
-                  placeholder={newNodeType === "condition" ? "e.g. lifecycle_stage equals Lead" : "e.g. Send Slack notification"}
+                  placeholder={newNodeType === "condition" ? "e.g. lifecycle_stage equals Lead" : newNodeType === "ai_action" ? "e.g. Classify lead, Draft follow-up email" : "e.g. Send Slack notification"}
                   className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 h-8"
                 />
               </div>
