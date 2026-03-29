@@ -310,28 +310,44 @@ async function searchWeb(query: string): Promise<string> {
 
 async function fallbackSearch(query: string): Promise<string> {
   try {
-    // Use DuckDuckGo instant answer API (no key needed)
+    // Use DuckDuckGo HTML search (not the instant answer API)
     const resp = await fetch(
-      `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`,
-      { signal: AbortSignal.timeout(5000) }
+      `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; endall-ai/1.0)",
+        },
+        signal: AbortSignal.timeout(5000),
+      }
     );
 
-    if (!resp.ok) return "";
+    if (!resp.ok) return noSearchFallback();
 
-    const data = await resp.json();
-    const parts: string[] = [];
+    const html = await resp.text();
 
-    if (data.Abstract) parts.push(data.Abstract);
-    if (data.Answer) parts.push(data.Answer);
+    // Extract result snippets from DuckDuckGo HTML response
+    const results: string[] = [];
+    const snippetRegex = new RegExp('<a class="result__snippet"[^>]*>(.*?)</a>', "gs");
+    const titleRegex = new RegExp('<a class="result__a"[^>]*>(.*?)</a>', "gs");
+    const tagStripper = new RegExp("<[^>]+>", "g");
 
-    if (data.RelatedTopics) {
-      for (const t of data.RelatedTopics.slice(0, 5)) {
-        if (t.Text) parts.push(`- ${t.Text}`);
+    const snippets = [...html.matchAll(snippetRegex)].map(m => m[1].replace(tagStripper, "").trim());
+    const titles = [...html.matchAll(titleRegex)].map(m => m[1].replace(tagStripper, "").trim());
+
+    for (let i = 0; i < Math.min(titles.length, 5); i++) {
+      if (titles[i] && snippets[i]) {
+        results.push(`- ${titles[i]}: ${snippets[i]}`);
       }
     }
 
-    return parts.join("\n") || "No web results found. Answer based on your training data and let the user know the information may not be current.";
+    return results.length > 0
+      ? results.join("\n")
+      : noSearchFallback();
   } catch {
-    return "Web search unavailable. Answer based on your training data and let the user know the information may not be current.";
+    return noSearchFallback();
   }
+}
+
+function noSearchFallback(): string {
+  return "I searched the web but couldn't find specific results. I'll answer based on what I know, but the information may not be fully current. For live scores and real-time updates, I'd recommend checking ESPN.com or Google directly.";
 }

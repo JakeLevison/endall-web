@@ -131,13 +131,14 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           position: "fixed",
           top: 0,
           right: 0,
-          bottom: 0,
           width: "min(480px, 100vw)",
+          height: "100dvh",
           background: "#0A0A0B",
           borderLeft: "1px solid rgba(255,255,255,0.06)",
           zIndex: 999,
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         }}
       >
         {/* Header */}
@@ -286,29 +287,32 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
+        {/* Input — sticky at bottom, survives mobile keyboard */}
         <form
           onSubmit={handleSubmit}
           style={{
             padding: "12px 16px",
+            paddingBottom: "max(12px, env(safe-area-inset-bottom))",
             borderTop: "1px solid rgba(255,255,255,0.06)",
             display: "flex",
             gap: 8,
+            flexShrink: 0,
+            background: "#0A0A0B",
           }}
         >
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your pipeline, contacts, deals..."
+            placeholder="Ask anything..."
             disabled={loading}
             style={{
               flex: 1,
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
+              borderRadius: 10,
               padding: "10px 14px",
-              fontSize: 13,
+              fontSize: 16,
               color: "#fff",
               outline: "none",
             }}
