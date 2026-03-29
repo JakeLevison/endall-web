@@ -130,6 +130,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Menu className="size-5" />
                 </button>
               </SheetTrigger>
+
+            {/* Logo — mobile only, links to dashboard */}
+            <Link href="/dashboard" className="md:hidden text-[15px] font-semibold text-white tracking-[-0.02em]">
+              endall
+            </Link>
               <SheetContent
                 side="left"
                 className="w-56 p-0 bg-[#0A0A0B] border-white/[0.04]"
