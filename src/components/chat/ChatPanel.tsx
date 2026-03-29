@@ -253,9 +253,9 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
               >
                 <div
                   style={{
-                    fontSize: 13,
+                    fontSize: 15,
                     color: msg.role === "user" ? "#fff" : "#ccc",
-                    lineHeight: 1.6,
+                    lineHeight: 1.65,
                     whiteSpace: "pre-wrap",
                   }}
                 >
