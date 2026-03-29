@@ -309,13 +309,15 @@ async function searchWeb(query: string): Promise<string> {
 }
 
 async function fallbackSearch(query: string): Promise<string> {
+  // Try Google search scrape as fallback
   try {
-    // Use DuckDuckGo HTML search (not the instant answer API)
     const resp = await fetch(
-      `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`,
+      `https://www.google.com/search?q=${encodeURIComponent(query)}&num=5`,
       {
         headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; endall-ai/1.0)",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/html",
+          "Accept-Language": "en-US,en;q=0.9",
         },
         signal: AbortSignal.timeout(5000),
       }
@@ -324,19 +326,28 @@ async function fallbackSearch(query: string): Promise<string> {
     if (!resp.ok) return noSearchFallback();
 
     const html = await resp.text();
-
-    // Extract result snippets from DuckDuckGo HTML response
     const results: string[] = [];
-    const snippetRegex = new RegExp('<a class="result__snippet"[^>]*>(.*?)</a>', "gs");
-    const titleRegex = new RegExp('<a class="result__a"[^>]*>(.*?)</a>', "gs");
-    const tagStripper = new RegExp("<[^>]+>", "g");
 
-    const snippets = [...html.matchAll(snippetRegex)].map(m => m[1].replace(tagStripper, "").trim());
-    const titles = [...html.matchAll(titleRegex)].map(m => m[1].replace(tagStripper, "").trim());
+    // Extract text content between common Google result tags
+    const textChunks = html
+      .replace(new RegExp("<script[^>]*>[\\s\\S]*?</script>", "gi"), "")
+      .replace(new RegExp("<style[^>]*>[\\s\\S]*?</style>", "gi"), "")
+      .replace(new RegExp("<[^>]+>", "g"), " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
-    for (let i = 0; i < Math.min(titles.length, 5); i++) {
-      if (titles[i] && snippets[i]) {
-        results.push(`- ${titles[i]}: ${snippets[i]}`);
+    // Find relevant sentences containing the query terms
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const sentences = textChunks.split(/[.!?]+/).filter(s => s.trim().length > 20);
+
+    for (const sentence of sentences) {
+      const lower = sentence.toLowerCase();
+      const matchCount = queryWords.filter(w => lower.includes(w)).length;
+      if (matchCount >= 2 && results.length < 8) {
+        const clean = sentence.trim().substring(0, 200);
+        if (!clean.includes("cookie") && !clean.includes("JavaScript") && !clean.includes("privacy")) {
+          results.push(`- ${clean}`);
+        }
       }
     }
 
@@ -349,5 +360,5 @@ async function fallbackSearch(query: string): Promise<string> {
 }
 
 function noSearchFallback(): string {
-  return "I searched the web but couldn't find specific results. I'll answer based on what I know, but the information may not be fully current. For live scores and real-time updates, I'd recommend checking ESPN.com or Google directly.";
+  return "Web search did not return specific results for this query. I'll do my best with what I know. Note: for live game scores, I recommend ESPN.com or the ESPN app for real-time updates.";
 }
