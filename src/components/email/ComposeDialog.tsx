@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, FileText } from "lucide-react";
+import { EMAIL_TEMPLATES } from "@/lib/email-templates";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -63,6 +64,20 @@ export default function ComposeDialog({ open, onOpenChange, defaultTo }: Compose
           <DialogTitle className="text-[15px] text-white">Compose email</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          {/* Template selector */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <FileText className="size-3.5 text-zinc-600 shrink-0" />
+            {EMAIL_TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => { setSubject(t.subject); setBody(t.body); }}
+                className="text-[11px] text-zinc-500 bg-white/[0.03] border border-white/[0.06] rounded-full px-2.5 py-1 hover:bg-white/[0.06] hover:text-zinc-300 transition-colors whitespace-nowrap shrink-0"
+              >
+                {t.name}
+              </button>
+            ))}
+          </div>
           <div>
             <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">To</label>
             <input
