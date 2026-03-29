@@ -41,12 +41,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next");
 
-  // If not authenticated and trying to access a protected route, redirect to login
-  if (!user && !isPublic) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // Auth gate disabled for now — enable before public launch
+  // if (!user && !isPublic) {
+  //   const loginUrl = new URL("/login", request.url);
+  //   loginUrl.searchParams.set("redirect", pathname);
+  //   return NextResponse.redirect(loginUrl);
+  // }
 
   // If authenticated and on login/signup, redirect to dashboard
   if (user && (pathname === "/login" || pathname === "/signup")) {
