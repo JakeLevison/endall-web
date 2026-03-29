@@ -304,17 +304,21 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
             type="submit"
             disabled={loading || !input.trim()}
             style={{
-              background: input.trim() ? "#fff" : "rgba(255,255,255,0.06)",
-              color: input.trim() ? "#000" : "#666",
+              background: input.trim() ? "#3b82f6" : "rgba(255,255,255,0.06)",
+              color: input.trim() ? "#fff" : "#666",
               border: "none",
-              borderRadius: 8,
-              padding: "0 14px",
+              borderRadius: 10,
+              padding: "0 16px",
+              minHeight: 42,
+              minWidth: 42,
               cursor: input.trim() ? "pointer" : "default",
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.15s",
             }}
           >
-            <Send size={14} />
+            <Send size={16} />
           </button>
         </form>
 
