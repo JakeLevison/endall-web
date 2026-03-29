@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, DragEvent, TouchEvent as ReactTouchEvent } from "react";
-import { Plus, Calendar } from "lucide-react";
+import { Plus, Calendar, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import type { Task as DBTask } from "@/lib/types";
@@ -506,6 +507,12 @@ export default function TasksPage() {
           >
             List
           </TabsTrigger>
+          <TabsTrigger
+            value="projects"
+            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+          >
+            Projects
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="board" className="mt-4">
           {tasks.length === 0 ? (
@@ -525,7 +532,143 @@ export default function TasksPage() {
             <TaskTableView tasks={tasks} />
           )}
         </TabsContent>
+        <TabsContent value="projects" className="mt-4">
+          <ProjectsList />
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ProjectsList() {
+  const [projects, setProjects] = useState<{ id: string; name: string; description: string; status: string; color: string; taskCount: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+
+  useEffect(() => {
+    async function fetch() {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("projects")
+          .select("*")
+          .order("created_at", { ascending: false });
+        setProjects((data || []).map((p: Record<string, unknown>) => ({
+          id: p.id as string,
+          name: (p.name as string) || "",
+          description: (p.description as string) || "",
+          status: (p.status as string) || "active",
+          color: (p.color as string) || "#3b82f6",
+          taskCount: 0,
+        })));
+      } catch { /* silent */ }
+      setLoading(false);
+    }
+    fetch();
+  }, []);
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return;
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("projects")
+        .insert({
+          name: newName.trim(),
+          description: newDesc.trim() || null,
+          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        })
+        .select()
+        .single();
+      if (data) {
+        setProjects((prev) => [{ id: data.id, name: data.name, description: data.description || "", status: "active", color: data.color || "#3b82f6", taskCount: 0 }, ...prev]);
+      }
+    } catch { /* silent */ }
+    setNewName("");
+    setNewDesc("");
+    setDialogOpen(false);
+  };
+
+  if (loading) return <p className="text-[13px] text-zinc-500 py-8 text-center">Loading...</p>;
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[13px] text-zinc-400">{projects.length} project{projects.length !== 1 ? "s" : ""}</p>
+        <Button className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3" onClick={() => setDialogOpen(true)}>
+          <Plus className="size-4 mr-1" />
+          New project
+        </Button>
+      </div>
+
+      {projects.length === 0 ? (
+        <div className="text-center py-16">
+          <FolderOpen className="size-8 text-zinc-700 mx-auto mb-3" />
+          <p className="text-[13px] text-zinc-600">No projects yet. Create one to group related tasks.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {projects.map((p) => (
+            <div
+              key={p.id}
+              className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4 hover:bg-white/[0.02] transition-colors"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="size-3 rounded-full" style={{ background: p.color }} />
+                <h3 className="text-[14px] font-medium text-white">{p.name}</h3>
+              </div>
+              {p.description && (
+                <p className="text-[12px] text-zinc-500 mb-3 line-clamp-2">{p.description}</p>
+              )}
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-[11px] font-normal bg-emerald-500/10 text-emerald-400 border-emerald-500/20 capitalize">
+                  {p.status}
+                </Badge>
+                <span className="text-[11px] text-zinc-600">{p.taskCount} tasks</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-[#111113] border-white/[0.06]">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] text-white">New project</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Name</Label>
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Q2 Outbound Campaign"
+                className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 h-8"
+                onKeyDown={(e) => { if (e.key === "Enter") handleCreate(); }}
+              />
+            </div>
+            <div>
+              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Description</Label>
+              <Input
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                placeholder="Optional description"
+                className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 h-8"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8" onClick={handleCreate} disabled={!newName.trim()}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

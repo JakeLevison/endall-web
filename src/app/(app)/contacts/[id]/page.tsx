@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
+import EmailPanel from "@/components/email/EmailPanel";
 import type { Contact as DBContact, Activity as DBActivity, Deal as DBDeal } from "@/lib/types";
 
 type ContactDetail = {
@@ -275,6 +276,13 @@ export default function ContactDetailPage({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Email panel */}
+          {contact.email && (
+            <div className="mt-6">
+              <EmailPanel contactEmail={contact.email} />
             </div>
           )}
         </div>

@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal, Activity } from "@/lib/types";
+import UpcomingEvents from "@/components/calendar/UpcomingEvents";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -412,6 +413,11 @@ export default function DashboardPage() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Calendar events */}
+      <div className="mt-6">
+        <UpcomingEvents />
       </div>
     </div>
   );
