@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal, Activity } from "@/lib/types";
 import UpcomingEvents from "@/components/calendar/UpcomingEvents";
+import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -242,6 +243,15 @@ export default function DashboardPage() {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-[15px] font-medium text-white">Dashboard</h1>
+
+      {/* Onboarding wizard — shows until dismissed */}
+      <WelcomeWizard
+        completedSteps={[]}
+        onDismiss={() => {
+          // Could save dismiss state to localStorage or Supabase
+          localStorage.setItem("endall-onboarding-dismissed", "1");
+        }}
+      />
 
       {/* ── Stats Row ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
