@@ -137,12 +137,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Web search for real-time questions
-    let webContext = "";
-    if (message && needsWebSearch(message)) {
-      webContext = await searchWeb(message);
-    }
-
     // Build the prompt for the pre-built action
     let userPrompt = message || "";
     if (action) {
@@ -153,14 +147,6 @@ export async function POST(request: NextRequest) {
     const messages: { role: string; content: string }[] = [
       { role: "system", content: getSystemPrompt() },
     ];
-
-    // Add web search results as context
-    if (webContext) {
-      messages.push({
-        role: "system",
-        content: `Here are relevant web search results for the user's question:\n\n${webContext}\n\nUse this information to answer the user's question accurately. Cite the source if relevant.`,
-      });
-    }
 
     // Add CRM context as a system message
     if (crmContext) {
@@ -198,6 +184,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 2048,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
         system: messages
           .filter((m) => m.role === "system")
           .map((m) => m.content)
@@ -218,8 +205,16 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    const reply =
-      data.content?.[0]?.text || "I couldn't generate a response.";
+
+    // Extract text from response — Claude may return multiple content blocks
+    // (web_search tool calls + text responses). We want the final text.
+    let reply = "";
+    for (const block of data.content || []) {
+      if (block.type === "text") {
+        reply += block.text;
+      }
+    }
+    if (!reply) reply = "I couldn't generate a response.";
 
     return NextResponse.json({ reply, context: crmContext ? true : false });
   } catch (err) {
@@ -248,117 +243,4 @@ function getActionPrompt(action: string, extra?: string): string {
     default:
       return extra || "Help me with this CRM task.";
   }
-}
-
-// ── Web Search ──────────────────────────────────────────────
-
-const REALTIME_KEYWORDS = [
-  "score", "scores", "game", "games", "match", "tournament",
-  "weather", "forecast", "temperature",
-  "stock", "price", "market", "trading",
-  "news", "latest", "today", "tonight", "yesterday", "this week",
-  "who won", "who is winning", "what happened",
-  "current", "live", "right now", "update",
-  "election", "results",
-  "flight", "status",
-  "march madness", "nba", "nfl", "mlb", "nhl", "premier league",
-  "super bowl", "world cup", "olympics",
-  "elite 8", "final four", "sweet 16",
-];
-
-function needsWebSearch(query: string): boolean {
-  const lower = query.toLowerCase();
-  return REALTIME_KEYWORDS.some((k) => lower.includes(k));
-}
-
-async function searchWeb(query: string): Promise<string> {
-  try {
-    // Use Brave Search API (free tier: 2000 queries/month)
-    const braveKey = process.env.BRAVE_SEARCH_API_KEY;
-    if (!braveKey) {
-      // Fallback: use a simple Google search scrape via fetch
-      return await fallbackSearch(query);
-    }
-
-    const resp = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`,
-      {
-        headers: {
-          "Accept": "application/json",
-          "Accept-Encoding": "gzip",
-          "X-Subscription-Token": braveKey,
-        },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
-
-    if (!resp.ok) return await fallbackSearch(query);
-
-    const data = await resp.json();
-    const results = data.web?.results || [];
-
-    return results
-      .slice(0, 5)
-      .map((r: { title: string; description: string; url: string }) =>
-        `- ${r.title}: ${r.description} (${r.url})`
-      )
-      .join("\n");
-  } catch {
-    return await fallbackSearch(query);
-  }
-}
-
-async function fallbackSearch(query: string): Promise<string> {
-  // Try Google search scrape as fallback
-  try {
-    const resp = await fetch(
-      `https://www.google.com/search?q=${encodeURIComponent(query)}&num=5`,
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "text/html",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-        signal: AbortSignal.timeout(5000),
-      }
-    );
-
-    if (!resp.ok) return noSearchFallback();
-
-    const html = await resp.text();
-    const results: string[] = [];
-
-    // Extract text content between common Google result tags
-    const textChunks = html
-      .replace(new RegExp("<script[^>]*>[\\s\\S]*?</script>", "gi"), "")
-      .replace(new RegExp("<style[^>]*>[\\s\\S]*?</style>", "gi"), "")
-      .replace(new RegExp("<[^>]+>", "g"), " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    // Find relevant sentences containing the query terms
-    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-    const sentences = textChunks.split(/[.!?]+/).filter(s => s.trim().length > 20);
-
-    for (const sentence of sentences) {
-      const lower = sentence.toLowerCase();
-      const matchCount = queryWords.filter(w => lower.includes(w)).length;
-      if (matchCount >= 2 && results.length < 8) {
-        const clean = sentence.trim().substring(0, 200);
-        if (!clean.includes("cookie") && !clean.includes("JavaScript") && !clean.includes("privacy")) {
-          results.push(`- ${clean}`);
-        }
-      }
-    }
-
-    return results.length > 0
-      ? results.join("\n")
-      : noSearchFallback();
-  } catch {
-    return noSearchFallback();
-  }
-}
-
-function noSearchFallback(): string {
-  return "Web search did not return specific results for this query. I'll do my best with what I know. Note: for live game scores, I recommend ESPN.com or the ESPN app for real-time updates.";
 }
