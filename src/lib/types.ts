@@ -285,3 +285,28 @@ export type Workflow = {
   created_at: string;
   updated_at: string;
 };
+
+// =============================================================================
+// Projects & Sprints (Migration 011)
+// =============================================================================
+
+export type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  status: "active" | "completed" | "archived";
+  color: string;
+  owner_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Sprint = {
+  id: string;
+  project_id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  status: "planned" | "active" | "completed";
+  created_at: string;
+};
