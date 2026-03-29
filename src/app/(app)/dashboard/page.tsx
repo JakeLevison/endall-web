@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Deal, Activity } from "@/lib/types";
 import UpcomingEvents from "@/components/calendar/UpcomingEvents";
 import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
+import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -424,6 +425,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Today's priorities (Salesloft Rhythm equivalent) */}
+      <TodaysPriorities />
 
       {/* Calendar events */}
       <div className="mt-6">
