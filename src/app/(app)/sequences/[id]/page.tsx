@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import StepAnalytics from "@/components/sequences/StepAnalytics";
 
 type Sequence = {
   id: string;
@@ -376,6 +377,7 @@ export default function SequenceDetailPage({
                       {step.type === "task" && step.body && (
                         <p className="text-[13px] text-zinc-500 mt-1">{step.body}</p>
                       )}
+                      <StepAnalytics sequenceId={id} stepId={step.id} stepType={step.type} />
                     </div>
                   </div>
                 </div>

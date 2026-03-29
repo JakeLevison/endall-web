@@ -265,9 +265,22 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           ))}
 
           {loading && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0" }}>
-              <Loader2 size={14} style={{ color: "#666", animation: "spin 1s linear infinite" }} />
-              <span style={{ fontSize: 12, color: "#666" }}>Thinking...</span>
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: "12px 12px 12px 2px",
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "0ms" }} />
+                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "200ms" }} />
+                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "400ms" }} />
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -326,6 +339,13 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+          }
+          .typing-dot {
+            animation: typing-bounce 1.2s ease-in-out infinite;
+          }
+          @keyframes typing-bounce {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-3px); }
           }
         `}</style>
       </div>
