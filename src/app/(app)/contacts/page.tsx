@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { enrichFromEmail } from "@/lib/enrichment";
 import type { Contact as DBContact } from "@/lib/types";
 
 type Contact = {
@@ -76,6 +77,7 @@ export default function ContactsPage() {
   const [newCompanyId, setNewCompanyId] = useState("");
   const [newLifecycleStage, setNewLifecycleStage] = useState("");
   const [companiesList, setCompaniesList] = useState<{ id: string; name: string }[]>([]);
+  const [enrichHint, setEnrichHint] = useState("");
 
   // Fetch companies for dropdown
   useEffect(() => {
@@ -393,9 +395,24 @@ export default function ContactsPage() {
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
+                onBlur={async () => {
+                  if (newEmail && newEmail.includes("@") && !newCompanyId) {
+                    const supabase = createClient();
+                    const result = await enrichFromEmail(supabase, process.env.NEXT_PUBLIC_TENANT_ID || "", newEmail);
+                    if (result.company_id) {
+                      setNewCompanyId(result.company_id);
+                      setEnrichHint(`Matched to ${result.company_name}`);
+                    } else if (result.company_name) {
+                      setEnrichHint(`Suggested company: ${result.company_name}`);
+                    }
+                  }
+                }}
                 placeholder="email@example.com"
                 className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
               />
+              {enrichHint && (
+                <p className="text-[11px] text-emerald-400">{enrichHint}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-[11px] text-zinc-600">Phone</Label>

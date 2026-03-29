@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
+import DealHealthBadge from "@/components/deals/DealHealthBadge";
 import type { Deal as DBDeal, Activity as DBActivity } from "@/lib/types";
 
 type DealDetail = {
@@ -233,6 +234,16 @@ export default function DealDetailPage({
             <div>
               <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Owner</p>
               <p className="text-[13px] text-zinc-300">{deal.owner || "---"}</p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Health</p>
+              <DealHealthBadge
+                dealId={id}
+                stage={deal.stage}
+                amount={parseFloat(deal.amount.replace(/[$,]/g, "")) || 0}
+                closeDate={deal.closeDate || null}
+                contactId={deal.contactId || null}
+              />
             </div>
           </div>
         </div>

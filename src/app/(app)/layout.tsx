@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
 import ComposeDialog from "@/components/email/ComposeDialog";
+import QuickSearch from "@/components/search/QuickSearch";
 import {
   Home,
   Users,
@@ -104,6 +105,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setChatOpen((prev) => !prev);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "/") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -214,6 +219,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Email Compose Dialog */}
       <ComposeDialog open={composeOpen} onOpenChange={setComposeOpen} />
+
+      {/* Quick Search */}
+      <QuickSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

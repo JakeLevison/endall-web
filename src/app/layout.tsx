@@ -4,22 +4,25 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Endall — The AI Operating System for Your Business",
+  title: "endall — The AI Operating System for Service Companies",
   description:
-    "CRM, email automation, task management, and AI agents — all in one platform. Built for SMBs who want enterprise tools without enterprise complexity.",
+    "CRM, scheduling, and sales automation that runs itself. One platform for HVAC, plumbing, electrical, and mechanical contractors.",
+  icons: {
+    icon: "/icon.svg",
+  },
   openGraph: {
-    title: "Endall — The AI Operating System for Your Business",
+    title: "endall — The AI Operating System for Service Companies",
     description:
-      "CRM, email automation, task management, and AI agents — all in one platform.",
+      "CRM, scheduling, and sales automation that runs itself. Built for service companies.",
     url: "https://endall.ai",
-    siteName: "Endall",
+    siteName: "endall",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Endall",
+    title: "endall",
     description:
-      "CRM, email automation, task management, and AI agents — all in one platform.",
+      "CRM, scheduling, and sales automation that runs itself. Built for service companies.",
   },
 };
 
