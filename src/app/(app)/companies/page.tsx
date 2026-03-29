@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import ExportButton from "@/components/shared/ExportButton";
 import type { Company as DBCompany } from "@/lib/types";
 
 type Company = {
@@ -187,10 +188,17 @@ export default function CompaniesPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[15px] font-medium text-white">Companies</h1>
-        <Button onClick={() => setCreateOpen(true)} className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3">
-          <Plus className="size-4 mr-1" />
-          Add company
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            data={companies as unknown as Record<string, unknown>[]}
+            columns={["name", "domain", "industry", "size", "city", "state"]}
+            filename="companies"
+          />
+          <Button onClick={() => setCreateOpen(true)} className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3">
+            <Plus className="size-4 mr-1" />
+            Add company
+          </Button>
+        </div>
       </div>
 
       <div className="relative max-w-xs mb-4">

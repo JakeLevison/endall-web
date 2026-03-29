@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
+import { SEQUENCE_TEMPLATES } from "@/lib/sequence-templates";
 
 type Sequence = {
   id: string;
@@ -51,6 +52,7 @@ export default function SequencesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -92,11 +94,14 @@ export default function SequencesPage() {
 
     try {
       const supabase = createClient();
+      const template = SEQUENCE_TEMPLATES.find((t) => t.id === selectedTemplate);
+
       const { data, error } = await supabase
         .from("sequences")
         .insert({
           name: newName.trim(),
           status: "draft",
+          steps_count: template?.steps.length || 0,
           tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
         })
         .select()
@@ -104,20 +109,29 @@ export default function SequencesPage() {
 
       if (error) throw error;
 
-      setSequences((prev) => [{
-        id: data.id,
-        name: data.name || "",
-        status: data.status || "draft",
-        steps: data.steps || 0,
-        enrolled: data.enrolled || 0,
-        reply_rate: data.reply_rate || 0,
-        created_at: data.created_at ? data.created_at.split("T")[0] : "",
-      }, ...prev]);
+      // Insert template steps if a template was selected
+      if (template && data) {
+        const steps = template.steps.map((s, i) => ({
+          sequence_id: data.id,
+          step_order: i + 1,
+          step_type: s.step_type,
+          delay_days: s.delay_days,
+          subject: s.subject || null,
+          body: s.body || null,
+          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        }));
+        await supabase.from("sequence_steps").insert(steps);
+      }
+
+      if (data) {
+        router.push(`/sequences/${data.id}`);
+      }
     } catch {
       // Silently fail
     }
 
     setNewName("");
+    setSelectedTemplate("");
     setDialogOpen(false);
     setCreating(false);
   };
@@ -205,8 +219,31 @@ export default function SequencesPage() {
               />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Status</Label>
-              <p className="text-[13px] text-zinc-400">Draft</p>
+              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Template</Label>
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTemplate("")}
+                  className={`w-full text-left px-3 py-2 rounded-md text-[13px] border transition-colors ${
+                    !selectedTemplate ? "border-white/[0.15] bg-white/[0.04] text-white" : "border-white/[0.06] bg-white/[0.01] text-zinc-500"
+                  }`}
+                >
+                  Blank sequence
+                </button>
+                {SEQUENCE_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => { setSelectedTemplate(t.id); if (!newName) setNewName(t.name); }}
+                    className={`w-full text-left px-3 py-2 rounded-md border transition-colors ${
+                      selectedTemplate === t.id ? "border-white/[0.15] bg-white/[0.04]" : "border-white/[0.06] bg-white/[0.01]"
+                    }`}
+                  >
+                    <p className={`text-[13px] ${selectedTemplate === t.id ? "text-white" : "text-zinc-400"}`}>{t.name}</p>
+                    <p className="text-[11px] text-zinc-600">{t.description} — {t.steps.length} steps</p>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>

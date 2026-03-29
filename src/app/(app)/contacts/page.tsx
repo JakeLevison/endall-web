@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import { enrichFromEmail } from "@/lib/enrichment";
+import ExportButton from "@/components/shared/ExportButton";
 import type { Contact as DBContact } from "@/lib/types";
 
 type Contact = {
@@ -222,13 +223,20 @@ export default function ContactsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-[15px] font-medium text-white">Contacts</h1>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
-        >
-          <Plus className="size-4 mr-1" />
-          Add contact
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            data={contacts as unknown as Record<string, unknown>[]}
+            columns={["first_name", "last_name", "email", "phone", "lifecycle_stage", "lead_score"]}
+            filename="contacts"
+          />
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
+          >
+            <Plus className="size-4 mr-1" />
+            Add contact
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
