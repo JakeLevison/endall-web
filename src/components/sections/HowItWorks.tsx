@@ -5,18 +5,18 @@ import { useEffect, useRef, useState } from "react";
 const steps = [
   {
     number: "01",
-    title: "Connect",
-    description: "Link email, calendar, and tools. Data syncs automatically.",
+    title: "Connect your email",
+    description: "Link Gmail or Outlook. Your contacts, calendar, and email history sync in seconds. No data entry.",
   },
   {
     number: "02",
-    title: "Configure",
-    description: "Pipeline stages, sequences, workflows. Templates or custom.",
+    title: "Set your pipeline",
+    description: "Define your sales stages. Build email sequences. Set up automations. Use a template or start from scratch.",
   },
   {
     number: "03",
-    title: "Operate",
-    description: "AI handles the routine. You handle the relationships.",
+    title: "Let AI run the routine",
+    description: "endall drafts follow-ups, scores leads, schedules meetings, and alerts you when a deal needs attention. You close.",
   },
 ];
 
@@ -56,7 +56,7 @@ export default function HowItWorks() {
             marginBottom: 48,
           }}
         >
-          Getting started
+          How it works
         </p>
 
         <h2 style={{
@@ -68,7 +68,7 @@ export default function HowItWorks() {
           textAlign: "center",
           marginBottom: "48px",
         }}>
-          Three steps to operational
+          Up and running in three minutes
         </h2>
 
         {/* Desktop: horizontal layout */}
