@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Send,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -40,6 +41,7 @@ const navItems = [
   { href: "/workflows", label: "Workflows", icon: Zap },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/outreach", label: "Outreach", icon: Send },
 ];
 
 function SidebarContent({ pathname }: { pathname: string }) {

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal as DBDeal } from "@/lib/types";
+import DealHealthBadge from "@/components/deals/DealHealthBadge";
 
 type Deal = {
   id: string;
@@ -176,7 +177,16 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <p className="text-[11px] text-zinc-600 mt-1">Close: {deal.closeDate}</p>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-[11px] text-zinc-600">Close: {deal.closeDate}</p>
+                    <DealHealthBadge
+                      dealId={deal.id}
+                      stage={deal.stage}
+                      amount={parseFloat(deal.amount.replace(/[$,]/g, "")) || 0}
+                      closeDate={deal.closeDate || null}
+                      contactId={null}
+                    />
+                  </div>
                 </div>
               ))}
               {stageDeals.length === 0 && (
