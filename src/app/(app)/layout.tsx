@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
+import ComposeDialog from "@/components/email/ComposeDialog";
 import {
   Home,
   Users,
@@ -93,6 +94,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
 
   // Cmd+K to open chat
   useEffect(() => {
@@ -157,6 +159,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
+          <div className="flex items-center gap-2">
+          {/* Compose email button */}
+          <button
+            onClick={() => setComposeOpen(true)}
+            className="text-zinc-500 hover:text-zinc-300 transition-colors p-1.5"
+            title="Compose email"
+          >
+            <Mail className="size-4" />
+          </button>
+
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -184,6 +196,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </header>
 
         {/* Content */}
@@ -196,6 +209,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* AI Chat Panel */}
       <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+
+      {/* Email Compose Dialog */}
+      <ComposeDialog open={composeOpen} onOpenChange={setComposeOpen} />
     </div>
   );
 }
