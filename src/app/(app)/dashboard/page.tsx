@@ -18,6 +18,7 @@ import type { Deal, Activity } from "@/lib/types";
 import UpcomingEvents from "@/components/calendar/UpcomingEvents";
 import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -429,8 +430,9 @@ export default function DashboardPage() {
       {/* Today's priorities (Salesloft Rhythm equivalent) */}
       <TodaysPriorities />
 
-      {/* Calendar events */}
-      <div className="mt-6">
+      {/* Activity feed + Calendar events side by side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <ActivityFeed />
         <UpcomingEvents />
       </div>
     </div>
