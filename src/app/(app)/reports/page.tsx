@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal as DBDeal, Activity as DBActivity, Contact as DBContact } from "@/lib/types";
 import dynamic from "next/dynamic";
@@ -118,7 +117,6 @@ export default function ReportsPage() {
   const [lifecycleCounts, setLifecycleCounts] = useState<LifecycleCount[]>([]);
   const [recentDeals, setRecentDeals] = useState<RecentDeal[]>([]);
   const [dealTimeline, setDealTimeline] = useState<{ date: string; value: number }[]>([]);
-  const [activityTimeline, setActivityTimeline] = useState<{ date: string; value: number }[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -226,16 +224,6 @@ export default function ReportsPage() {
             .map(([date, value]) => ({ date, value }))
         );
 
-        // Activity timeline — group by created date (last 30 days)
-        const actByDay = new Map<string, number>();
-        for (const a of activities) {
-          // activities only has 'type', not created_at in this query — skip timeline for now
-        }
-        setActivityTimeline(
-          Array.from(actByDay.entries())
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([date, value]) => ({ date, value }))
-        );
       } catch {
         // Supabase failed — leave everything at zero defaults
       } finally {

@@ -14,6 +14,10 @@ async function cosRequest(path: string, method: string = "POST", body?: Record<s
     signal: AbortSignal.timeout(30000),
   });
 
+  if (!resp.ok) {
+    throw new Error(`COS API returned ${resp.status}`);
+  }
+
   return resp.json();
 }
 

@@ -6,7 +6,7 @@ import {
   assemblePipelineContext,
 } from "@/lib/context-assembler";
 
-const TENANT_ID = "109d88ca-983a-4bfd-9e79-c64061fd0727"; // Endall tenant
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "109d88ca-983a-4bfd-9e79-c64061fd0727";
 
 function getSystemPrompt(): string {
   const today = new Date().toLocaleDateString("en-US", {

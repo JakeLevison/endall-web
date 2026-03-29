@@ -32,9 +32,6 @@ export async function assembleContext(
     records: { contacts: [], companies: [], deals: [], activities: [] },
   };
 
-  // Extract potential entity names (words that start with uppercase, multi-word sequences)
-  const words = query.split(/\s+/);
-
   // Search contacts by name fragments
   const { data: contacts } = await supabase
     .from("contacts")
