@@ -275,6 +275,20 @@ export type SequenceStep = {
   created_at: string;
 };
 
+export type SequenceVariant = {
+  id: string;
+  step_id: string;
+  variant_label: string;
+  subject: string;
+  body: string | null;
+  weight: number;
+  sent_count: number;
+  opened_count: number;
+  replied_count: number;
+  is_winner: boolean;
+  created_at: string;
+};
+
 export type Workflow = {
   id: string;
   name: string;
