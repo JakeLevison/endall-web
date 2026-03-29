@@ -14,6 +14,9 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal as DBDeal, Activity as DBActivity, Contact as DBContact } from "@/lib/types";
+import dynamic from "next/dynamic";
+
+const TimeSeriesChart = dynamic(() => import("@/components/charts/TimeSeriesChart"), { ssr: false });
 
 /* ── Types ─────────────────────────────────────────────── */
 
@@ -114,6 +117,8 @@ export default function ReportsPage() {
   });
   const [lifecycleCounts, setLifecycleCounts] = useState<LifecycleCount[]>([]);
   const [recentDeals, setRecentDeals] = useState<RecentDeal[]>([]);
+  const [dealTimeline, setDealTimeline] = useState<{ date: string; value: number }[]>([]);
+  const [activityTimeline, setActivityTimeline] = useState<{ date: string; value: number }[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -207,6 +212,29 @@ export default function ReportsPage() {
         }
         setLifecycleCounts(
           lifecycleOrder.map((s) => ({ stage: s, count: lcMap.get(s) || 0 }))
+        );
+
+        // Deal timeline — group by created month
+        const dealsByMonth = new Map<string, number>();
+        for (const d of deals) {
+          const date = d.created_at ? d.created_at.substring(0, 7) : null; // YYYY-MM
+          if (date) dealsByMonth.set(date, (dealsByMonth.get(date) || 0) + (d.amount || 0));
+        }
+        setDealTimeline(
+          Array.from(dealsByMonth.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([date, value]) => ({ date, value }))
+        );
+
+        // Activity timeline — group by created date (last 30 days)
+        const actByDay = new Map<string, number>();
+        for (const a of activities) {
+          // activities only has 'type', not created_at in this query — skip timeline for now
+        }
+        setActivityTimeline(
+          Array.from(actByDay.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([date, value]) => ({ date, value }))
         );
       } catch {
         // Supabase failed — leave everything at zero defaults
@@ -414,6 +442,14 @@ export default function ReportsPage() {
               )}
             </div>
           </div>
+
+          {/* Pipeline Value Over Time */}
+          {dealTimeline.length > 1 && (
+            <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
+              <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Pipeline Value Over Time</h2>
+              <TimeSeriesChart data={dealTimeline} color="#3b82f6" valuePrefix="$" height={220} />
+            </div>
+          )}
 
           {/* Contact Lifecycle Funnel */}
           <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">

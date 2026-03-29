@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import StepAnalytics from "@/components/sequences/StepAnalytics";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("@/components/editor/RichTextEditor"), { ssr: false });
 
 type Sequence = {
   id: string;
@@ -465,25 +468,11 @@ export default function SequenceDetailPage({
             {newType === "email" && (
               <div>
                 <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Body</Label>
-                <Textarea
-                  value={newBody}
-                  onChange={(e) => setNewBody(e.target.value)}
-                  placeholder="Email body content..."
-                  className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 min-h-[80px]"
+                <RichTextEditor
+                  content={newBody}
+                  onChange={setNewBody}
+                  placeholder="Write your email..."
                 />
-                <div className="flex flex-wrap gap-1 mt-2">
-                  <span className="text-[10px] text-zinc-600 mr-1 self-center">Insert:</span>
-                  {MERGE_TAGS.map((tag) => (
-                    <button
-                      key={tag.token}
-                      type="button"
-                      onClick={() => insertMergeTag(tag.token)}
-                      className="text-[10px] text-zinc-500 bg-white/[0.03] border border-white/[0.06] rounded px-1.5 py-0.5 hover:bg-white/[0.06] hover:text-zinc-300 transition-colors"
-                    >
-                      {tag.label}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
 
