@@ -14,13 +14,16 @@ function getSystemPrompt(): string {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "America/New_York",
   });
 
   return `You are the AI assistant built into endall, an AI-powered business operating system. Today is ${today}.
 
 You are a capable, general-purpose AI assistant. You can answer questions, have conversations, brainstorm ideas, write content, explain concepts, and help with anything the user asks.
 
-You also have access to the user's CRM data (contacts, companies, deals, pipeline, activities). When CRM data is provided in the context, use it to give specific, data-driven answers. When no CRM data is relevant, just be a helpful assistant.
+You have two special capabilities:
+1. CRM data access — contacts, companies, deals, pipeline, activities from the user's workspace. When CRM data is provided, use it for specific, data-driven answers.
+2. Web search — for real-time questions (sports scores, news, weather, stock prices, current events), search results are provided. Use them to give accurate, up-to-date answers.
 
 Rules:
 - Be concise and actionable. Lead with the answer, not the preamble.
@@ -134,6 +137,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Web search for real-time questions
+    let webContext = "";
+    if (message && needsWebSearch(message)) {
+      webContext = await searchWeb(message);
+    }
+
     // Build the prompt for the pre-built action
     let userPrompt = message || "";
     if (action) {
@@ -144,6 +153,14 @@ export async function POST(request: NextRequest) {
     const messages: { role: string; content: string }[] = [
       { role: "system", content: getSystemPrompt() },
     ];
+
+    // Add web search results as context
+    if (webContext) {
+      messages.push({
+        role: "system",
+        content: `Here are relevant web search results for the user's question:\n\n${webContext}\n\nUse this information to answer the user's question accurately. Cite the source if relevant.`,
+      });
+    }
 
     // Add CRM context as a system message
     if (crmContext) {
@@ -230,5 +247,91 @@ function getActionPrompt(action: string, extra?: string): string {
       return `Analyze the recent activity and suggest concrete next steps. Prioritize by urgency and impact. Format as a numbered action list with owners and deadlines.${extra ? " Additional context: " + extra : ""}`;
     default:
       return extra || "Help me with this CRM task.";
+  }
+}
+
+// ── Web Search ──────────────────────────────────────────────
+
+const REALTIME_KEYWORDS = [
+  "score", "scores", "game", "games", "match", "tournament",
+  "weather", "forecast", "temperature",
+  "stock", "price", "market", "trading",
+  "news", "latest", "today", "tonight", "yesterday", "this week",
+  "who won", "who is winning", "what happened",
+  "current", "live", "right now", "update",
+  "election", "results",
+  "flight", "status",
+  "march madness", "nba", "nfl", "mlb", "nhl", "premier league",
+  "super bowl", "world cup", "olympics",
+  "elite 8", "final four", "sweet 16",
+];
+
+function needsWebSearch(query: string): boolean {
+  const lower = query.toLowerCase();
+  return REALTIME_KEYWORDS.some((k) => lower.includes(k));
+}
+
+async function searchWeb(query: string): Promise<string> {
+  try {
+    // Use Brave Search API (free tier: 2000 queries/month)
+    const braveKey = process.env.BRAVE_SEARCH_API_KEY;
+    if (!braveKey) {
+      // Fallback: use a simple Google search scrape via fetch
+      return await fallbackSearch(query);
+    }
+
+    const resp = await fetch(
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`,
+      {
+        headers: {
+          "Accept": "application/json",
+          "Accept-Encoding": "gzip",
+          "X-Subscription-Token": braveKey,
+        },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+
+    if (!resp.ok) return await fallbackSearch(query);
+
+    const data = await resp.json();
+    const results = data.web?.results || [];
+
+    return results
+      .slice(0, 5)
+      .map((r: { title: string; description: string; url: string }) =>
+        `- ${r.title}: ${r.description} (${r.url})`
+      )
+      .join("\n");
+  } catch {
+    return await fallbackSearch(query);
+  }
+}
+
+async function fallbackSearch(query: string): Promise<string> {
+  try {
+    // Use DuckDuckGo instant answer API (no key needed)
+    const resp = await fetch(
+      `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+
+    if (!resp.ok) return "";
+
+    const data = await resp.json();
+    const parts: string[] = [];
+
+    if (data.Abstract) parts.push(data.Abstract);
+    if (data.Answer) parts.push(data.Answer);
+
+    if (data.RelatedTopics) {
+      for (const t of data.RelatedTopics.slice(0, 5)) {
+        if (t.Text) parts.push(`- ${t.Text}`);
+      }
+    }
+
+    return parts.join("\n") || "No web results found. Answer based on your training data and let the user know the information may not be current.";
+  } catch {
+    return "Web search unavailable. Answer based on your training data and let the user know the information may not be current.";
   }
 }
