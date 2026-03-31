@@ -147,8 +147,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
 
-            {/* Logo — mobile only, links to dashboard */}
-            <Link href="/dashboard" className="md:hidden text-[15px] font-semibold text-white tracking-[-0.02em]">
+            {/* Logo — mobile only, links to landing page */}
+            <Link href="/" className="md:hidden text-[15px] font-semibold text-white tracking-[-0.02em] px-3 py-2 min-h-[36px] flex items-center">
               endall
             </Link>
 
