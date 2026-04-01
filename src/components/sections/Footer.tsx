@@ -65,7 +65,7 @@ export default function Footer() {
             color: "#666",
           }}
         >
-          &copy; 2026 Endall AI
+          &copy; 2026 Endall
         </span>
       </div>
     </footer>

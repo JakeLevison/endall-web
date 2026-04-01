@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const words = ["CRM", "Sequences", "Workflows", "Tasks", "Reports"];
+const words = ["Calls", "Scheduling", "Leads", "Briefings", "Follow-ups"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -58,7 +58,7 @@ export default function HeroHeadline() {
           marginBottom: "20px",
         }}
       >
-        The AI Operating System for Your Business
+        Your front office, fully staffed
       </p>
 
       {/* Hidden measurement element — same font/size as headline, measures "Sequences" (has descender) */}
@@ -93,7 +93,7 @@ export default function HeroHeadline() {
         }}
         className="text-[36px] sm:text-[56px] lg:text-[72px]"
       >
-        <span>One platform for</span>
+        <span>We handle your</span>
         <br className="sm:hidden" />
         {" "}
         {stepPx > 0 && (
@@ -145,7 +145,7 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        CRM, email sequences, workflow automation, task management, and AI agents.
+        Endall answers your calls, qualifies your leads, books your jobs, and briefs you every morning on what needs attention.
       </p>
 
       <div style={{ marginTop: "40px" }}>
@@ -168,7 +168,7 @@ export default function HeroHeadline() {
           onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
           onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
         >
-          Open App
+          See How It Works
         </Link>
       </div>
 

@@ -1,14 +1,14 @@
 "use client";
 
 const teams = [
-  "Series A Startups",
-  "Consulting Firms",
-  "SaaS Companies",
-  "Real Estate Teams",
-  "Financial Services",
-  "Marketing Agencies",
-  "Professional Services",
-  "Growth-Stage Companies",
+  "Electrical Contractors",
+  "MEP Firms",
+  "HVAC Companies",
+  "Plumbing Contractors",
+  "Fire Protection",
+  "Data Center Subcontractors",
+  "Commercial Electricians",
+  "Service Companies",
 ];
 
 export default function SocialProofTicker() {
@@ -25,7 +25,7 @@ export default function SocialProofTicker() {
           marginBottom: "24px",
         }}
       >
-        Built for teams like yours
+        Built for contractors like you
       </p>
       <div style={{ position: "relative", overflow: "hidden" }}>
         <div

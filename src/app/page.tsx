@@ -21,45 +21,45 @@ import Footer from "@/components/sections/Footer";
 
 const features = [
   {
-    label: "CRM",
-    title: "Every relationship, one view.",
+    label: "Calls",
+    title: "Every call answered. Every time.",
     description:
-      "Contacts, companies, deals, pipeline. Custom fields, activity timelines, automatic enrichment.",
+      "Picks up in under 60 seconds. Knows the difference between a GC, a property manager, and a homeowner. No more voicemail.",
     mock: <CRMMock />,
   },
   {
-    label: "Sequences",
-    title: "Outreach on autopilot.",
+    label: "Qualification",
+    title: "Knows what's worth your time.",
     description:
-      "Multi-step email cadences. Smart scheduling. Personalization tokens. Auto-unenroll on reply.",
+      "Qualifies every lead using logic built for electrical and MEP contractors. Commercial, residential, emergency, service call.",
     mock: <SequencesMock />,
   },
   {
-    label: "Workflows",
-    title: "Automate any process.",
+    label: "Booking",
+    title: "Jobs on your calendar. Automatically.",
     description:
-      "Trigger on any event. Branch on any condition. AI classification, summarization, and research built in.",
+      "Books qualified opportunities directly on your calendar. No phone tag. No back-and-forth. The right jobs, scheduled.",
     mock: <WorkflowsMock />,
   },
   {
-    label: "Tasks",
-    title: "Ship work, not updates.",
+    label: "Briefings",
+    title: "Wake up knowing what happened.",
     description:
-      "Issues, projects, boards, sprints. Prioritize, assign, and track without the meetings.",
+      "Every morning you get a plain-language summary: what came in overnight, what's commercial, what's urgent, what needs a decision.",
     mock: <TasksMock />,
   },
   {
-    label: "AI",
-    title: "Ask anything.",
+    label: "Speed",
+    title: "Live in 48 hours. Not 48 days.",
     description:
-      "Natural language across all your data. Meeting prep. Deal briefs. Follow-up drafts. Account research.",
+      "No training manuals. No 90-day onboarding. Endall deploys on your existing phone number and calendar in two days.",
     mock: <AIMock />,
   },
   {
-    label: "Reports",
-    title: "Decisions, not dashboards.",
+    label: "Control",
+    title: "Your business. Your rules.",
     description:
-      "Pipeline analytics. Revenue metrics. Activity tracking. Real-time, always current.",
+      "Set your service area, your hours, your job types. Pause anytime. No contracts. Cancel whenever you want.",
     mock: <ReportsMock />,
   },
 ];
@@ -117,7 +117,7 @@ export default function Home() {
                     marginBottom: "16px",
                   }}
                 >
-                  Platform
+                  What Endall does
                 </p>
                 <h2
                   style={{
@@ -130,7 +130,7 @@ export default function Home() {
                     marginBottom: "48px",
                   }}
                 >
-                  Everything you need
+                  The front office you never had to hire
                 </h2>
                 <div
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"

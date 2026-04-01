@@ -5,18 +5,18 @@ import { useEffect, useRef, useState } from "react";
 const steps = [
   {
     number: "01",
-    title: "Connect your email",
-    description: "Link Gmail or Outlook. Your contacts, calendar, and email history sync in seconds. No data entry.",
+    title: "We set up on your number",
+    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. Takes 48 hours.",
   },
   {
     number: "02",
-    title: "Set your pipeline",
-    description: "Define your sales stages. Build email sequences. Set up automations. Use a template or start from scratch.",
+    title: "Endall answers your calls",
+    description: "Every inbound call gets picked up in under 60 seconds. Endall qualifies the caller, determines urgency, and books qualified jobs on your calendar.",
   },
   {
     number: "03",
-    title: "Let AI run the routine",
-    description: "endall drafts follow-ups, scores leads, schedules meetings, and alerts you when a deal needs attention. You close.",
+    title: "You get a morning briefing",
+    description: "Every morning before you leave the house, you know exactly what came in overnight, what's commercial, what's time-sensitive, and what needs your attention.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function HowItWorks() {
           textAlign: "center",
           marginBottom: "48px",
         }}>
-          Up and running in three minutes
+          Up and running in 48 hours
         </h2>
 
         {/* Desktop: horizontal layout */}

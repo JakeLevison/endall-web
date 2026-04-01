@@ -36,7 +36,7 @@ export default function FinalCTA() {
             marginBottom: 12,
           }}
         >
-          {["Stop duct-taping", "tools together."].map((line, i) => (
+          {["Stop losing jobs", "to voicemail."].map((line, i) => (
             <span
               key={line}
               style={{
@@ -69,7 +69,7 @@ export default function FinalCTA() {
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms",
           }}
         >
-          One platform. Three minutes to operational.
+          60 days free. No credit card. Live in 48 hours.
         </p>
 
         {/* CTA Button */}
@@ -97,7 +97,7 @@ export default function FinalCTA() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
-            Open App
+            Start Your Pilot
           </Link>
         </div>
       </div>
