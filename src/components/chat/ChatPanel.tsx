@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, Loader2, RotateCcw } from "lucide-react";
+import { X, Send, Sparkles, Loader2, RotateCcw, Download } from "lucide-react";
+
+type FileAttachment = {
+  file_id: string;
+  filename: string;
+  download_url: string;
+};
 
 type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  files?: FileAttachment[];
 };
 
 type Action = {
@@ -41,6 +48,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -70,13 +78,19 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       setInput("");
       setLoading(true);
 
+      // Track active workflow for routing follow-ups to the bridge
+      if (action) {
+        setActiveWorkflow(action);
+      }
+
       try {
         const resp = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: text,
-            action,
+            action: action || undefined,
+            activeWorkflow: action || activeWorkflow || undefined,
             recordType,
             recordId,
             history: messages.map((m) => ({ role: m.role, content: m.content })),
@@ -89,6 +103,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           role: "assistant",
           content: data.reply || data.error || "Something went wrong.",
           timestamp: new Date(),
+          files: data.files || undefined,
         };
         setMessages((prev) => [...prev, aiMsg]);
       } catch {
@@ -171,7 +186,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {messages.length > 0 && (
               <button
-                onClick={() => setMessages([])}
+                onClick={() => { setMessages([]); setActiveWorkflow(null); }}
                 title="New chat"
                 style={{
                   background: "none",
@@ -289,6 +304,43 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
                 >
                   {msg.content}
                 </div>
+                {msg.files && msg.files.length > 0 && (
+                  <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+                    {msg.files.map((f) => (
+                      <a
+                        key={f.file_id}
+                        href={f.download_url}
+                        download={f.filename}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "8px 12px",
+                          background: "rgba(59, 130, 246, 0.1)",
+                          border: "1px solid rgba(59, 130, 246, 0.3)",
+                          borderRadius: 8,
+                          color: "#60a5fa",
+                          fontSize: 13,
+                          fontWeight: 500,
+                          textDecoration: "none",
+                          cursor: "pointer",
+                          transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "rgba(59, 130, 246, 0.2)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "rgba(59, 130, 246, 0.1)")
+                        }
+                      >
+                        <Download size={14} />
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {f.filename}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

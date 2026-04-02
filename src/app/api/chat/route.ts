@@ -6,6 +6,9 @@ import {
   assemblePipelineContext,
 } from "@/lib/context-assembler";
 
+// Allow up to 120s for Skills API file generation (pause_turn loops)
+export const maxDuration = 120;
+
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "109d88ca-983a-4bfd-9e79-c64061fd0727";
 
 function getSystemPrompt(): string {
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, action, recordType, recordId, history } =
+    const { message, action, activeWorkflow, recordType, recordId, history } =
       await request.json();
 
     if (!message && !action) {
@@ -180,47 +183,76 @@ export async function POST(request: NextRequest) {
 
     messages.push({ role: "user", content: userPrompt });
 
-    // Call Claude API with Skills API for file generation workflows
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY not configured" },
-        { status: 500 }
-      );
-    }
-
     // Determine if this is a workflow that needs Skills API (file generation)
     const SKILLS_ACTIONS = [
       "financial_model", "generate_budget", "capabilities_doc", "npv_analysis",
       "project_estimate", "proposal", "competitive_analysis", "review_financials",
       "swot_analysis",
     ];
-    const needsSkills = action && SKILLS_ACTIONS.includes(action);
+    const needsSkills = (action && SKILLS_ACTIONS.includes(action)) ||
+      (activeWorkflow && SKILLS_ACTIONS.includes(activeWorkflow));
 
-    const betaHeaders = needsSkills
-      ? "code-execution-2025-08-25,files-api-2025-04-14,skills-2025-10-02"
-      : "";
+    // -------------------------------------------------------------------
+    // File-generation workflows: proxy to the Python FastAPI bridge
+    // which uses the Anthropic Python SDK with Skills API support.
+    // -------------------------------------------------------------------
+    if (needsSkills) {
+      const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
+      try {
+        const bridgeResp = await fetch(`${bridgeUrl}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userPrompt,
+            action: action || activeWorkflow,
+            session_id: ip, // one session per IP for now
+            tenant_id: TENANT_ID,
+          }),
+          signal: AbortSignal.timeout(120000), // 2 min - Skills API can be slow
+        });
 
-    const skills = needsSkills
-      ? [
-          { type: "anthropic", skill_id: "xlsx", version: "latest" },
-          { type: "anthropic", skill_id: "pptx", version: "latest" },
-          { type: "anthropic", skill_id: "docx", version: "latest" },
-          { type: "anthropic", skill_id: "pdf", version: "latest" },
-        ]
-      : undefined;
+        if (!bridgeResp.ok) {
+          const errText = await bridgeResp.text();
+          console.error("Ask Endall bridge error:", bridgeResp.status, errText);
+          return NextResponse.json(
+            { error: "File generation service unavailable. Try again shortly." },
+            { status: 502 }
+          );
+        }
 
-    const tools: any[] = needsSkills
-      ? [{ type: "code_execution_20250825", name: "code_execution" }]
-      : [{ type: "web_search_20250305", name: "web_search" }];
+        const bridgeData = await bridgeResp.json();
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    };
-    if (betaHeaders) {
-      headers["anthropic-beta"] = betaHeaders;
+        // Rewrite file download URLs to go through our Next.js proxy
+        const files = (bridgeData.files || []).map((f: { file_id: string; filename: string }) => ({
+          file_id: f.file_id,
+          filename: f.filename,
+          download_url: `/api/chat/download?file_id=${f.file_id}&filename=${encodeURIComponent(f.filename)}`,
+        }));
+
+        return NextResponse.json({
+          reply: bridgeData.reply || "File generation complete.",
+          context: crmContext ? true : false,
+          files: files.length > 0 ? files : undefined,
+          container_id: bridgeData.container_id || undefined,
+        });
+      } catch (err) {
+        console.error("Ask Endall bridge connection error:", err);
+        return NextResponse.json(
+          { error: "File generation service is not running. Please try again later." },
+          { status: 502 }
+        );
+      }
+    }
+
+    // -------------------------------------------------------------------
+    // Standard chat: call Claude API directly (no file generation)
+    // -------------------------------------------------------------------
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "ANTHROPIC_API_KEY not configured" },
+        { status: 500 }
+      );
     }
 
     const systemText = messages
@@ -232,128 +264,44 @@ export async function POST(request: NextRequest) {
       .filter((m) => m.role !== "system")
       .map((m) => ({ role: m.role, content: m.content }));
 
-    const body: Record<string, any> = {
-      model: needsSkills ? "claude-sonnet-4-5-20250929" : "claude-sonnet-4-20250514",
-      max_tokens: needsSkills ? 16384 : 2048,
-      system: systemText,
-      messages: apiMessages,
-      tools,
-    };
-
-    // Skills API requires container in body for beta endpoint
-    if (needsSkills && skills) {
-      body.container = { skills };
-    }
-
-    // Clean undefined keys
-    Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
-
-    // Skills API uses the beta messages endpoint
-    const apiUrl = needsSkills
-      ? "https://api.anthropic.com/v1/messages?beta=true"
-      : "https://api.anthropic.com/v1/messages";
-
-    let response = await fetch(apiUrl, {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers,
-      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 2048,
+        system: systemText,
+        messages: apiMessages,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+      }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
       console.error("Claude API error:", response.status, errText);
-
-      // If Skills API fails, fall back to standard API without file generation
-      if (needsSkills) {
-        console.log("Skills API failed, falling back to standard API...");
-        const fallbackBody = {
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4096,
-          system: systemText,
-          messages: apiMessages,
-        };
-        const fallbackHeaders = {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        };
-        response = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: fallbackHeaders,
-          body: JSON.stringify(fallbackBody),
-        });
-        if (!response.ok) {
-          const fallbackErr = await response.text();
-          console.error("Fallback API error:", fallbackErr);
-          return NextResponse.json(
-            { error: "AI service error" },
-            { status: 502 }
-          );
-        }
-      } else {
-        return NextResponse.json(
-          { error: "AI service error" },
-          { status: 502 }
-        );
-      }
+      return NextResponse.json(
+        { error: "AI service error" },
+        { status: 502 }
+      );
     }
 
-    let data = await response.json();
+    const data = await response.json();
 
-    // Handle pause_turn for long-running Skills operations
-    let retries = 0;
-    while (data.stop_reason === "pause_turn" && retries < 10) {
-      retries++;
-      const continueMessages = [
-        ...apiMessages,
-        { role: "assistant", content: data.content },
-        { role: "user", content: "Continue." },
-      ];
-      const continueBody: Record<string, any> = {
-        ...body,
-        container: data.container?.id ? { id: data.container.id, skills } : body.container,
-        messages: continueMessages,
-      };
-      Object.keys(continueBody).forEach((k) => continueBody[k] === undefined && delete continueBody[k]);
-      const contResp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(continueBody),
-      });
-      if (!contResp.ok) break;
-      data = await contResp.json();
-    }
-
-    // Extract text and file IDs from response
     let reply = "";
-    const fileIds: string[] = [];
-
     for (const block of data.content || []) {
       if (block.type === "text") {
         reply += block.text;
       }
-      // Files from bash execution (cp to $OUTPUT_DIR)
-      if (block.type === "bash_code_execution_tool_result" || block.type === "text_editor_code_execution_tool_result") {
-        const items = block.content?.content || [];
-        for (const item of items) {
-          if (item.file_id) fileIds.push(item.file_id);
-        }
-      }
     }
-
     if (!reply) reply = "I couldn't generate a response.";
-
-    // If files were generated, include download info
-    const files = fileIds.map((id) => ({
-      file_id: id,
-      download_url: `/api/chat/download?file_id=${id}`,
-    }));
 
     return NextResponse.json({
       reply,
       context: crmContext ? true : false,
-      files: files.length > 0 ? files : undefined,
-      container_id: data.container?.id || undefined,
     });
   } catch (err) {
     console.error("Chat API error:", err);
