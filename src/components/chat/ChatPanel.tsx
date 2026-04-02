@@ -217,6 +217,15 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           previewHtml: data.previewHtml || undefined,
         };
         setMessages((prev) => [...prev, aiMsg]);
+
+        // Dispatch toast event for file generation (visible even outside chat panel)
+        if (data.files && data.files.length > 0) {
+          for (const f of data.files) {
+            window.dispatchEvent(new CustomEvent("endall-file-ready", {
+              detail: { filename: f.filename, downloadUrl: f.download_url },
+            }));
+          }
+        }
       } catch (err) {
         const errorMsg = err instanceof Error && err.message !== "Failed to fetch"
           ? err.message

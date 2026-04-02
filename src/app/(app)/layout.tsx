@@ -114,6 +114,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [toast, setToast] = useState<{ filename: string; downloadUrl: string } | null>(null);
+
+  // Listen for file-ready events from ChatPanel
+  useEffect(() => {
+    function handleFileReady(e: Event) {
+      const detail = (e as CustomEvent).detail;
+      setToast({ filename: detail.filename, downloadUrl: detail.downloadUrl });
+      const timer = setTimeout(() => setToast(null), 15000);
+      return () => clearTimeout(timer);
+    }
+    window.addEventListener("endall-file-ready", handleFileReady);
+    return () => window.removeEventListener("endall-file-ready", handleFileReady);
+  }, []);
 
   // Auto-open Ask Endall on first app load
   useEffect(() => {
@@ -249,6 +262,73 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Quick Search */}
       <QuickSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      {/* File ready toast */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 1000,
+            background: "#1a1a1b",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 12,
+            padding: "14px 18px",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            animation: "toast-in 0.3s ease",
+            maxWidth: 360,
+          }}
+        >
+          <div style={{ fontSize: 20 }}>📄</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, color: "#fff", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {toast.filename}
+            </div>
+            <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>Ready to download</div>
+          </div>
+          <a
+            href={toast.downloadUrl}
+            download={toast.filename}
+            onClick={() => setToast(null)}
+            style={{
+              padding: "6px 14px",
+              background: "#3b82f6",
+              color: "#fff",
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 500,
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            Download
+          </a>
+          <button
+            onClick={() => setToast(null)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#555",
+              cursor: "pointer",
+              padding: 2,
+              fontSize: 16,
+              lineHeight: 1,
+            }}
+          >
+            &times;
+          </button>
+          <style>{`
+            @keyframes toast-in {
+              from { transform: translateY(20px); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }
