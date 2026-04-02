@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2 } from "lucide-react";
+import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, FileSpreadsheet, FileText, File } from "lucide-react";
 
 type FileAttachment = {
   file_id: string;
@@ -58,6 +58,16 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
   const [loadingPhase, setLoadingPhase] = useState("");
   const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chat" | "files">("chat");
+  const [savedFiles, setSavedFiles] = useState<Array<{
+    id: string;
+    file_name: string;
+    file_type: string;
+    description: string;
+    file_path: string;
+    workflow: string;
+    created_at: string;
+  }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -66,6 +76,16 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Load files when Files tab is opened
+  useEffect(() => {
+    if (activeTab === "files") {
+      fetch(`${BRIDGE_URL}/files`)
+        .then((r) => r.json())
+        .then((d) => setSavedFiles(d.files || []))
+        .catch(() => setSavedFiles([]));
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -323,8 +343,101 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           </div>
         </div>
 
-        {/* Messages */}
-        <div
+        {/* Tab bar */}
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          {(["chat", "files"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                flex: 1,
+                padding: "8px 0",
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                color: activeTab === tab ? "#fff" : "#555",
+                background: "none",
+                border: "none",
+                borderBottom: activeTab === tab ? "2px solid #3b82f6" : "2px solid transparent",
+                cursor: "pointer",
+                transition: "color 0.15s",
+              }}
+            >
+              {tab === "chat" ? "Chat" : "My Files"}
+            </button>
+          ))}
+        </div>
+
+        {/* Files tab */}
+        {activeTab === "files" && (
+          <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+            {savedFiles.length === 0 ? (
+              <p style={{ fontSize: 13, color: "#555", textAlign: "center", marginTop: 40 }}>
+                No files generated yet. Use the Chat tab to create budgets, NPV analyses, and more.
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {savedFiles.map((f) => {
+                  const icon = f.file_type === "xlsx" ? FileSpreadsheet
+                    : f.file_type === "pdf" ? FileText
+                    : File;
+                  const Icon = icon;
+                  return (
+                    <div
+                      key={f.id}
+                      style={{
+                        padding: "12px 14px",
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderRadius: 8,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <Icon size={18} style={{ color: "#3b82f6", flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, color: "#fff", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {f.file_name}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+                            {f.description}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                            {new Date(f.created_at).toLocaleString()}
+                          </div>
+                        </div>
+                        <a
+                          href={`${BRIDGE_URL}/download/${f.file_path}`}
+                          download={f.file_name}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                            padding: "6px 10px",
+                            background: "rgba(59,130,246,0.1)",
+                            border: "1px solid rgba(59,130,246,0.3)",
+                            borderRadius: 6,
+                            color: "#60a5fa",
+                            fontSize: 12,
+                            textDecoration: "none",
+                            cursor: "pointer",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Download size={12} />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Messages (Chat tab) */}
+        {activeTab === "chat" && (
+          <div
           onClick={(e) => {
             // Only focus input if clicking empty space, not selecting text
             const sel = window.getSelection();
@@ -489,8 +602,10 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           )}
           <div ref={messagesEndRef} />
         </div>
+        )}
 
-        {/* Input — sticky at bottom, survives mobile keyboard */}
+        {/* Input — visible on chat tab only */}
+        {activeTab === "chat" && (
         <form
           onSubmit={handleSubmit}
           style={{
@@ -555,6 +670,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
             <Send size={16} />
           </button>
         </form>
+        )}
 
         <style jsx>{`
           @keyframes spin {
