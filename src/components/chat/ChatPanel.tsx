@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, Loader2, RotateCcw, Download } from "lucide-react";
+import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2 } from "lucide-react";
 
 type FileAttachment = {
   file_id: string;
@@ -56,7 +56,9 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState("");
   const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -65,6 +67,16 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && expanded) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expanded]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,6 +111,22 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
         (currentWorkflow && SKILLS_ACTIONS.has(currentWorkflow))
       );
 
+      // Progress phases for file generation
+      const phases = [
+        { delay: 0, msg: "Building your document..." },
+        { delay: 10000, msg: "Running calculations..." },
+        { delay: 25000, msg: "Formatting workbook and applying conditional formatting..." },
+        { delay: 45000, msg: "Finalizing and preparing download..." },
+        { delay: 90000, msg: "This is taking longer than usual. Still working - complex models can take up to 2 minutes." },
+      ];
+      const phaseTimers: ReturnType<typeof setTimeout>[] = [];
+
+      if (isSkillsWorkflow) {
+        for (const phase of phases) {
+          phaseTimers.push(setTimeout(() => setLoadingPhase(phase.msg), phase.delay));
+        }
+      }
+
       try {
         let data: { reply?: string; error?: string; files?: FileAttachment[] };
 
@@ -116,7 +144,17 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
 
           if (!resp.ok) {
             const errText = await resp.text();
-            throw new Error(errText);
+            let parsed: { detail?: string } = {};
+            try { parsed = JSON.parse(errText); } catch { /* not JSON */ }
+            const detail = parsed.detail || errText;
+
+            let userMessage = "Something went wrong generating your file. Try again or ask me to simplify the request.";
+            if (resp.status === 429 || detail.includes("rate_limit")) {
+              userMessage = "We've hit a temporary limit. Please wait 30 seconds and try again.";
+            } else if (detail.includes("timeout") || resp.status === 504) {
+              userMessage = "Your request is taking longer than expected. Try refreshing in 30 seconds, or try again.";
+            }
+            throw new Error(userMessage);
           }
 
           const bridgeData = await resp.json();
@@ -157,17 +195,24 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           files: data.files || undefined,
         };
         setMessages((prev) => [...prev, aiMsg]);
-      } catch {
+      } catch (err) {
+        const errorMsg = err instanceof Error && err.message !== "Failed to fetch"
+          ? err.message
+          : isSkillsWorkflow
+            ? "We're having trouble reaching our AI service. This usually resolves in a few minutes."
+            : "Failed to connect to AI service. Please try again.";
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: "assistant",
-            content: "Failed to connect to AI service.",
+            content: errorMsg,
             timestamp: new Date(),
           },
         ]);
       } finally {
+        phaseTimers.forEach(clearTimeout);
+        setLoadingPhase("");
         setLoading(false);
       }
     },
@@ -206,9 +251,9 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       <div
         style={{
           position: "fixed",
-          top: 0,
+          top: expanded ? 0 : 0,
           right: 0,
-          width: "min(480px, 100vw)",
+          width: expanded ? "min(75vw, 900px)" : "min(480px, 100vw)",
           height: "100dvh",
           background: "#0A0A0B",
           borderLeft: "1px solid rgba(255,255,255,0.06)",
@@ -216,6 +261,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          transition: "width 0.2s ease",
         }}
       >
         {/* Header */}
@@ -250,6 +296,19 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
                 <RotateCcw size={16} />
               </button>
             )}
+            <button
+              onClick={() => setExpanded(!expanded)}
+              title={expanded ? "Collapse (Esc)" : "Expand"}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                color: "#666",
+              }}
+            >
+              {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
             <button
               onClick={onClose}
               style={{
@@ -405,13 +464,20 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
                   background: "rgba(255,255,255,0.03)",
                   border: "1px solid rgba(255,255,255,0.06)",
                   display: "flex",
-                  alignItems: "center",
-                  gap: 4,
+                  flexDirection: "column",
+                  gap: 8,
                 }}
               >
-                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "0ms" }} />
-                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "200ms" }} />
-                <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "400ms" }} />
+                {loadingPhase && (
+                  <div style={{ fontSize: 13, color: "#888", lineHeight: 1.4 }}>
+                    {loadingPhase}
+                  </div>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "0ms" }} />
+                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "200ms" }} />
+                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "400ms" }} />
+                </div>
               </div>
             </div>
           )}
