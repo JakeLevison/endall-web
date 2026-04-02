@@ -235,17 +235,25 @@ export async function POST(request: NextRequest) {
     const body: Record<string, any> = {
       model: needsSkills ? "claude-sonnet-4-5-20250929" : "claude-sonnet-4-20250514",
       max_tokens: needsSkills ? 16384 : 2048,
-      betas: needsSkills ? ["code-execution-2025-08-25", "skills-2025-10-02"] : undefined,
-      container: skills ? { skills } : undefined,
       system: systemText,
       messages: apiMessages,
       tools,
     };
 
+    // Skills API requires container in body for beta endpoint
+    if (needsSkills && skills) {
+      body.container = { skills };
+    }
+
     // Clean undefined keys
     Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
-    let response = await fetch("https://api.anthropic.com/v1/messages", {
+    // Skills API uses the beta messages endpoint
+    const apiUrl = needsSkills
+      ? "https://api.anthropic.com/v1/messages?beta=true"
+      : "https://api.anthropic.com/v1/messages";
+
+    let response = await fetch(apiUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
@@ -253,11 +261,41 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("Claude API error:", errText);
-      return NextResponse.json(
-        { error: "AI service error" },
-        { status: 502 }
-      );
+      console.error("Claude API error:", response.status, errText);
+
+      // If Skills API fails, fall back to standard API without file generation
+      if (needsSkills) {
+        console.log("Skills API failed, falling back to standard API...");
+        const fallbackBody = {
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4096,
+          system: systemText,
+          messages: apiMessages,
+        };
+        const fallbackHeaders = {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        };
+        response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: fallbackHeaders,
+          body: JSON.stringify(fallbackBody),
+        });
+        if (!response.ok) {
+          const fallbackErr = await response.text();
+          console.error("Fallback API error:", fallbackErr);
+          return NextResponse.json(
+            { error: "AI service error" },
+            { status: 502 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          { error: "AI service error" },
+          { status: 502 }
+        );
+      }
     }
 
     let data = await response.json();
