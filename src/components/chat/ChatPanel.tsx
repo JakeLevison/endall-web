@@ -15,6 +15,7 @@ type Message = {
   content: string;
   timestamp: Date;
   files?: FileAttachment[];
+  previewHtml?: string;
 };
 
 type Action = {
@@ -147,7 +148,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       }
 
       try {
-        let data: { reply?: string; error?: string; files?: FileAttachment[] };
+        let data: { reply?: string; error?: string; files?: FileAttachment[]; previewHtml?: string };
 
         if (isSkillsWorkflow) {
           // Call Railway bridge directly — no Vercel timeout
@@ -188,6 +189,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           data = {
             reply: bridgeData.reply,
             files: files.length > 0 ? files : undefined,
+            previewHtml: bridgeData.preview_html || undefined,
           };
         } else {
           // Plain chat — Vercel API route
@@ -212,6 +214,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
           content: data.reply || data.error || "Something went wrong.",
           timestamp: new Date(),
           files: data.files || undefined,
+          previewHtml: data.previewHtml || undefined,
         };
         setMessages((prev) => [...prev, aiMsg]);
       } catch (err) {
@@ -533,6 +536,23 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
                 >
                   {msg.content}
                 </div>
+                {msg.previewHtml && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: 11, color: "#666", marginBottom: 4 }}>Preview</div>
+                    <div
+                      style={{
+                        overflowX: "auto",
+                        borderRadius: 6,
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(0,0,0,0.3)",
+                      }}
+                      dangerouslySetInnerHTML={{ __html: msg.previewHtml }}
+                    />
+                    <div style={{ fontSize: 10, color: "#444", marginTop: 4 }}>
+                      Full workbook available in the download below
+                    </div>
+                  </div>
+                )}
                 {msg.files && msg.files.length > 0 && (
                   <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                     {msg.files.map((f) => (
