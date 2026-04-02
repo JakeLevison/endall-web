@@ -42,7 +42,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -111,6 +111,14 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(input);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+    // Shift+Enter = newline (default textarea behavior, no action needed)
   };
 
   if (!isOpen) return null;
@@ -320,12 +328,14 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
             background: "#0A0A0B",
           }}
         >
-          <input
-            ref={inputRef}
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Ask anything..."
             disabled={loading}
+            rows={1}
             style={{
               flex: 1,
               background: "rgba(255,255,255,0.04)",
@@ -335,6 +345,17 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
               fontSize: 16,
               color: "#fff",
               outline: "none",
+              resize: "none",
+              minHeight: 42,
+              maxHeight: 120,
+              overflow: "auto",
+              fontFamily: "inherit",
+              lineHeight: 1.4,
+            }}
+            onInput={(e) => {
+              const el = e.currentTarget;
+              el.style.height = "auto";
+              el.style.height = Math.min(el.scrollHeight, 120) + "px";
             }}
           />
           <button
