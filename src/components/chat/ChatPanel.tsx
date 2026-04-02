@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Sparkles, Loader2 } from "lucide-react";
+import { X, Send, Sparkles, Loader2, RotateCcw } from "lucide-react";
 
 type Message = {
   id: string;
@@ -160,18 +160,35 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
               ask endall
             </span>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 4,
-              color: "#666",
-            }}
-          >
-            <X size={18} />
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {messages.length > 0 && (
+              <button
+                onClick={() => setMessages([])}
+                title="New chat"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 4,
+                  color: "#666",
+                }}
+              >
+                <RotateCcw size={16} />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                color: "#666",
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
