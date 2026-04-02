@@ -33,15 +33,14 @@ const SKILLS_ACTIONS = new Set([
 ]);
 
 const QUICK_ACTIONS: Action[] = [
-  { id: "financial_model", label: "Build financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
+  { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
   { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
-  { id: "capabilities_doc", label: "Create capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
-  { id: "npv_analysis", label: "Run NPV analysis", description: "Project returns, IRR, sensitivity analysis", icon: "📈" },
-  { id: "project_estimate", label: "Build a project estimate", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
-  { id: "proposal", label: "Build a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
-  { id: "competitive_analysis", label: "Run competitive analysis", description: "Report on competitors in your market", icon: "🔍" },
+  { id: "capabilities_doc", label: "Create a capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
+  { id: "npv_analysis", label: "Analyze project returns", description: "NPV, IRR, sensitivity analysis on a specific bid", icon: "📈" },
+  { id: "project_estimate", label: "Estimate a project", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
+  { id: "proposal", label: "Draft a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
+  { id: "competitive_analysis", label: "Research competitors", description: "Report on competitors in your market", icon: "🔍" },
   { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
-  { id: "swot_analysis", label: "Run SWOT analysis", description: "One-page strengths, weaknesses, opportunities, threats", icon: "🎯" },
 ];
 
 interface ChatPanelProps {
@@ -511,27 +510,27 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
             onKeyDown={handleKeyDown}
             placeholder="Ask anything..."
             disabled={loading}
-            rows={1}
+            rows={3}
             style={{
               flex: 1,
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 10,
               padding: "10px 14px",
-              fontSize: 16,
+              fontSize: 15,
               color: "#fff",
               outline: "none",
               resize: "none",
-              minHeight: 42,
-              maxHeight: 120,
+              minHeight: 72,
+              maxHeight: 160,
               overflow: "auto",
               fontFamily: "inherit",
-              lineHeight: 1.4,
+              lineHeight: 1.5,
             }}
             onInput={(e) => {
               const el = e.currentTarget;
               el.style.height = "auto";
-              el.style.height = Math.min(el.scrollHeight, 120) + "px";
+              el.style.height = Math.min(el.scrollHeight, 160) + "px";
             }}
           />
           <button
@@ -545,6 +544,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
               padding: "0 16px",
               minHeight: 42,
               minWidth: 42,
+              alignSelf: "flex-end",
               cursor: input.trim() ? "pointer" : "default",
               display: "flex",
               alignItems: "center",

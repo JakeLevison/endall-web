@@ -35,6 +35,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
+  { href: "#ask-endall", label: "Ask Endall", icon: Sparkles, isChat: true },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/deals", label: "Deals", icon: HandCoins },
@@ -45,7 +46,7 @@ const navItems = [
   { href: "/outreach", label: "Outreach", icon: Send },
 ];
 
-function SidebarContent({ pathname }: { pathname: string }) {
+function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat?: () => void }) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-4">
@@ -58,7 +59,22 @@ function SidebarContent({ pathname }: { pathname: string }) {
       </div>
       <nav className="flex-1 px-2 space-y-0.5">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isChat = "isChat" in item && item.isChat;
+          const isActive = !isChat && pathname === item.href;
+
+          if (isChat) {
+            return (
+              <button
+                key={item.href}
+                onClick={onOpenChat}
+                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors w-full text-left text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
+              >
+                <item.icon className="size-4 shrink-0" />
+                {item.label}
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href}
@@ -99,6 +115,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
 
+  // Auto-open Ask Endall on first app load
+  useEffect(() => {
+    const seen = sessionStorage.getItem("endall-chat-shown");
+    if (!seen) {
+      setChatOpen(true);
+      sessionStorage.setItem("endall-chat-shown", "1");
+    }
+  }, []);
+
+  const openChat = useCallback(() => setChatOpen(true), []);
+
   // Cmd+K to open chat
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -124,7 +151,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-[#0A0A0B] text-zinc-300">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-white/[0.04]">
-        <SidebarContent pathname={pathname} />
+        <SidebarContent pathname={pathname} onOpenChat={openChat} />
       </aside>
 
       {/* Main area */}
@@ -143,7 +170,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 side="left"
                 className="w-56 p-0 bg-[#0A0A0B] border-white/[0.04]"
               >
-                <SidebarContent pathname={pathname} />
+                <SidebarContent pathname={pathname} onOpenChat={openChat} />
               </SheetContent>
             </Sheet>
 
