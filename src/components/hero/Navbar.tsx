@@ -38,23 +38,27 @@ export default function Navbar() {
           transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
-        <Link
-          href="/"
-          style={{
-            fontFamily: "var(--font-sans), sans-serif",
-            fontSize: "18px",
-            color: "#ffffff",
-            textDecoration: "none",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          endall
-        </Link>
+        {/* Left section — fixed width to balance right section */}
+        <div style={{ minWidth: 160 }}>
+          <Link
+            href="/"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "18px",
+              color: "#ffffff",
+              textDecoration: "none",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            endall
+          </Link>
+        </div>
 
-        {/* Desktop links */}
+        {/* Center section — true viewport center */}
         <div
-          className="hidden md:flex items-center gap-7"
+          className="hidden md:flex items-center justify-center gap-7"
+          style={{ flex: 1 }}
         >
           <a
             href="#features"
@@ -106,7 +110,8 @@ export default function Navbar() {
           </a>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {/* Right section — fixed width to balance left section */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 160, justifyContent: "flex-end" }}>
           <Link
             href="/dashboard"
             style={{
