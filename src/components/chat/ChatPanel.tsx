@@ -24,6 +24,14 @@ type Action = {
   icon: string;
 };
 
+const BRIDGE_URL = process.env.NEXT_PUBLIC_ASK_ENDALL_BRIDGE_URL || "https://ask-endall-bridge-production.up.railway.app";
+
+const SKILLS_ACTIONS = new Set([
+  "financial_model", "generate_budget", "capabilities_doc", "npv_analysis",
+  "project_estimate", "proposal", "competitive_analysis", "review_financials",
+  "swot_analysis",
+]);
+
 const QUICK_ACTIONS: Action[] = [
   { id: "financial_model", label: "Build financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
   { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
@@ -79,25 +87,68 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
       setLoading(true);
 
       // Track active workflow for routing follow-ups to the bridge
+      const currentWorkflow = action || activeWorkflow;
       if (action) {
         setActiveWorkflow(action);
       }
 
-      try {
-        const resp = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: text,
-            action: action || undefined,
-            activeWorkflow: action || activeWorkflow || undefined,
-            recordType,
-            recordId,
-            history: messages.map((m) => ({ role: m.role, content: m.content })),
-          }),
-        });
+      // Route: Skills workflows go directly to the Railway bridge (no Vercel proxy).
+      // Plain chat goes through /api/chat on Vercel.
+      const isSkillsWorkflow = !!(
+        (action && SKILLS_ACTIONS.has(action)) ||
+        (currentWorkflow && SKILLS_ACTIONS.has(currentWorkflow))
+      );
 
-        const data = await resp.json();
+      try {
+        let data: { reply?: string; error?: string; files?: FileAttachment[] };
+
+        if (isSkillsWorkflow) {
+          // Call Railway bridge directly — no Vercel timeout
+          const resp = await fetch(`${BRIDGE_URL}/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: text,
+              action: action || currentWorkflow,
+              session_id: "web-" + (typeof window !== "undefined" ? window.location.hostname : "default"),
+            }),
+          });
+
+          if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(errText);
+          }
+
+          const bridgeData = await resp.json();
+
+          // Rewrite download URLs to point to the bridge directly
+          const files = (bridgeData.files || []).map((f: { file_id: string; filename: string }) => ({
+            file_id: f.file_id,
+            filename: f.filename,
+            download_url: `${BRIDGE_URL}/download/${f.file_id}`,
+          }));
+
+          data = {
+            reply: bridgeData.reply,
+            files: files.length > 0 ? files : undefined,
+          };
+        } else {
+          // Plain chat — Vercel API route
+          const resp = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: text,
+              action,
+              recordType,
+              recordId,
+              history: messages.map((m) => ({ role: m.role, content: m.content })),
+            }),
+          });
+
+          data = await resp.json();
+        }
+
         const aiMsg: Message = {
           id: crypto.randomUUID(),
           role: "assistant",
@@ -120,7 +171,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
         setLoading(false);
       }
     },
-    [messages, recordType, recordId]
+    [messages, activeWorkflow, recordType, recordId]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
