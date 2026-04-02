@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const words = ["Calls", "Scheduling", "Leads", "Briefings", "Proposals", "Budgets"];
+const words = ["Calls", "Leads", "Front Office", "Budgets", "Follow-ups", "Proposals", "Scheduling"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -24,17 +24,18 @@ export default function HeroHeadline() {
   }, []);
 
   // Build pixel-accurate keyframes from the measured step height.
-  // 6 words + 1 duplicate for seamless loop = 7 positions.
-  const totalH = stepPx * 7;
+  // 7 words + 1 duplicate for seamless loop = 8 positions.
+  const totalH = stepPx * 8;
   const keyframes = stepPx > 0 ? `
     @keyframes cycle-words-px {
-      0%, 11%    { transform: translateY(0); }
-      14%, 25%   { transform: translateY(-${stepPx}px); }
-      28%, 39%   { transform: translateY(-${stepPx * 2}px); }
-      42%, 53%   { transform: translateY(-${stepPx * 3}px); }
-      56%, 67%   { transform: translateY(-${stepPx * 4}px); }
-      70%, 81%   { transform: translateY(-${stepPx * 5}px); }
-      84%, 100%  { transform: translateY(-${stepPx * 6}px); }
+      0%, 9%     { transform: translateY(0); }
+      12%, 21%   { transform: translateY(-${stepPx}px); }
+      24%, 33%   { transform: translateY(-${stepPx * 2}px); }
+      36%, 45%   { transform: translateY(-${stepPx * 3}px); }
+      48%, 57%   { transform: translateY(-${stepPx * 4}px); }
+      60%, 69%   { transform: translateY(-${stepPx * 5}px); }
+      72%, 81%   { transform: translateY(-${stepPx * 6}px); }
+      84%, 100%  { transform: translateY(-${stepPx * 7}px); }
     }
   ` : "";
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 
 export default function FinalCTA() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -36,7 +35,7 @@ export default function FinalCTA() {
             marginBottom: 12,
           }}
         >
-          {["Your operations team", "is ready."].map((line, i) => (
+          {["Your front office,", "fully staffed."].map((line, i) => (
             <span
               key={line}
               style={{
@@ -69,7 +68,7 @@ export default function FinalCTA() {
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms",
           }}
         >
-          Calls answered. Leads qualified. Jobs booked. Briefings delivered. Financial models built on demand.
+          See how Endall works for your shop.
         </p>
 
         {/* CTA Button */}
@@ -80,8 +79,8 @@ export default function FinalCTA() {
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms",
           }}
         >
-          <Link
-            href="/dashboard"
+          <a
+            href="mailto:jake@endall.ai"
             style={{
               display: "inline-block",
               background: "#fff",
@@ -97,8 +96,8 @@ export default function FinalCTA() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
-            See It In Action
-          </Link>
+            Talk to Our Team
+          </a>
         </div>
       </div>
     </section>

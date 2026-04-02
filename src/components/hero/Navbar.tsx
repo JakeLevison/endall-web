@@ -92,22 +92,6 @@ export default function Navbar() {
           >
             How it Works
           </a>
-          <a
-            href="#pricing"
-            style={{
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
-              color: "var(--text-tertiary)",
-              textDecoration: "none",
-              transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
-            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-          >
-            Pricing
-          </a>
         </div>
 
         {/* Right section — fixed width to balance left section */}
@@ -243,7 +227,7 @@ export default function Navbar() {
             How it Works
           </a>
           <a
-            href="#pricing"
+            href="mailto:jake@endall.ai"
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
@@ -255,7 +239,7 @@ export default function Navbar() {
               alignItems: "center",
             }}
           >
-            Pricing
+            Contact
           </a>
         </div>
       )}
