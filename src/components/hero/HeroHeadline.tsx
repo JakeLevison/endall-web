@@ -46,6 +46,8 @@ export default function HeroHeadline() {
         textAlign: "center",
         paddingLeft: "16px",
         paddingRight: "16px",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       {/* Tagline */}
@@ -68,6 +70,8 @@ export default function HeroHeadline() {
         aria-hidden="true"
         style={{
           position: "absolute",
+          left: 0,
+          top: 0,
           visibility: "hidden",
           pointerEvents: "none",
           fontFamily: "var(--font-sans), sans-serif",
