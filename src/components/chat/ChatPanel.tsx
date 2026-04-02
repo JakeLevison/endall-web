@@ -326,6 +326,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
 
         {/* Messages */}
         <div
+          onClick={() => inputRef.current?.focus()}
           style={{
             flex: 1,
             overflowY: "auto",
@@ -333,6 +334,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
             display: "flex",
             flexDirection: "column",
             gap: 12,
+            cursor: "text",
           }}
         >
           {messages.length === 0 && (
