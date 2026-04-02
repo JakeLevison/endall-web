@@ -36,7 +36,7 @@ export default function FinalCTA() {
             marginBottom: 12,
           }}
         >
-          {["Stop losing jobs", "to voicemail."].map((line, i) => (
+          {["Your operations team", "is ready."].map((line, i) => (
             <span
               key={line}
               style={{
@@ -69,7 +69,7 @@ export default function FinalCTA() {
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 500ms",
           }}
         >
-          60 days free. No credit card. Live in 48 hours.
+          Calls answered. Leads qualified. Jobs booked. Briefings delivered. Financial models built on demand.
         </p>
 
         {/* CTA Button */}
@@ -97,7 +97,7 @@ export default function FinalCTA() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
-            Start Your Pilot
+            See It In Action
           </Link>
         </div>
       </div>

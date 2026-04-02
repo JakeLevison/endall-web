@@ -18,6 +18,11 @@ const steps = [
     title: "You get a morning briefing",
     description: "Every morning before you leave the house, you know exactly what came in overnight, what's commercial, what's time-sensitive, and what needs your attention.",
   },
+  {
+    number: "04",
+    title: "Ask it anything",
+    description: "Financial models, project estimates, capabilities docs, proposals. Ask Endall to build what you need, and it delivers a finished file. No templates. No busywork.",
+  },
 ];
 
 export default function HowItWorks() {
@@ -149,8 +154,8 @@ export default function HowItWorks() {
       <style jsx>{`
         .hiw-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 48px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 36px;
           position: relative;
         }
         .hiw-line-h {

@@ -49,6 +49,20 @@ const features = [
     mock: <TasksMock />,
   },
   {
+    label: "Financial Models",
+    title: "Know your numbers. Finally.",
+    description:
+      "Ask Endall to build a budget, run project returns, or generate a 13-week cash flow. Live Excel formulas, not screenshots.",
+    mock: <AIMock />,
+  },
+  {
+    label: "Proposals & Docs",
+    title: "Capabilities decks in 10 seconds.",
+    description:
+      "Endall builds proposals, capabilities docs, and project estimates from your company profile. No input required for the capabilities deck.",
+    mock: <ReportsMock />,
+  },
+  {
     label: "Speed",
     title: "Live in 48 hours. Not 48 days.",
     description:

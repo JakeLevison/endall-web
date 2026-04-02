@@ -2,209 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import ShimmerBorder from "@/components/shared/ShimmerBorder";
-
-const plans = [
-  {
-    name: "Pilot",
-    price: 0,
-    priceLabel: "Free",
-    sub: "60 days. No credit card.",
-    features: ["24/7 call answering", "Lead qualification", "Calendar booking", "Morning briefings", "48-hour setup"],
-    highlighted: false,
-  },
-  {
-    name: "Endall",
-    price: 199,
-    priceLabel: "$199",
-    period: "/mo",
-    sub: "After your pilot",
-    features: ["Everything in Pilot", "Unlimited calls", "No contracts", "Cancel anytime", "Direct support from our team"],
-    highlighted: true,
-  },
-  {
-    name: "Custom",
-    price: 0,
-    priceLabel: "Let's talk",
-    sub: "Multi-location or fleet",
-    features: ["Multiple phone lines", "Custom qualification logic", "Dedicated onboarding", "Volume pricing"],
-    highlighted: false,
-  },
-];
-
-function AnimatedPrice({ target, label, isVisible }: { target: number; label: string; isVisible: boolean }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isVisible || target === 0) return;
-    let start = 0;
-    const duration = 800;
-    const startTime = performance.now();
-
-    function tick(now: number) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      start = Math.round(eased * target);
-      setCount(start);
-      if (progress < 1) requestAnimationFrame(tick);
-    }
-
-    requestAnimationFrame(tick);
-  }, [isVisible, target]);
-
-  if (target === 0) {
-    return <span>{label}</span>;
-  }
-
-  return <span>${isVisible ? count : 0}</span>;
-}
-
-function PricingCard({ plan, isVisible }: { plan: typeof plans[number]; isVisible: boolean }) {
-  const innerCard = (
-    <div
-      className="pricing-card-inner"
-      style={{
-        background: "#111",
-        border: `1px solid ${plan.highlighted ? "#333" : "rgba(255,255,255,0.08)"}`,
-        borderRadius: 12,
-        padding: 28,
-        boxShadow: plan.highlighted ? "0 0 80px rgba(255,255,255,0.03)" : "none",
-        transition: "border-color 0.3s ease",
-      }}
-    >
-      {/* Plan name */}
-      <div
-        style={{
-          fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-          fontSize: 11,
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          color: "#666",
-          marginBottom: 16,
-        }}
-      >
-        {plan.name}
-      </div>
-
-      {/* Price */}
-      <div
-        style={{
-          fontFamily: "var(--font-sans), sans-serif",
-          fontSize: 36,
-          color: "#fff",
-          fontWeight: 600,
-          letterSpacing: "-0.02em",
-          marginBottom: 2,
-        }}
-      >
-        <AnimatedPrice target={plan.price} label={plan.priceLabel} isVisible={isVisible} />
-        {plan.period && (
-          <span
-            style={{
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: 13,
-              color: "#666",
-              fontWeight: 400,
-            }}
-          >
-            {plan.period}
-          </span>
-        )}
-      </div>
-
-      {/* Subtitle */}
-      <p
-        style={{
-          fontFamily: "var(--font-sans), sans-serif",
-          fontSize: 12,
-          color: "#666",
-          marginBottom: 20,
-        }}
-      >
-        {plan.sub}
-      </p>
-
-      {/* Features */}
-      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px 0" }}>
-        {plan.features.map((f) => (
-          <li
-            key={f}
-            style={{
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: 13,
-              color: "#888",
-              padding: "4px 0",
-            }}
-          >
-            {f}
-          </li>
-        ))}
-      </ul>
-
-      {/* CTA Button */}
-      <Link
-        href="/dashboard"
-        style={{
-          display: "block",
-          textAlign: "center",
-          padding: "10px 20px",
-          borderRadius: 8,
-          fontSize: 13,
-          fontWeight: 500,
-          textDecoration: "none",
-          transition: "opacity 0.2s ease",
-          ...(plan.highlighted
-            ? { background: "#fff", color: "#000" }
-            : { background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.15)" }),
-        }}
-      >
-        {plan.name === "Enterprise" ? "Contact Us" : "Get Started"}
-      </Link>
-    </div>
-  );
-
-  if (plan.highlighted) {
-    return (
-      <div style={{ position: "relative" }}>
-        {/* Badge centered above card */}
-        <div
-          style={{
-            position: "absolute",
-            top: -14,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 2,
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: 10,
-            textTransform: "uppercase",
-            letterSpacing: "2px",
-            background: "#fff",
-            color: "#000",
-            padding: "4px 12px",
-            borderRadius: 4,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Most popular
-        </div>
-        <ShimmerBorder>{innerCard}</ShimmerBorder>
-      </div>
-    );
-  }
-
-  return innerCard;
-}
 
 export default function Pricing() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          setVisible(true);
           observer.disconnect();
         }
       },
@@ -216,7 +23,7 @@ export default function Pricing() {
 
   return (
     <section ref={sectionRef} id="pricing" style={{ padding: "80px 16px" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
         <p
           style={{
             fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
@@ -224,43 +31,73 @@ export default function Pricing() {
             textTransform: "uppercase",
             letterSpacing: "0.15em",
             color: "#666",
-            textAlign: "center",
-            marginBottom: 48,
+            marginBottom: 24,
           }}
         >
-          Pricing
+          Get started
+        </p>
+
+        <h2
+          style={{
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: "clamp(28px, 5vw, 40px)",
+            color: "#fff",
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.15,
+            marginBottom: 16,
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          See what Endall looks like for your shop
+        </h2>
+
+        <p
+          style={{
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: 16,
+            color: "#888",
+            lineHeight: 1.6,
+            marginBottom: 32,
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 200ms",
+          }}
+        >
+          We'll walk through your inbound volume, your calendar, and your service area.
+          If it's a fit, we deploy in 48 hours.
         </p>
 
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 16,
-            alignItems: "start",
-            paddingTop: 20,
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 400ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 400ms",
           }}
-          className="pricing-grid"
         >
-          {plans.map((plan) => (
-            <div key={plan.name} className={plan.highlighted ? "pricing-highlighted" : ""}>
-              <PricingCard plan={plan} isVisible={isVisible} />
-            </div>
-          ))}
+          <Link
+            href="/dashboard"
+            style={{
+              display: "inline-block",
+              background: "#fff",
+              color: "#000",
+              padding: "14px 32px",
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 500,
+              textDecoration: "none",
+              fontFamily: "var(--font-sans), sans-serif",
+              transition: "background-color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+          >
+            Talk to Our Team
+          </Link>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .pricing-grid {
-            grid-template-columns: 1fr !important;
-            max-width: 400px;
-            margin: 0 auto;
-          }
-          .pricing-highlighted {
-            order: -1;
-          }
-        }
-      `}</style>
     </section>
   );
 }

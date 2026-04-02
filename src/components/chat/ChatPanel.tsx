@@ -18,12 +18,15 @@ type Action = {
 };
 
 const QUICK_ACTIONS: Action[] = [
-  { id: "meeting_prep", label: "Meeting prep", description: "Briefing for an upcoming meeting", icon: "📋" },
-  { id: "deal_brief", label: "Deal brief", description: "Full briefing on a deal", icon: "💰" },
-  { id: "follow_up_email", label: "Follow-up email", description: "Draft a follow-up email", icon: "✉️" },
-  { id: "account_research", label: "Account research", description: "Research a company", icon: "🔍" },
-  { id: "next_steps", label: "Suggest next steps", description: "Actionable task list", icon: "✅" },
-  { id: "objection_handling", label: "Handle objections", description: "Prepare for objections", icon: "🛡️" },
+  { id: "financial_model", label: "Build financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
+  { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
+  { id: "capabilities_doc", label: "Create capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
+  { id: "npv_analysis", label: "Run NPV analysis", description: "Project returns, IRR, sensitivity analysis", icon: "📈" },
+  { id: "project_estimate", label: "Build a project estimate", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
+  { id: "proposal", label: "Build a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
+  { id: "competitive_analysis", label: "Run competitive analysis", description: "Report on competitors in your market", icon: "🔍" },
+  { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
+  { id: "swot_analysis", label: "Run SWOT analysis", description: "One-page strengths, weaknesses, opportunities, threats", icon: "🎯" },
 ];
 
 interface ChatPanelProps {
@@ -192,7 +195,7 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
                   textAlign: "center",
                 }}
               >
-                Ask anything about your CRM data, or use a quick action:
+                Ask anything, or pick a workflow:
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {QUICK_ACTIONS.map((action) => (

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const words = ["Calls", "Scheduling", "Leads", "Briefings", "Follow-ups"];
+const words = ["Calls", "Scheduling", "Leads", "Briefings", "Proposals", "Budgets"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -24,16 +24,17 @@ export default function HeroHeadline() {
   }, []);
 
   // Build pixel-accurate keyframes from the measured step height.
-  // 5 words + 1 duplicate for seamless loop = 6 positions.
-  const totalH = stepPx * 6;
+  // 6 words + 1 duplicate for seamless loop = 7 positions.
+  const totalH = stepPx * 7;
   const keyframes = stepPx > 0 ? `
     @keyframes cycle-words-px {
-      0%, 14%    { transform: translateY(0); }
-      18%, 30%   { transform: translateY(-${stepPx}px); }
-      34%, 48%   { transform: translateY(-${stepPx * 2}px); }
-      52%, 64%   { transform: translateY(-${stepPx * 3}px); }
-      68%, 80%   { transform: translateY(-${stepPx * 4}px); }
-      84%, 100%  { transform: translateY(-${stepPx * 5}px); }
+      0%, 11%    { transform: translateY(0); }
+      14%, 25%   { transform: translateY(-${stepPx}px); }
+      28%, 39%   { transform: translateY(-${stepPx * 2}px); }
+      42%, 53%   { transform: translateY(-${stepPx * 3}px); }
+      56%, 67%   { transform: translateY(-${stepPx * 4}px); }
+      70%, 81%   { transform: translateY(-${stepPx * 5}px); }
+      84%, 100%  { transform: translateY(-${stepPx * 6}px); }
     }
   ` : "";
 
@@ -93,7 +94,7 @@ export default function HeroHeadline() {
         }}
         className="text-[36px] sm:text-[56px] lg:text-[72px]"
       >
-        <span>We handle your</span>
+        <span>We run your</span>
         <br className="sm:hidden" />
         {" "}
         {stepPx > 0 && (
@@ -145,7 +146,7 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        Endall answers your calls, qualifies your leads, books your jobs, and briefs you every morning on what needs attention.
+        Endall answers your calls, qualifies your leads, books your jobs, briefs you every morning, and builds financial models, proposals, and capabilities docs on demand.
       </p>
 
       <div style={{ marginTop: "40px" }}>
