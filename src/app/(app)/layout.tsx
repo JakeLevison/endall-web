@@ -137,6 +137,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Open chat when navigating to /dashboard?chat=open
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("chat") === "open") {
+      setChatOpen(true);
+    }
+  }, [pathname]);
+
   const openChat = useCallback(() => setChatOpen(true), []);
 
   // Cmd+K to open chat
