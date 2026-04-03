@@ -16,7 +16,7 @@ const TEAM: TeamMember[] = [
     name: "Jake Levison",
     title: "Founder & CEO",
     image: "/jake-headshot.png",
-    bio: "Before founding Endall, Jake spent six years as Director of Business Development at Post Harvest Technologies, an investment and operating platform with vertically integrated cold storage, refrigeration contracting, and facility management businesses \u2013 including Central Coast Cooling and Facilities Management Group. He led capital formation, deal origination, and investor relations across the portfolio, presenting directly to institutional investors, sovereign wealth funds, and C-suite executives at national food and agriculture brands. Across PHT\u2019s portfolio companies, Jake worked closely with senior management and operations teams and saw the same pattern across the board: owners running growing service businesses with no one covering the front office. That gap is what led him to start Endall. Prior to PHT, Jake held roles at Blockworks, M&T Bank, and Morgan Stanley. He holds a B.A. in Philosophy, Politics, and Economics from the University of Pennsylvania, where he played Division I baseball, and serves on the Chairman\u2019s Council of New York Restoration Project.",
+    bio: "Before founding Endall, Jake spent six years as Director of Business Development at Post Harvest Technologies, an investment and operating platform with vertically integrated cold storage, refrigeration contracting, and facility management businesses \u2013 including Central Coast Cooling and Facilities Management Group. He led capital formation, deal origination, and investor relations across the portfolio, presenting directly to institutional investors, sovereign wealth funds, and C-suite executives at national food and agriculture brands.\n\nAcross PHT\u2019s portfolio companies, Jake worked closely with senior management and operations teams and saw the same pattern across the board: owners running growing service businesses with no one covering the front office. That gap is what led him to start Endall.\n\nPrior to PHT, Jake held roles at Blockworks, M&T Bank, and Morgan Stanley. He holds a B.A. in Philosophy, Politics, and Economics from the University of Pennsylvania, where he played Division I baseball, and serves on the Chairman\u2019s Council of New York Restoration Project.",
   },
 ];
 
@@ -25,7 +25,7 @@ function MemberCard({ member }: { member: TeamMember }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div style={{ textAlign: "center", maxWidth: 360 }}>
+    <div style={{ textAlign: "center", maxWidth: 600 }}>
       {/* Headshot */}
       <div
         onClick={() => setOpen(!open)}
@@ -106,7 +106,7 @@ function MemberCard({ member }: { member: TeamMember }) {
       {/* Bio accordion */}
       <div
         style={{
-          maxHeight: open ? 600 : 0,
+          maxHeight: open ? 800 : 0,
           overflow: "hidden",
           transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease",
           opacity: open ? 1 : 0,
@@ -122,16 +122,20 @@ function MemberCard({ member }: { member: TeamMember }) {
             textAlign: "left",
           }}
         >
-          <p
-            style={{
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: 14,
-              color: "var(--text-secondary)",
-              lineHeight: 1.7,
-            }}
-          >
-            {member.bio}
-          </p>
+          {member.bio.split("\n\n").map((paragraph, i) => (
+            <p
+              key={i}
+              style={{
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: 14,
+                color: "var(--text-secondary)",
+                lineHeight: 1.7,
+                marginBottom: i < member.bio.split("\n\n").length - 1 ? 14 : 0,
+              }}
+            >
+              {paragraph}
+            </p>
+          ))}
         </div>
       </div>
     </div>

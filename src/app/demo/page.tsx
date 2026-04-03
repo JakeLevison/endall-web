@@ -1,0 +1,321 @@
+"use client";
+
+import { useState } from "react";
+import Navbar from "@/components/hero/Navbar";
+import Footer from "@/components/sections/Footer";
+
+const TRADE_OPTIONS = [
+  "HVAC",
+  "Plumbing",
+  "Electrical",
+  "Mechanical",
+  "Fire Protection",
+  "Refrigeration",
+  "Multi-trade",
+  "Other",
+];
+
+const TEAM_SIZE_OPTIONS = [
+  "1\u201310",
+  "11\u201325",
+  "26\u201350",
+  "51\u2013100",
+  "100+",
+];
+
+const inputStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans), sans-serif",
+  fontSize: 14,
+  padding: "14px 16px",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: 8,
+  color: "#fff",
+  outline: "none",
+  width: "100%",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  appearance: "none",
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 16px center",
+  cursor: "pointer",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--font-sans), sans-serif",
+  fontSize: 12,
+  fontWeight: 500,
+  color: "var(--text-muted)",
+  textTransform: "uppercase",
+  letterSpacing: 1,
+  marginBottom: 8,
+  display: "block",
+};
+
+export default function DemoPage() {
+  const [submitted, setSubmitted] = useState(false);
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--bg)",
+        color: "var(--text-secondary)",
+      }}
+    >
+      <Navbar />
+      <main style={{ paddingTop: 140, paddingBottom: 80 }}>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 24px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 64,
+            }}
+            className="md:grid-cols-2"
+          >
+            {/* Left column — pitch */}
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: 3,
+                  color: "var(--text-muted)",
+                  marginBottom: 16,
+                }}
+              >
+                Request a Demo
+              </p>
+              <h1
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(28px, 5vw, 40px)",
+                  fontWeight: 600,
+                  color: "#fff",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.15,
+                  marginBottom: 20,
+                }}
+              >
+                See Endall in action
+              </h1>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: 16,
+                  color: "var(--text-tertiary)",
+                  lineHeight: 1.7,
+                  marginBottom: 40,
+                }}
+              >
+                Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall handles lead capture, quoting, scheduling, and follow-ups — so your team can focus on the work.
+              </p>
+
+              {/* Trust signals */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {[
+                  { label: "No credit card required", detail: "Free to explore, cancel anytime." },
+                  { label: "Built for MEP contractors", detail: "HVAC, plumbing, electrical, mechanical — not a generic SaaS." },
+                  { label: "Live in under a week", detail: "We handle setup and data migration." },
+                ].map((item) => (
+                  <div key={item.label} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        marginTop: 2,
+                      }}
+                    >
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-sans), sans-serif",
+                          fontSize: 14,
+                          fontWeight: 500,
+                          color: "#fff",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-sans), sans-serif",
+                          fontSize: 13,
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        {item.detail}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right column — form */}
+            <div>
+              {submitted ? (
+                <div
+                  style={{
+                    padding: "48px 32px",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: 20,
+                      fontWeight: 500,
+                      color: "#fff",
+                      marginBottom: 8,
+                    }}
+                  >
+                    You&rsquo;re on the list.
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: 14,
+                      color: "var(--text-tertiary)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    We&rsquo;ll reach out within one business day to schedule your demo.
+                  </p>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const data = new FormData(form);
+                    const name = data.get("name") as string;
+                    const email = data.get("email") as string;
+                    const company = data.get("company") as string;
+                    const trade = data.get("trade") as string;
+                    const teamSize = data.get("teamSize") as string;
+                    const notes = data.get("notes") as string;
+                    window.location.href = `mailto:jake@endall.ai?subject=Demo Request from ${encodeURIComponent(company)}&body=${encodeURIComponent(
+                      `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nTrade: ${trade}\nTeam size: ${teamSize}\n\nNotes:\n${notes}`
+                    )}`;
+                    setSubmitted(true);
+                  }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 20,
+                    padding: "32px",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                    <div style={{ flex: "1 1 200px" }}>
+                      <label style={labelStyle}>Name</label>
+                      <input name="name" required placeholder="Full name" style={inputStyle} />
+                    </div>
+                    <div style={{ flex: "1 1 200px" }}>
+                      <label style={labelStyle}>Work Email</label>
+                      <input name="email" type="email" required placeholder="you@company.com" style={inputStyle} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Company</label>
+                    <input name="company" required placeholder="Company name" style={inputStyle} />
+                  </div>
+
+                  <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                    <div style={{ flex: "1 1 200px" }}>
+                      <label style={labelStyle}>Trade</label>
+                      <select name="trade" required style={selectStyle} defaultValue="">
+                        <option value="" disabled>Select trade</option>
+                        {TRADE_OPTIONS.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ flex: "1 1 200px" }}>
+                      <label style={labelStyle}>Team Size</label>
+                      <select name="teamSize" required style={selectStyle} defaultValue="">
+                        <option value="" disabled>Select range</option>
+                        {TEAM_SIZE_OPTIONS.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Anything we should know?</label>
+                    <textarea
+                      name="notes"
+                      rows={3}
+                      placeholder="Current tools, pain points, timeline — whatever helps us prep"
+                      style={{ ...inputStyle, resize: "vertical" }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: 14,
+                      fontWeight: 500,
+                      padding: "14px 32px",
+                      background: "#fff",
+                      color: "#000",
+                      border: "none",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                      width: "100%",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                  >
+                    Request a Demo
+                  </button>
+
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: 12,
+                      color: "var(--text-muted)",
+                      textAlign: "center",
+                    }}
+                  >
+                    No spam. We&rsquo;ll only use your info to set up the demo.
+                  </p>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

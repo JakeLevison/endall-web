@@ -80,7 +80,7 @@ export default function FinalCTA() {
           }}
         >
           <a
-            href="mailto:jake@endall.ai"
+            href="/demo"
             style={{
               display: "inline-block",
               background: "#fff",
@@ -96,7 +96,7 @@ export default function FinalCTA() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
-            Talk to Our Team
+            Request a Demo
           </a>
         </div>
       </div>

@@ -109,7 +109,7 @@ export default function Navbar() {
             Team
           </a>
           <a
-            href="mailto:jake@endall.ai"
+            href="/contact"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
@@ -284,7 +284,7 @@ export default function Navbar() {
             Team
           </a>
           <a
-            href="mailto:jake@endall.ai"
+            href="/contact"
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
