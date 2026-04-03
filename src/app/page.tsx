@@ -15,34 +15,20 @@ import TasksMock from "@/components/features/TasksMock";
 import AIMock from "@/components/features/AIMock";
 import ReportsMock from "@/components/features/ReportsMock";
 import HowItWorks from "@/components/sections/HowItWorks";
-// Pricing removed — not showing pricing pre-launch
+import Pricing from "@/components/sections/Pricing";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
 
 const features = [
   {
-    label: "Calls",
-    title: "Every call answered. Every time.",
+    label: "Front Office",
+    title: "Every call answered. Every lead qualified.",
     description:
-      "Picks up in under 60 seconds. Knows the difference between a GC, a property manager, and a homeowner. No more voicemail.",
+      "Picks up in under 60 seconds. Qualifies by trade logic. Books qualified jobs on your calendar. No voicemail, no phone tag.",
     mock: <CRMMock />,
   },
   {
-    label: "Qualification",
-    title: "Knows what's worth your time.",
-    description:
-      "Qualifies every lead using logic built for electrical and MEP contractors. Commercial, residential, emergency, service call.",
-    mock: <SequencesMock />,
-  },
-  {
-    label: "Booking",
-    title: "Jobs on your calendar. Automatically.",
-    description:
-      "Books qualified opportunities directly on your calendar. No phone tag. No back-and-forth. The right jobs, scheduled.",
-    mock: <WorkflowsMock />,
-  },
-  {
-    label: "Briefings",
+    label: "Morning Briefings",
     title: "Wake up knowing what happened.",
     description:
       "Every morning you get a plain-language summary: what came in overnight, what's commercial, what's urgent, what needs a decision.",
@@ -50,31 +36,45 @@ const features = [
   },
   {
     label: "Financial Models",
+    title: "P&L, cash flow, job margins, KPI dashboard.",
+    description:
+      "Ask Endall to build a financial model with live Excel formulas. 6-tab workbook with assumptions, projections, and sensitivity analysis.",
+    mock: <AIMock />,
+  },
+  {
+    label: "Budgets & NPV",
     title: "Know your numbers. Finally.",
     description:
-      "Ask Endall to build a budget, run project returns, or generate a 13-week cash flow. Live Excel formulas, not screenshots.",
-    mock: <AIMock />,
-  },
-  {
-    label: "Proposals & Docs",
-    title: "Capabilities decks in 10 seconds.",
-    description:
-      "Endall builds proposals, capabilities docs, and project estimates from your company profile. No input required for the capabilities deck.",
+      "Monthly budgets with P&L tracking. NPV analysis with IRR, sensitivity tables, and break-even projections. Real formulas, not screenshots.",
     mock: <ReportsMock />,
   },
   {
-    label: "Speed",
-    title: "Live in days. Not months.",
+    label: "Project Estimates",
+    title: "Labor, materials, subs, timeline, margins.",
     description:
-      "No training manuals. No 90-day onboarding. Endall deploys on your existing phone number and calendar in two days.",
-    mock: <AIMock />,
+      "Describe the job and get a 4-tab Excel workbook: summary, itemized detail with formulas, schedule, and margin calculations.",
+    mock: <WorkflowsMock />,
   },
   {
-    label: "Control",
-    title: "Your business. Your rules.",
+    label: "Proposals",
+    title: "Scoped SOW with pricing in minutes.",
     description:
-      "Set your service area, your hours, your job types. Deploys in days, not weeks. No setup headaches.",
+      "Branded DOCX with executive summary, scope of work, timeline, pricing pulled from your estimate, terms, and company info.",
+    mock: <SequencesMock />,
+  },
+  {
+    label: "Competitive Analysis",
+    title: "Know your market. Name your competitors.",
+    description:
+      "Competitor profiles with strengths, weaknesses, and sources. SWOT analysis. Positioning recommendations. All in a branded report.",
     mock: <ReportsMock />,
+  },
+  {
+    label: "Capabilities & Reviews",
+    title: "Professional docs from your company profile.",
+    description:
+      "Capabilities docs with verified certifications and key projects. Monthly financial reviews with revenue, cost, cash flow, and action items.",
+    mock: <AIMock />,
   },
 ];
 
@@ -144,7 +144,7 @@ export default function Home() {
                     marginBottom: "48px",
                   }}
                 >
-                  The front office you never had to hire
+                  8 actions. Zero busywork.
                 </h2>
                 <div
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
@@ -175,6 +175,16 @@ export default function Home() {
             }}
           />
           <HowItWorks />
+
+          {/* Pricing */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <Pricing />
 
           {/* Final CTA */}
           <div

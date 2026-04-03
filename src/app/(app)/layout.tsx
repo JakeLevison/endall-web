@@ -22,6 +22,7 @@ import {
   X,
   Sparkles,
   Send,
+  ChevronDown,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -33,9 +34,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const navItems = [
+const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
+];
+
+const secondaryNav = [
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/deals", label: "Deals", icon: HandCoins },
@@ -46,7 +50,32 @@ const navItems = [
   { href: "/outreach", label: "Outreach", icon: Send },
 ];
 
+function NavLink({ item, pathname }: { item: { href: string; label: string; icon: React.ElementType }; pathname: string }) {
+  const isActive = pathname === item.href
+    || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+
+  return (
+    <Link
+      href={item.href}
+      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
+        isActive
+          ? "bg-white/[0.06] text-white"
+          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
+      }`}
+    >
+      <item.icon className="size-4 shrink-0" />
+      {item.label}
+    </Link>
+  );
+}
+
 function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat?: () => void }) {
+  // Auto-expand if user is on a CRM page
+  const isOnCrmPage = secondaryNav.some(
+    (item) => pathname === item.href || pathname.startsWith(item.href + "/")
+  );
+  const [moreOpen, setMoreOpen] = useState(isOnCrmPage);
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-4">
@@ -58,25 +87,36 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
         </Link>
       </div>
       <nav className="flex-1 px-2 space-y-0.5">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
-            || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+        {primaryNav.map((item) => (
+          <NavLink key={item.href} item={item} pathname={pathname} />
+        ))}
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
-                isActive
-                  ? "bg-white/[0.06] text-white"
-                  : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
-              }`}
-            >
-              <item.icon className="size-4 shrink-0" />
-              {item.label}
-            </Link>
-          );
-        })}
+        {/* Collapsible CRM section */}
+        <div className="pt-3 mt-3 border-t border-white/[0.04]">
+          <button
+            onClick={() => setMoreOpen((prev) => !prev)}
+            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] text-zinc-600 hover:text-zinc-400 transition-colors w-full"
+          >
+            <ChevronDown
+              className="size-3.5 shrink-0 transition-transform"
+              style={{ transform: moreOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+            />
+            CRM
+          </button>
+          <div
+            style={{
+              maxHeight: moreOpen ? 400 : 0,
+              overflow: "hidden",
+              transition: "max-height 0.2s ease",
+            }}
+          >
+            <div className="space-y-0.5 mt-0.5">
+              {secondaryNav.map((item) => (
+                <NavLink key={item.href} item={item} pathname={pathname} />
+              ))}
+            </div>
+          </div>
+        </div>
       </nav>
       <div className="px-2 pb-4">
         <Link

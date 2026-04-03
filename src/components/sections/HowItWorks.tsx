@@ -5,23 +5,18 @@ import { useEffect, useRef, useState } from "react";
 const steps = [
   {
     number: "01",
-    title: "We set up on your number",
-    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. We take care of setup end to end.",
+    title: "Tell us about your business",
+    description: "Your service area, job types, hours, and company profile. We configure Endall to match how you run your operation. Setup takes days, not months.",
   },
   {
     number: "02",
-    title: "Endall answers your calls",
-    description: "Every inbound call gets picked up in under 60 seconds. Endall qualifies the caller, determines urgency, and books qualified jobs on your calendar.",
+    title: "Endall runs your front office",
+    description: "Every call answered in under 60 seconds. Leads qualified by trade logic. Qualified jobs booked on your calendar. Morning briefing delivered before you leave the house.",
   },
   {
     number: "03",
-    title: "You get a morning briefing",
-    description: "Every morning before you leave the house, you know exactly what came in overnight, what's commercial, what's time-sensitive, and what needs your attention.",
-  },
-  {
-    number: "04",
-    title: "Ask it anything",
-    description: "Financial models, project estimates, capabilities docs, proposals. Ask Endall to build what you need, and it delivers a finished file. No templates. No busywork.",
+    title: "Ask Endall to build anything",
+    description: "Financial models, budgets, project estimates, proposals, capabilities docs, competitive analysis, NPV reports, and financial reviews. Ask for it, get a finished file.",
   },
 ];
 
@@ -73,7 +68,7 @@ export default function HowItWorks() {
           textAlign: "center",
           marginBottom: "48px",
         }}>
-          Up and running in days, not weeks.
+          Three steps to a fully staffed operation.
         </h2>
 
         {/* Desktop: horizontal layout */}
@@ -154,7 +149,7 @@ export default function HowItWorks() {
       <style jsx>{`
         .hiw-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
           gap: 36px;
           position: relative;
         }
