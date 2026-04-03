@@ -78,7 +78,7 @@ export default function Pricing() {
           }}
         >
           <Link
-            href="/dashboard"
+            href="/ask-endall"
             style={{
               display: "inline-block",
               background: "#fff",

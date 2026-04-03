@@ -129,7 +129,7 @@ export default function Navbar() {
         {/* Right section — fixed width to balance left section */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 160, justifyContent: "flex-end" }}>
           <Link
-            href="/dashboard#ask-endall"
+            href="/ask-endall"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",

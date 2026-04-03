@@ -156,7 +156,7 @@ export default function HeroHeadline() {
 
       <div style={{ marginTop: "40px" }}>
         <Link
-          href="/dashboard"
+          href="/ask-endall"
           style={{
             display: "inline-block",
             fontFamily: "var(--font-sans), sans-serif",
