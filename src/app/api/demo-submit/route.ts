@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     try {
       await resend.emails.send({
         from: "Endall <notifications@endall.ai>",
-        to: "jake@endall.ai",
+        to: ["jake@endall.ai", "levison1995@gmail.com"],
         subject: `New Demo Request: ${name} — ${company}`,
         html: `
           <h2>New Demo Request</h2>
