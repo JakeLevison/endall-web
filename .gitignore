@@ -40,3 +40,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 supabase/seed*.py
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# qa infrastructure
+/qa-reports/
+/security-reports/
+/screenshots/qa/

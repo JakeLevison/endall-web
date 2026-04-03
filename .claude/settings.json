@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "bash -c 'FILE=\"$TOOL_INPUT\"; if [[ \"$FILE\" == */src/* ]] || [[ \"$FILE\" == */app/* ]]; then if [[ \"$FILE\" != *test* ]] && [[ \"$FILE\" != *spec* ]] && [[ \"$FILE\" != *.md ]] && [[ \"$FILE\" != *.json ]] && [[ \"$FILE\" != *.config* ]]; then echo \"[Auto-test] Smoke test triggered by edit to $FILE\"; cd /home/jakob/endall-web && npm test --watchAll=false 2>&1 | tail -15; fi; fi'"
+      }
+    ]
+  }
+}
