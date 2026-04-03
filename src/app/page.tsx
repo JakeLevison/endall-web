@@ -16,7 +16,6 @@ import AIMock from "@/components/features/AIMock";
 import ReportsMock from "@/components/features/ReportsMock";
 import HowItWorks from "@/components/sections/HowItWorks";
 // Pricing removed — not showing pricing pre-launch
-import Team from "@/components/sections/Team";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
 
@@ -176,16 +175,6 @@ export default function Home() {
             }}
           />
           <HowItWorks />
-
-          {/* Team */}
-          <div
-            style={{
-              maxWidth: "1100px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-            }}
-          />
-          <Team />
 
           {/* Final CTA */}
           <div

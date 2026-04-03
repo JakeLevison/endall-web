@@ -92,6 +92,38 @@ export default function Navbar() {
           >
             How it Works
           </a>
+          <a
+            href="/team"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "13px",
+              color: "var(--text-tertiary)",
+              textDecoration: "none",
+              transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          >
+            Team
+          </a>
+          <a
+            href="mailto:jake@endall.ai"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "13px",
+              color: "var(--text-tertiary)",
+              textDecoration: "none",
+              transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          >
+            Contact
+          </a>
         </div>
 
         {/* Right section — fixed width to balance left section */}
@@ -175,8 +207,18 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu drawer */}
+      {/* Mobile menu backdrop + drawer */}
       {menuOpen && (
+        <>
+        <div
+          className="md:hidden"
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 98,
+          }}
+        />
         <div
           className="md:hidden"
           style={{
@@ -227,6 +269,21 @@ export default function Navbar() {
             How it Works
           </a>
           <a
+            href="/team"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "15px",
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            Team
+          </a>
+          <a
             href="mailto:jake@endall.ai"
             onClick={() => setMenuOpen(false)}
             style={{
@@ -242,6 +299,7 @@ export default function Navbar() {
             Contact
           </a>
         </div>
+        </>
       )}
     </>
   );
