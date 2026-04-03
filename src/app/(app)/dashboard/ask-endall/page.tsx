@@ -10,6 +10,7 @@ import {
   FileText,
   File,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type FileAttachment = {
   file_id: string;
@@ -87,7 +88,8 @@ export default function AskEndallPage() {
 
   useEffect(() => {
     if (activeTab === "files") {
-      fetch(`${BRIDGE_URL}/files`)
+      const sessionId = "web-" + (typeof window !== "undefined" ? window.location.hostname : "default");
+      fetch(`${BRIDGE_URL}/files?session_id=${encodeURIComponent(sessionId)}`)
         .then((r) => r.json())
         .then((d) => setSavedFiles(d.files || []))
         .catch(() => setSavedFiles([]));
@@ -381,8 +383,9 @@ export default function AskEndallPage() {
                           </div>
                         </div>
                         <a
-                          href={`${BRIDGE_URL}/download/${f.file_path}`}
+                          href={`${BRIDGE_URL}/download/${f.id}`}
                           download={f.file_name}
+                          onClick={() => toast.success("File downloaded")}
                           style={{
                             display: "flex",
                             alignItems: "center",
@@ -569,6 +572,7 @@ export default function AskEndallPage() {
                           key={f.file_id}
                           href={f.download_url}
                           download={f.filename}
+                          onClick={() => toast.success("File downloaded")}
                           style={{
                             display: "flex",
                             alignItems: "center",

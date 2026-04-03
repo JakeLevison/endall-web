@@ -73,7 +73,7 @@ const features = [
     label: "Control",
     title: "Your business. Your rules.",
     description:
-      "Set your service area, your hours, your job types. Pause anytime. No contracts. Cancel whenever you want.",
+      "Set your service area, your hours, your job types. Deploys in days, not weeks. No setup headaches.",
     mock: <ReportsMock />,
   },
 ];

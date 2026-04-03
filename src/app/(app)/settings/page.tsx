@@ -344,7 +344,7 @@ function BillingTab() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-[13px] text-white font-medium">Founder Plan</p>
-            <p className="text-[11px] text-zinc-500 mt-0.5">Free during beta</p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Active</p>
           </div>
           <Badge variant="outline" className="text-[10px] font-normal bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
             Active

@@ -6,7 +6,7 @@ const steps = [
   {
     number: "01",
     title: "We set up on your number",
-    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. We handle the setup end to end.",
+    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. We take care of setup end to end.",
   },
   {
     number: "02",

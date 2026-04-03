@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +33,24 @@ export async function POST(request: NextRequest) {
         { error: "Failed to save message" },
         { status: 500 }
       );
+    }
+
+    // Fire-and-forget email notification
+    try {
+      await resend.emails.send({
+        from: "Endall <notifications@endall.ai>",
+        to: "jake@endall.ai",
+        subject: `New Contact: ${name}`,
+        html: `
+          <h2>New Contact Submission</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Message:</strong> ${message}</p>
+          <p><em>Submitted at ${new Date().toISOString()}</em></p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("Resend email error (contact-submit):", emailErr);
     }
 
     return NextResponse.json({ success: true });

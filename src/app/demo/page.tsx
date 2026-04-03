@@ -117,15 +117,14 @@ export default function DemoPage() {
                   marginBottom: 40,
                 }}
               >
-                Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall handles lead capture, quoting, scheduling, and follow-ups — so your team can focus on the work.
+                Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall runs lead capture, quoting, scheduling, and follow-ups — so your team can focus on the work.
               </p>
 
               {/* Trust signals */}
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {[
-                  { label: "No credit card required", detail: "Free to explore, cancel anytime." },
                   { label: "Built for MEP contractors", detail: "HVAC, plumbing, electrical, mechanical — not a generic SaaS." },
-                  { label: "Live in under a week", detail: "We handle setup and data migration." },
+                  { label: "Live in under a week", detail: "We take care of setup and data migration." },
                 ].map((item) => (
                   <div key={item.label} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <div
@@ -239,18 +238,18 @@ export default function DemoPage() {
                     <div style={{ flex: "1 1 200px" }}>
                       <label style={labelStyle}>Trade</label>
                       <select name="trade" required style={selectStyle} defaultValue="">
-                        <option value="" disabled>Select trade</option>
+                        <option value="" disabled style={{ color: "#000", background: "#fff" }}>Select trade</option>
                         {TRADE_OPTIONS.map((t) => (
-                          <option key={t} value={t}>{t}</option>
+                          <option key={t} value={t} style={{ color: "#000", background: "#fff" }}>{t}</option>
                         ))}
                       </select>
                     </div>
                     <div style={{ flex: "1 1 200px" }}>
                       <label style={labelStyle}>Team Size</label>
                       <select name="teamSize" required style={selectStyle} defaultValue="">
-                        <option value="" disabled>Select range</option>
+                        <option value="" disabled style={{ color: "#000", background: "#fff" }}>Select range</option>
                         {TEAM_SIZE_OPTIONS.map((s) => (
-                          <option key={s} value={s}>{s}</option>
+                          <option key={s} value={s} style={{ color: "#000", background: "#fff" }}>{s}</option>
                         ))}
                       </select>
                     </div>
