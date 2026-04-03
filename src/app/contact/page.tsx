@@ -6,6 +6,8 @@ import Footer from "@/components/sections/Footer";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <div
@@ -88,16 +90,28 @@ export default function ContactPage() {
             </div>
           ) : (
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                const form = e.currentTarget;
-                const data = new FormData(form);
-                // POST to a future API route — for now, open mailto fallback
-                const name = data.get("name") as string;
-                const email = data.get("email") as string;
-                const message = data.get("message") as string;
-                window.location.href = `mailto:jake@endall.ai?subject=Contact from ${encodeURIComponent(name)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
-                setSubmitted(true);
+                setSubmitting(true);
+                setError("");
+                const data = new FormData(e.currentTarget);
+                try {
+                  const res = await fetch("/api/contact-submit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      name: data.get("name"),
+                      email: data.get("email"),
+                      message: data.get("message"),
+                    }),
+                  });
+                  if (!res.ok) throw new Error("Failed to send");
+                  setSubmitted(true);
+                } catch {
+                  setError("Something went wrong. Please try again or email jake@endall.ai directly.");
+                } finally {
+                  setSubmitting(false);
+                }
               }}
               style={{ display: "flex", flexDirection: "column", gap: 20 }}
             >
@@ -153,25 +167,31 @@ export default function ContactPage() {
                   resize: "vertical",
                 }}
               />
+              {error && (
+                <p style={{ fontFamily: "var(--font-sans), sans-serif", fontSize: 13, color: "#ef4444" }}>
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
+                disabled={submitting}
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 14,
                   fontWeight: 500,
                   padding: "14px 32px",
-                  background: "#fff",
+                  background: submitting ? "#888" : "#fff",
                   color: "#000",
                   border: "none",
                   borderRadius: 8,
-                  cursor: "pointer",
+                  cursor: submitting ? "not-allowed" : "pointer",
                   alignSelf: "flex-start",
                   transition: "background-color 0.2s ease",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#e5e5e5"; }}
+                onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#ffffff"; }}
               >
-                Send Message
+                {submitting ? "Sending..." : "Send Message"}
               </button>
             </form>
           )}
