@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/hero/Navbar";
 import Footer from "@/components/sections/Footer";
 
@@ -57,7 +58,9 @@ const labelStyle: React.CSSProperties = {
 };
 
 export default function DemoPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div
@@ -172,54 +175,39 @@ export default function DemoPage() {
 
             {/* Right column — form */}
             <div>
-              {submitted ? (
-                <div
-                  style={{
-                    padding: "48px 32px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: 12,
-                    textAlign: "center",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans), sans-serif",
-                      fontSize: 20,
-                      fontWeight: 500,
-                      color: "#fff",
-                      marginBottom: 8,
-                    }}
-                  >
-                    You&rsquo;re on the list.
-                  </p>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-sans), sans-serif",
-                      fontSize: 14,
-                      color: "var(--text-tertiary)",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    We&rsquo;ll reach out within one business day to schedule your demo.
-                  </p>
-                </div>
-              ) : (
-                <form
-                  onSubmit={(e) => {
+              <form
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    const form = e.currentTarget;
-                    const data = new FormData(form);
-                    const name = data.get("name") as string;
-                    const email = data.get("email") as string;
-                    const company = data.get("company") as string;
-                    const trade = data.get("trade") as string;
-                    const teamSize = data.get("teamSize") as string;
-                    const notes = data.get("notes") as string;
-                    window.location.href = `mailto:jake@endall.ai?subject=Demo Request from ${encodeURIComponent(company)}&body=${encodeURIComponent(
-                      `Name: ${name}\nEmail: ${email}\nCompany: ${company}\nTrade: ${trade}\nTeam size: ${teamSize}\n\nNotes:\n${notes}`
-                    )}`;
-                    setSubmitted(true);
+                    setSubmitting(true);
+                    setError(null);
+
+                    const data = new FormData(e.currentTarget);
+                    const payload = {
+                      name: data.get("name") as string,
+                      work_email: data.get("email") as string,
+                      company: data.get("company") as string,
+                      trade: data.get("trade") as string,
+                      team_size: data.get("teamSize") as string,
+                      notes: data.get("notes") as string,
+                    };
+
+                    try {
+                      const res = await fetch("/api/demo-submit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                      });
+
+                      if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        throw new Error(body.error || "Something went wrong");
+                      }
+
+                      router.push("/demo/confirmation");
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Something went wrong");
+                      setSubmitting(false);
+                    }
                   }}
                   style={{
                     display: "flex",
@@ -278,25 +266,39 @@ export default function DemoPage() {
                     />
                   </div>
 
+                  {error && (
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans), sans-serif",
+                        fontSize: 13,
+                        color: "#ef4444",
+                        textAlign: "center",
+                      }}
+                    >
+                      {error}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
+                    disabled={submitting}
                     style={{
                       fontFamily: "var(--font-sans), sans-serif",
                       fontSize: 14,
                       fontWeight: 500,
                       padding: "14px 32px",
-                      background: "#fff",
+                      background: submitting ? "#999" : "#fff",
                       color: "#000",
                       border: "none",
                       borderRadius: 8,
-                      cursor: "pointer",
+                      cursor: submitting ? "not-allowed" : "pointer",
                       transition: "background-color 0.2s ease",
                       width: "100%",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                    onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#e5e5e5"; }}
+                    onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#ffffff"; }}
                   >
-                    Request a Demo
+                    {submitting ? "Submitting..." : "Request a Demo"}
                   </button>
 
                   <p
@@ -310,7 +312,6 @@ export default function DemoPage() {
                     No spam. We&rsquo;ll only use your info to set up the demo.
                   </p>
                 </form>
-              )}
             </div>
           </div>
         </div>

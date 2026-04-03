@@ -129,7 +129,7 @@ export default function Navbar() {
         {/* Right section — fixed width to balance left section */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 160, justifyContent: "flex-end" }}>
           <Link
-            href="/dashboard"
+            href="/dashboard#ask-endall"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
@@ -151,7 +151,7 @@ export default function Navbar() {
             onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
             onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
           >
-            Open App
+            Ask Endall
           </Link>
 
           {/* Mobile hamburger */}
