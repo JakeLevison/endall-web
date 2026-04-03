@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Send,
   Sparkles,
@@ -9,76 +9,23 @@ import {
   FileSpreadsheet,
   FileText,
   File,
+  MessageSquare,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-
-type FileAttachment = {
-  file_id: string;
-  filename: string;
-  download_url: string;
-};
-
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  files?: FileAttachment[];
-  previewHtml?: string;
-};
-
-type Action = {
-  id: string;
-  label: string;
-  description: string;
-  icon: string;
-};
+import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
 
 const BRIDGE_URL =
   process.env.NEXT_PUBLIC_ASK_ENDALL_BRIDGE_URL ||
   "https://ask-endall-bridge-production.up.railway.app";
 
-const SKILLS_ACTIONS = new Set([
-  "financial_model",
-  "generate_budget",
-  "capabilities_doc",
-  "npv_analysis",
-  "project_estimate",
-  "proposal",
-  "competitive_analysis",
-  "review_financials",
-  "swot_analysis",
-]);
-
-const QUICK_ACTIONS: Action[] = [
-  { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
-  { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
-  { id: "capabilities_doc", label: "Create a capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
-  { id: "npv_analysis", label: "Analyze project returns", description: "NPV, IRR, sensitivity analysis on a specific bid", icon: "📈" },
-  { id: "project_estimate", label: "Estimate a project", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
-  { id: "proposal", label: "Draft a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
-  { id: "competitive_analysis", label: "Research competitors", description: "Report on competitors in your market", icon: "🔍" },
-  { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
-];
-
 export default function AskEndallPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messages, conversations, loading, loadingPhase,
+    activeWorkflow, activeTab, savedFiles,
+    setActiveTab, sendMessage, resetChat, loadConversation, deleteConversation,
+  } = useChat();
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState("");
-  const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"chat" | "files">("chat");
-  const [savedFiles, setSavedFiles] = useState<
-    Array<{
-      id: string;
-      file_name: string;
-      file_type: string;
-      description: string;
-      file_path: string;
-      workflow: string;
-      created_at: string;
-    }>
-  >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -87,168 +34,116 @@ export default function AskEndallPage() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "files") {
-      fetch(`${BRIDGE_URL}/files`)
-        .then((r) => r.json())
-        .then((d) => setSavedFiles(d.files || []))
-        .catch(() => setSavedFiles([]));
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const sendMessage = useCallback(
-    async (text: string, action?: string) => {
-      if (!text.trim() && !action) return;
-
-      const userMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: action
-          ? `[${QUICK_ACTIONS.find((a) => a.id === action)?.label}] ${text || ""}`
-          : text,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, userMsg]);
-      setInput("");
-      setLoading(true);
-
-      const currentWorkflow = action || activeWorkflow;
-      if (action) {
-        setActiveWorkflow(action);
-      }
-
-      const isSkillsWorkflow = !!(
-        (action && SKILLS_ACTIONS.has(action)) ||
-        (currentWorkflow && SKILLS_ACTIONS.has(currentWorkflow))
-      );
-
-      const phases = [
-        { delay: 0, msg: "Building your document..." },
-        { delay: 10000, msg: "Running calculations..." },
-        { delay: 25000, msg: "Formatting workbook and applying conditional formatting..." },
-        { delay: 45000, msg: "Finalizing and preparing download..." },
-        { delay: 90000, msg: "This is taking longer than usual. Still working - complex models can take up to 2 minutes." },
-      ];
-      const phaseTimers: ReturnType<typeof setTimeout>[] = [];
-
-      if (isSkillsWorkflow) {
-        for (const phase of phases) {
-          phaseTimers.push(setTimeout(() => setLoadingPhase(phase.msg), phase.delay));
-        }
-      }
-
-      try {
-        let data: { reply?: string; error?: string; files?: FileAttachment[]; previewHtml?: string };
-
-        if (isSkillsWorkflow) {
-          const resp = await fetch(`${BRIDGE_URL}/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action: action || currentWorkflow,
-              session_id: "web-" + (typeof window !== "undefined" ? window.location.hostname : "default"),
-            }),
-          });
-
-          if (!resp.ok) {
-            const errText = await resp.text();
-            let parsed: { detail?: string } = {};
-            try { parsed = JSON.parse(errText); } catch { /* not JSON */ }
-            const detail = parsed.detail || errText;
-
-            let userMessage = "Something went wrong generating your file. Try again or ask me to simplify the request.";
-            if (resp.status === 429 || detail.includes("rate_limit")) {
-              userMessage = "We've hit a temporary limit. Please wait 30 seconds and try again.";
-            } else if (detail.includes("timeout") || resp.status === 504) {
-              userMessage = "Your request is taking longer than expected. Try refreshing in 30 seconds, or try again.";
-            }
-            throw new Error(userMessage);
-          }
-
-          const bridgeData = await resp.json();
-          const files = (bridgeData.files || []).map((f: { file_id: string; filename: string }) => ({
-            file_id: f.file_id,
-            filename: f.filename,
-            download_url: `${BRIDGE_URL}/download/${f.file_id}`,
-          }));
-
-          data = {
-            reply: bridgeData.reply,
-            files: files.length > 0 ? files : undefined,
-            previewHtml: bridgeData.preview_html || undefined,
-          };
-        } else {
-          const resp = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action,
-              history: messages.map((m) => ({ role: m.role, content: m.content })),
-            }),
-          });
-          data = await resp.json();
-        }
-
-        const aiMsg: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: data.reply || data.error || "Something went wrong.",
-          timestamp: new Date(),
-          files: data.files || undefined,
-          previewHtml: data.previewHtml || undefined,
-        };
-        setMessages((prev) => [...prev, aiMsg]);
-      } catch (err) {
-        const errorMsg =
-          err instanceof Error && err.message !== "Failed to fetch"
-            ? err.message
-            : isSkillsWorkflow
-              ? "We're having trouble reaching our AI service. This usually resolves in a few minutes."
-              : "Failed to connect to AI service. Please try again.";
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: errorMsg,
-            timestamp: new Date(),
-          },
-        ]);
-      } finally {
-        phaseTimers.forEach(clearTimeout);
-        setLoadingPhase("");
-        setLoading(false);
-      }
-    },
-    [messages, activeWorkflow]
-  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(input);
+    setInput("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
+      setInput("");
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+      {/* Conversation history sidebar */}
+      <div
+        style={{
+          width: 240,
+          flexShrink: 0,
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          display: "flex",
+          flexDirection: "column",
+          background: "rgba(0,0,0,0.2)",
+        }}
+      >
+        <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <button
+            onClick={resetChat}
+            style={{
+              width: "100%",
+              padding: "8px 12px",
+              fontSize: 13,
+              fontWeight: 500,
+              color: "#fff",
+              background: "rgba(59,130,246,0.15)",
+              border: "1px solid rgba(59,130,246,0.3)",
+              borderRadius: 6,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Sparkles size={14} /> New Chat
+          </button>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+          {conversations.length === 0 ? (
+            <p style={{ fontSize: 12, color: "#444", textAlign: "center", marginTop: 20, padding: "0 12px" }}>
+              No conversations yet
+            </p>
+          ) : (
+            conversations.map((conv) => (
+              <div
+                key={conv.id}
+                onClick={() => loadConversation(conv.id)}
+                style={{
+                  padding: "8px 12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "transparent",
+                  borderLeft: "2px solid transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <MessageSquare size={14} style={{ color: "#555", flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: "#ccc", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {conv.title || "New conversation"}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#444", marginTop: 2 }}>
+                    {new Date(conv.updated_at).toLocaleDateString()}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
+                  title="Delete conversation"
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "#444", opacity: 0.5 }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.5"; }}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Main chat area */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
       {/* Header */}
       <div
         style={{
@@ -305,10 +200,7 @@ export default function AskEndallPage() {
           </div>
           {messages.length > 0 && (
             <button
-              onClick={() => {
-                setMessages([]);
-                setActiveWorkflow(null);
-              }}
+              onClick={resetChat}
               title="New chat"
               style={{
                 background: "none",
@@ -724,6 +616,7 @@ export default function AskEndallPage() {
           }
         }
       `}</style>
+      </div>{/* end main chat area */}
     </div>
   );
 }

@@ -1,49 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, FileSpreadsheet, FileText, File } from "lucide-react";
 import { toast } from "sonner";
-
-type FileAttachment = {
-  file_id: string;
-  filename: string;
-  download_url: string;
-};
-
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-  files?: FileAttachment[];
-  previewHtml?: string;
-};
-
-type Action = {
-  id: string;
-  label: string;
-  description: string;
-  icon: string;
-};
+import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
 
 const BRIDGE_URL = process.env.NEXT_PUBLIC_ASK_ENDALL_BRIDGE_URL || "https://ask-endall-bridge-production.up.railway.app";
-
-const SKILLS_ACTIONS = new Set([
-  "financial_model", "generate_budget", "capabilities_doc", "npv_analysis",
-  "project_estimate", "proposal", "competitive_analysis", "review_financials",
-  "swot_analysis",
-]);
-
-const QUICK_ACTIONS: Action[] = [
-  { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
-  { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
-  { id: "capabilities_doc", label: "Create a capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
-  { id: "npv_analysis", label: "Analyze project returns", description: "NPV, IRR, sensitivity analysis on a specific bid", icon: "📈" },
-  { id: "project_estimate", label: "Estimate a project", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
-  { id: "proposal", label: "Draft a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
-  { id: "competitive_analysis", label: "Research competitors", description: "Report on competitors in your market", icon: "🔍" },
-  { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
-];
 
 interface ChatPanelProps {
   isOpen: boolean;
@@ -56,22 +18,13 @@ interface ChatPanelProps {
 }
 
 export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordType, recordId }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messages, conversations, loading, loadingPhase,
+    activeWorkflow, activeTab, savedFiles,
+    setActiveTab, sendMessage, resetChat, loadConversation,
+  } = useChat({ recordType, recordId });
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState("");
-  const [activeWorkflow, setActiveWorkflow] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"chat" | "files">("chat");
-  const [savedFiles, setSavedFiles] = useState<Array<{
-    id: string;
-    file_name: string;
-    file_type: string;
-    description: string;
-    file_path: string;
-    workflow: string;
-    created_at: string;
-  }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -81,15 +34,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
     }
   }, [isOpen]);
 
-  // Load files when Files tab is opened
-  useEffect(() => {
-    if (activeTab === "files") {
-      fetch(`${BRIDGE_URL}/files`)
-        .then((r) => r.json())
-        .then((d) => setSavedFiles(d.files || []))
-        .catch(() => setSavedFiles([]));
-    }
-  }, [activeTab]);
+  // Files tab loading is now handled by useChat hook
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,165 +50,18 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = useCallback(
-    async (text: string, action?: string) => {
-      if (!text.trim() && !action) return;
-
-      const userMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: action
-          ? `[${QUICK_ACTIONS.find((a) => a.id === action)?.label}] ${text || ""}`
-          : text,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, userMsg]);
-      setInput("");
-      setLoading(true);
-
-      // Track active workflow for routing follow-ups to the bridge
-      const currentWorkflow = action || activeWorkflow;
-      if (action) {
-        setActiveWorkflow(action);
-      }
-
-      // Route: Skills workflows go directly to the Railway bridge (no Vercel proxy).
-      // Plain chat goes through /api/chat on Vercel.
-      const isSkillsWorkflow = !!(
-        (action && SKILLS_ACTIONS.has(action)) ||
-        (currentWorkflow && SKILLS_ACTIONS.has(currentWorkflow))
-      );
-
-      // Progress phases for file generation
-      const phases = [
-        { delay: 0, msg: "Building your document..." },
-        { delay: 10000, msg: "Running calculations..." },
-        { delay: 25000, msg: "Formatting workbook and applying conditional formatting..." },
-        { delay: 45000, msg: "Finalizing and preparing download..." },
-        { delay: 90000, msg: "This is taking longer than usual. Still working - complex models can take up to 2 minutes." },
-      ];
-      const phaseTimers: ReturnType<typeof setTimeout>[] = [];
-
-      if (isSkillsWorkflow) {
-        for (const phase of phases) {
-          phaseTimers.push(setTimeout(() => setLoadingPhase(phase.msg), phase.delay));
-        }
-      }
-
-      try {
-        let data: { reply?: string; error?: string; files?: FileAttachment[]; previewHtml?: string };
-
-        if (isSkillsWorkflow) {
-          // Call Railway bridge directly — no Vercel timeout
-          const resp = await fetch(`${BRIDGE_URL}/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action: action || currentWorkflow,
-              session_id: "web-" + (typeof window !== "undefined" ? window.location.hostname : "default"),
-            }),
-          });
-
-          if (!resp.ok) {
-            const errText = await resp.text();
-            let parsed: { detail?: string } = {};
-            try { parsed = JSON.parse(errText); } catch { /* not JSON */ }
-            const detail = parsed.detail || errText;
-
-            let userMessage = "Something went wrong generating your file. Try again or ask me to simplify the request.";
-            if (resp.status === 429 || detail.includes("rate_limit")) {
-              userMessage = "We've hit a temporary limit. Please wait 30 seconds and try again.";
-            } else if (detail.includes("timeout") || resp.status === 504) {
-              userMessage = "Your request is taking longer than expected. Try refreshing in 30 seconds, or try again.";
-            }
-            throw new Error(userMessage);
-          }
-
-          const bridgeData = await resp.json();
-
-          // Rewrite download URLs to point to the bridge directly
-          const files = (bridgeData.files || []).map((f: { file_id: string; filename: string }) => ({
-            file_id: f.file_id,
-            filename: f.filename,
-            download_url: `${BRIDGE_URL}/download/${f.file_id}`,
-          }));
-
-          data = {
-            reply: bridgeData.reply,
-            files: files.length > 0 ? files : undefined,
-            previewHtml: bridgeData.preview_html || undefined,
-          };
-        } else {
-          // Plain chat — Vercel API route
-          const resp = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action,
-              recordType,
-              recordId,
-              history: messages.map((m) => ({ role: m.role, content: m.content })),
-            }),
-          });
-
-          data = await resp.json();
-        }
-
-        const aiMsg: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: data.reply || data.error || "Something went wrong.",
-          timestamp: new Date(),
-          files: data.files || undefined,
-          previewHtml: data.previewHtml || undefined,
-        };
-        setMessages((prev) => [...prev, aiMsg]);
-
-        // Dispatch toast event for file generation (visible even outside chat panel)
-        if (data.files && data.files.length > 0) {
-          for (const f of data.files) {
-            window.dispatchEvent(new CustomEvent("endall-file-ready", {
-              detail: { filename: f.filename, downloadUrl: f.download_url },
-            }));
-          }
-        }
-      } catch (err) {
-        const errorMsg = err instanceof Error && err.message !== "Failed to fetch"
-          ? err.message
-          : isSkillsWorkflow
-            ? "We're having trouble reaching our AI service. This usually resolves in a few minutes."
-            : "Failed to connect to AI service. Please try again.";
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: errorMsg,
-            timestamp: new Date(),
-          },
-        ]);
-      } finally {
-        phaseTimers.forEach(clearTimeout);
-        setLoadingPhase("");
-        setLoading(false);
-      }
-    },
-    [messages, activeWorkflow, recordType, recordId]
-  );
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage(input);
+    setInput("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
+      setInput("");
     }
-    // Shift+Enter = newline (default textarea behavior, no action needed)
   };
 
   if (!isOpen) return null;
@@ -317,7 +115,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {messages.length > 0 && (
               <button
-                onClick={() => { setMessages([]); setActiveWorkflow(null); }}
+                onClick={resetChat}
                 title="New chat"
                 style={{
                   background: "none",
