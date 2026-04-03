@@ -72,7 +72,7 @@ export default function Team() {
             alt="Jake Levison"
             width={120}
             height={120}
-            style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            style={{ objectFit: "cover", width: "100%", height: "100%", objectPosition: "center 20%", transform: "scale(0.9)" }}
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function Team() {
                 lineHeight: 1.7,
               }}
             >
-              Jake led institutional capital formation for Post Harvest Technologies, a vertically integrated food logistics and infrastructure platform. At PHT, he focused on sales, operations, strategy, and underwriting across the portfolio, with a particular emphasis on operational challenges and inefficiencies. Among PHT's portfolio companies was Facilities Management Group, a specialty equipment manufacturer, service provider, refrigeration contractor, and facility management firm. Working alongside FMG's operations team, Jake saw firsthand the gaps that slow contractors down {'\u2013'} missed calls, no financial visibility, manual bookkeeping, and zero competitive intelligence or market research. That experience led directly to Endall. Prior to PHT, Jake held roles at Blockworks, M&T Bank, and Morgan Stanley. He serves on the Chairman's Council of the New York Restoration Project, a non-profit expanding green spaces in underserved NYC communities. He holds a B.A. in Philosophy, Politics, and Economics from the University of Pennsylvania, where he played Division I varsity baseball.
+              Before founding Endall, Jake spent six years as Director of Business Development at Post Harvest Technologies, an investment and operating platform with vertically integrated cold storage, refrigeration contracting, and facility management businesses {'\u2014'} including Central Coast Cooling and Facilities Management Group. He led capital formation, deal origination, and investor relations across the portfolio. Working closely with senior management and operations teams, he saw the same pattern across the board: owners running growing service businesses with no one covering the front office. That gap is what led him to start Endall. Prior to PHT, Jake held roles at Blockworks, M&T Bank, and Morgan Stanley. He holds a B.A. in Philosophy, Politics, and Economics from the University of Pennsylvania, where he played Division I baseball, and serves on the Chairman&#39;s Council of New York Restoration Project.
             </p>
           </div>
         )}
