@@ -35,7 +35,7 @@ export default function FinalCTA() {
             marginBottom: 12,
           }}
         >
-          {["Your front office,", "fully staffed."].map((line, i) => (
+          {["Your AI ops team.", "Ready when you are."].map((line, i) => (
             <span
               key={line}
               style={{

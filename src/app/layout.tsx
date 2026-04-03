@@ -5,25 +5,25 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "endall — The AI Operating System for Service Companies",
+  title: "Endall — AI Ops Team for MEP Contractors",
   description:
-    "CRM, scheduling, and sales automation that runs itself. One platform for HVAC, plumbing, electrical, and mechanical contractors.",
+    "Financial models, proposals, project estimates, competitive analysis, call answering, and morning briefings. One AI ops team for HVAC, plumbing, electrical, and mechanical contractors.",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "endall — The AI Operating System for Service Companies",
+    title: "Endall — AI Ops Team for MEP Contractors",
     description:
-      "CRM, scheduling, and sales automation that runs itself. Built for service companies.",
+      "Financial models, proposals, project estimates, and competitive analysis. One AI ops team for MEP contractors.",
     url: "https://endall.ai",
-    siteName: "endall",
+    siteName: "Endall",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "endall",
+    title: "Endall",
     description:
-      "CRM, scheduling, and sales automation that runs itself. Built for service companies.",
+      "Financial models, proposals, project estimates, and competitive analysis. One AI ops team for MEP contractors.",
   },
 };
 

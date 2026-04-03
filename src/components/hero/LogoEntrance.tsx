@@ -22,14 +22,14 @@ export default function LogoEntrance({ onComplete }: LogoEntranceProps) {
     // Phase 1 (0ms): mount with fadein state, CSS transition handles the visual fade
     // Phase 2 (50ms → hold): trigger the fade-in transition immediately after first paint
     const holdTimer = setTimeout(() => setPhase("hold"), 50);
-    // Phase 3 (2000ms → fadeout): dissolve the overlay
-    const fadeoutTimer = setTimeout(() => setPhase("fadeout"), 2000);
-    // Phase 4 (2600ms → done): clean up
+    // Phase 3 (800ms → fadeout): dissolve the overlay
+    const fadeoutTimer = setTimeout(() => setPhase("fadeout"), 800);
+    // Phase 4 (1200ms → done): clean up
     const doneTimer = setTimeout(() => {
       setPhase("done");
       sessionStorage.setItem("endall-entrance-seen", "1");
       onCompleteRef.current();
-    }, 2600);
+    }, 1200);
 
     return () => {
       clearTimeout(holdTimer);

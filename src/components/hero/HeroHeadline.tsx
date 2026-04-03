@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const words = ["Calls", "Leads", "Front Office", "Budgets", "Follow-ups", "Proposals", "Scheduling"];
+const words = ["Operations", "Proposals", "Budgets", "Estimates", "Front Office", "Follow-ups", "Calls"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -62,7 +62,7 @@ export default function HeroHeadline() {
           marginBottom: "20px",
         }}
       >
-        Your front office, fully staffed
+        Your AI ops team
       </p>
 
       {/* Hidden measurement element — same font/size as headline, measures "Sequences" (has descender) */}
@@ -151,12 +151,12 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        Endall answers your calls, qualifies your leads, books your jobs, briefs you every morning, and builds financial models, proposals, and capabilities docs on demand.
+        Financial models, proposals, project estimates, and competitive analysis — plus call answering, lead qualification, and morning briefings. One platform runs your entire operation.
       </p>
 
       <div style={{ marginTop: "40px" }}>
         <Link
-          href="/dashboard"
+          href="/demo"
           style={{
             display: "inline-block",
             fontFamily: "var(--font-sans), sans-serif",
@@ -174,7 +174,7 @@ export default function HeroHeadline() {
           onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
           onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
         >
-          See How It Works
+          Request a Demo
         </Link>
       </div>
 

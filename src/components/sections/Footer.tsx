@@ -34,8 +34,8 @@ export default function Footer() {
         <div style={{ display: "flex", gap: 20 }}>
           {[
             { label: "Contact", href: "mailto:jake@endall.ai" },
-            { label: "Privacy", href: "#" },
-            { label: "Terms", href: "#" },
+            { label: "Privacy", href: "/privacy" },
+            { label: "Terms", href: "/terms" },
           ].map((link) => (
             <a
               key={link.label}
