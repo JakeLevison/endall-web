@@ -16,29 +16,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const { error } = await supabase.from("demo_requests").insert({
-      name,
-      work_email,
-      company,
-      trade,
-      team_size,
-      notes: notes || null,
-    });
-
-    if (error) {
-      console.error("demo_requests insert error:", error);
-      return NextResponse.json(
-        { error: "Failed to save request" },
-        { status: 500 }
+    // DB insert — best effort (table may not exist yet)
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
+      const { error } = await supabase.from("demo_requests").insert({
+        name,
+        work_email,
+        company,
+        trade,
+        team_size,
+        notes: notes || null,
+      });
+      if (error) {
+        console.error("demo_requests insert error:", error);
+      }
+    } catch (dbErr) {
+      console.error("demo_requests DB error:", dbErr);
     }
 
-    // Fire-and-forget email notification
+    // Email notification — independent of DB
     try {
       await resend.emails.send({
         from: "Endall <notifications@endall.ai>",

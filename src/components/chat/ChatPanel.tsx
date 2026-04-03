@@ -84,8 +84,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
   // Load files when Files tab is opened
   useEffect(() => {
     if (activeTab === "files") {
-      const sessionId = "web-" + (typeof window !== "undefined" ? window.location.hostname : "default");
-      fetch(`${BRIDGE_URL}/files?session_id=${encodeURIComponent(sessionId)}`)
+      fetch(`${BRIDGE_URL}/files`)
         .then((r) => r.json())
         .then((d) => setSavedFiles(d.files || []))
         .catch(() => setSavedFiles([]));
@@ -430,7 +429,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                           </div>
                         </div>
                         <a
-                          href={`${BRIDGE_URL}/download/${f.id}`}
+                          href={`${BRIDGE_URL}/download/${f.file_path}`}
                           download={f.file_name}
                           onClick={() => toast.success("File downloaded")}
                           style={{
