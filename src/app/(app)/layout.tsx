@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
 import ComposeDialog from "@/components/email/ComposeDialog";
@@ -35,7 +35,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "#ask-endall", label: "Ask Endall", icon: Sparkles, isChat: true },
+  { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/deals", label: "Deals", icon: HandCoins },
@@ -59,21 +59,8 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
       </div>
       <nav className="flex-1 px-2 space-y-0.5">
         {navItems.map((item) => {
-          const isChat = "isChat" in item && item.isChat;
-          const isActive = !isChat && pathname === item.href;
-
-          if (isChat) {
-            return (
-              <button
-                key={item.href}
-                onClick={onOpenChat}
-                className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors w-full text-left text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
-              >
-                <item.icon className="size-4 shrink-0" />
-                {item.label}
-              </button>
-            );
-          }
+          const isActive = pathname === item.href
+            || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
 
           return (
             <Link
@@ -110,6 +97,7 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -136,14 +124,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       sessionStorage.setItem("endall-chat-shown", "1");
     }
   }, []);
-
-  // Open chat when navigating to /dashboard?chat=open
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("chat") === "open") {
-      setChatOpen(true);
-    }
-  }, [pathname]);
 
   const openChat = useCallback(() => setChatOpen(true), []);
 
@@ -263,7 +243,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* AI Chat Panel */}
-      <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatPanel
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+        onExpandFullPage={() => router.push("/dashboard/ask-endall")}
+      />
 
       {/* Email Compose Dialog */}
       <ComposeDialog open={composeOpen} onOpenChange={setComposeOpen} />

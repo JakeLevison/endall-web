@@ -47,12 +47,14 @@ const QUICK_ACTIONS: Action[] = [
 interface ChatPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Navigate to full-page Ask Endall */
+  onExpandFullPage?: () => void;
   /** Pre-fill context for a specific record */
   recordType?: "contact" | "company" | "deal";
   recordId?: string;
 }
 
-export default function ChatPanel({ isOpen, onClose, recordType, recordId }: ChatPanelProps) {
+export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordType, recordId }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -328,8 +330,15 @@ export default function ChatPanel({ isOpen, onClose, recordType, recordId }: Cha
               </button>
             )}
             <button
-              onClick={() => setExpanded(!expanded)}
-              title={expanded ? "Collapse (Esc)" : "Expand"}
+              onClick={() => {
+                if (!expanded && onExpandFullPage) {
+                  onClose();
+                  onExpandFullPage();
+                } else {
+                  setExpanded(!expanded);
+                }
+              }}
+              title={expanded ? "Collapse (Esc)" : "Open full page"}
               style={{
                 background: "none",
                 border: "none",
