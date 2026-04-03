@@ -67,7 +67,7 @@ export default function Pricing() {
           }}
         >
           We'll walk through your inbound volume, your calendar, and your service area.
-          If it's a fit, we deploy in 48 hours.
+          If it's a fit, we move quickly.
         </p>
 
         <div

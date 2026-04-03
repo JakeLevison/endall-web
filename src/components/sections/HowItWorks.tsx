@@ -6,7 +6,7 @@ const steps = [
   {
     number: "01",
     title: "We set up on your number",
-    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. Takes 48 hours.",
+    description: "Give us your business phone number and calendar. We configure Endall to match your service area, job types, and hours. We handle the setup end to end.",
   },
   {
     number: "02",
@@ -73,7 +73,7 @@ export default function HowItWorks() {
           textAlign: "center",
           marginBottom: "48px",
         }}>
-          Up and running in 48 hours
+          Up and running in days, not weeks.
         </h2>
 
         {/* Desktop: horizontal layout */}

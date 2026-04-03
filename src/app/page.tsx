@@ -64,7 +64,7 @@ const features = [
   },
   {
     label: "Speed",
-    title: "Live in 48 hours. Not 48 days.",
+    title: "Live in days. Not months.",
     description:
       "No training manuals. No 90-day onboarding. Endall deploys on your existing phone number and calendar in two days.",
     mock: <AIMock />,
