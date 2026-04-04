@@ -75,6 +75,7 @@ export default function Navbar() {
         >
           <a
             href="#features"
+            className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
@@ -91,6 +92,7 @@ export default function Navbar() {
           </a>
           <a
             href="#how-it-works"
+            className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
@@ -107,6 +109,7 @@ export default function Navbar() {
           </a>
           <a
             href="/team"
+            className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
@@ -123,6 +126,7 @@ export default function Navbar() {
           </a>
           <a
             href="/contact"
+            className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",

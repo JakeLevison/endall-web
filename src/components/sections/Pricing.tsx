@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 
 const tiers = [
   {
@@ -49,21 +50,8 @@ const tiers = [
 
 export default function Pricing() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <section ref={sectionRef} id="pricing" style={{ padding: "80px 16px" }}>
@@ -116,8 +104,12 @@ export default function Pricing() {
           }}
         >
           {tiers.map((tier, i) => (
-            <div
+            <motion.div
               key={tier.name}
+              initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, ease: "easeOut", delay: i * 0.1 }}
+              whileHover={!tier.highlight && !prefersReducedMotion ? { scale: 1.02 } : {}}
               style={{
                 padding: "32px 28px",
                 background: tier.highlight ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
@@ -125,9 +117,6 @@ export default function Pricing() {
                 borderRadius: 12,
                 display: "flex",
                 flexDirection: "column",
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(20px)",
-                transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${i * 100}ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${i * 100}ms`,
               }}
             >
               <p
@@ -225,7 +214,7 @@ export default function Pricing() {
               >
                 {tier.cta}
               </a>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface FeatureCardProps {
   label: string;
@@ -10,8 +11,13 @@ interface FeatureCardProps {
 }
 
 export default function FeatureCard({ label, title, description, children }: FeatureCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <div>
+    <motion.div
+      whileHover={prefersReducedMotion ? {} : { y: -4 }}
+      transition={{ duration: 0.2 }}
+    >
       <div
         className="feature-card"
         style={{
@@ -19,7 +25,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
           border: "1px solid #1a1a1a",
           borderRadius: 12,
           padding: 24,
-          transition: "border-color 0.3s ease, transform 0.3s ease",
+          transition: "border-color 0.3s ease",
           cursor: "default",
         }}
       >
@@ -70,10 +76,9 @@ export default function FeatureCard({ label, title, description, children }: Fea
         <style jsx>{`
           .feature-card:hover {
             border-color: #333 !important;
-            transform: translateY(-2px);
           }
         `}</style>
       </div>
-    </div>
+    </motion.div>
   );
 }

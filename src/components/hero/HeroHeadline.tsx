@@ -2,12 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 
 const words = ["Operations", "Proposals", "Budgets", "Estimates", "Front Office", "Follow-ups", "Calls"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
   const [stepPx, setStepPx] = useState(0);
+  const prefersReducedMotion = useReducedMotion();
+
+  const fadeUp = (delay: number) => ({
+    initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, ease: "easeOut" as const, delay },
+  });
 
   // Measure the actual rendered pixel height of a word so the container
   // and animation step are EXACTLY right — no em guessing, no font-metric
@@ -52,7 +60,8 @@ export default function HeroHeadline() {
       }}
     >
       {/* Tagline */}
-      <p
+      <motion.p
+        {...fadeUp(0)}
         style={{
           fontFamily: "var(--font-mono), monospace",
           fontSize: "11px",
@@ -63,7 +72,7 @@ export default function HeroHeadline() {
         }}
       >
         Your AI ops team
-      </p>
+      </motion.p>
 
       {/* Hidden measurement element — same font/size as headline, measures "Sequences" (has descender) */}
       <span
@@ -87,7 +96,8 @@ export default function HeroHeadline() {
         Sequences
       </span>
 
-      <h1
+      <motion.h1
+        {...fadeUp(0.15)}
         style={{
           fontFamily: "var(--font-sans), sans-serif",
           fontWeight: 600,
@@ -139,9 +149,10 @@ export default function HeroHeadline() {
             </span>
           </span>
         )}
-      </h1>
+      </motion.h1>
 
-      <p
+      <motion.p
+        {...fadeUp(0.3)}
         style={{
           fontFamily: "var(--font-sans), sans-serif",
           fontSize: "clamp(15px, 3vw, 18px)",
@@ -152,9 +163,9 @@ export default function HeroHeadline() {
         }}
       >
         Answers your calls. Qualifies leads. Books jobs. Sends proposals. Runs your morning briefing. One platform runs your entire operation.
-      </p>
+      </motion.p>
 
-      <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+      <motion.div {...fadeUp(0.45)} style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
           <Link
             href="/demo"
@@ -209,7 +220,7 @@ export default function HeroHeadline() {
         >
           60-day free pilot. No credit card.
         </p>
-      </div>
+      </motion.div>
 
       {keyframes && <style dangerouslySetInnerHTML={{ __html: keyframes }} />}
     </section>
