@@ -435,6 +435,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                   display: "flex",
                   flexDirection: "column",
                   gap: 8,
+                  minWidth: 200,
                 }}
               >
                 {loadingPhase && (
@@ -442,16 +443,23 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                     {loadingPhase}
                   </div>
                 )}
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "0ms" }} />
-                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "200ms" }} />
-                  <span className="typing-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: "#555", animationDelay: "400ms" }} />
+                <div className="progress-bar-track" style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                  <div className="progress-bar-fill" style={{ height: "100%", background: "#fff", borderRadius: 2 }} />
                 </div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
+        )}
+
+        {/* Progress bar above input */}
+        {loading && activeTab === "chat" && (
+          <div style={{ padding: "0 16px", background: "#0A0A0B" }}>
+            <div className="progress-bar-track" style={{ height: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, overflow: "hidden" }}>
+              <div className="progress-bar-fill" style={{ height: "100%", background: "#fff", borderRadius: 1 }} />
+            </div>
+          </div>
         )}
 
         {/* Input — visible on chat tab only */}
@@ -461,7 +469,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
           style={{
             padding: "12px 16px",
             paddingBottom: "max(12px, env(safe-area-inset-bottom))",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
+            borderTop: loading ? "none" : "1px solid rgba(255,255,255,0.06)",
             display: "flex",
             gap: 8,
             flexShrink: 0,
@@ -522,16 +530,13 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
         )}
 
         <style jsx>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+          @keyframes progress-slide {
+            0% { transform: translateX(-100%); width: 40%; }
+            50% { width: 60%; }
+            100% { transform: translateX(300%); width: 40%; }
           }
-          .typing-dot {
-            animation: typing-bounce 1.2s ease-in-out infinite;
-          }
-          @keyframes typing-bounce {
-            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-3px); }
+          .progress-bar-fill {
+            animation: progress-slide 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
           }
         `}</style>
       </div>
