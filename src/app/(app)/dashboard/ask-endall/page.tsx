@@ -198,7 +198,6 @@ export default function AskEndallPage() {
               color: "#fff",
               cursor: "pointer",
               padding: 4,
-              display: "none",
               alignItems: "center",
             }}
           >
@@ -653,49 +652,6 @@ export default function AskEndallPage() {
         }
         .progress-bar-fill {
           animation: progress-slide 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        /* Conversation history sidebar — responsive */
-        .ae-sidebar {
-          width: 240px;
-          flex-shrink: 0;
-          border-right: 1px solid rgba(255,255,255,0.06);
-          display: flex;
-          flex-direction: column;
-          background: rgba(0,0,0,0.2);
-        }
-        @media (max-width: 767px) {
-          .ae-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            height: 100%;
-            width: 85vw;
-            max-width: 320px;
-            z-index: 50;
-            background: #0a0a0a;
-            transform: translateX(-100%);
-            transition: transform 0.25s ease-out;
-            box-shadow: 0 0 24px rgba(0,0,0,0.5);
-          }
-          .ae-sidebar.ae-sidebar-open {
-            transform: translateX(0);
-          }
-          .ae-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 40;
-            animation: ae-backdrop-in 0.2s ease-out;
-          }
-          .ae-hamburger {
-            display: inline-flex !important;
-          }
-        }
-        @keyframes ae-backdrop-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
         }
       `}</style>
       </div>{/* end main chat area */}
