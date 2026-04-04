@@ -154,28 +154,61 @@ export default function HeroHeadline() {
         Financial models, proposals, project estimates, and competitive analysis — plus call answering, lead qualification, and morning briefings. One platform runs your entire operation.
       </p>
 
-      <div style={{ marginTop: "40px" }}>
-        <Link
-          href="/demo"
+      <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
+          <Link
+            href="/demo"
+            style={{
+              display: "inline-block",
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#000000",
+              backgroundColor: "#ffffff",
+              padding: "12px 24px",
+              borderRadius: "6px",
+              textDecoration: "none",
+              transition: "background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+          >
+            Request a Demo
+          </Link>
+          <Link
+            href="/dashboard/ask-endall"
+            style={{
+              display: "inline-block",
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "#ffffff",
+              backgroundColor: "transparent",
+              padding: "12px 24px",
+              borderRadius: "6px",
+              textDecoration: "none",
+              border: "1px solid rgba(255,255,255,0.3)",
+              transition: "border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+          >
+            Try Ask Endall Free
+          </Link>
+        </div>
+        <p
           style={{
-            display: "inline-block",
             fontFamily: "var(--font-sans), sans-serif",
-            fontSize: "14px",
-            fontWeight: 500,
-            color: "#000000",
-            backgroundColor: "#ffffff",
-            padding: "12px 24px",
-            borderRadius: "6px",
-            textDecoration: "none",
-            transition: "background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+            fontSize: "12px",
+            color: "var(--text-muted)",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
-          onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-          onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
         >
-          Request a Demo
-        </Link>
+          60-day free pilot. No credit card.
+        </p>
       </div>
 
       {keyframes && <style dangerouslySetInnerHTML={{ __html: keyframes }} />}

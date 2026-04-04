@@ -14,6 +14,7 @@ import WorkflowsMock from "@/components/features/WorkflowsMock";
 import TasksMock from "@/components/features/TasksMock";
 import AIMock from "@/components/features/AIMock";
 import ReportsMock from "@/components/features/ReportsMock";
+import UseCases from "@/components/sections/UseCases";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/Pricing";
 import FinalCTA from "@/components/sections/FinalCTA";
@@ -165,6 +166,16 @@ export default function Home() {
               </div>
             </section>
           </ScrollReveal>
+
+          {/* Use Cases */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <UseCases />
 
           {/* How it works */}
           <div

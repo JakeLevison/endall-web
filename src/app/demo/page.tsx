@@ -108,6 +108,61 @@ export default function DemoPage() {
               >
                 See Endall in action
               </h1>
+
+              {/* Credibility bar */}
+              <p
+                style={{
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 11,
+                  color: "var(--text-muted)",
+                  letterSpacing: 1,
+                  lineHeight: 1.6,
+                  marginBottom: 12,
+                }}
+              >
+                Built for the $1.5 trillion data center and infrastructure buildout
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 0",
+                  alignItems: "center",
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 11,
+                  color: "var(--text-muted)",
+                  marginBottom: 16,
+                }}
+              >
+                <span>8 AI-powered actions</span>
+                <span style={{ margin: "0 10px", opacity: 0.4 }}>&middot;</span>
+                <span>Real Excel formulas</span>
+                <span style={{ margin: "0 10px", opacity: 0.4 }}>&middot;</span>
+                <span>60-day free pilot</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 0",
+                  alignItems: "center",
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: 2,
+                  color: "rgba(255,255,255,0.25)",
+                  marginBottom: 32,
+                }}
+              >
+                <span>Powered by</span>
+                <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Supabase</span>
+                <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Twilio</span>
+                <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
+                <span style={{ color: "rgba(255,255,255,0.4)" }}>Anthropic</span>
+              </div>
+
               <p
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
@@ -117,7 +172,7 @@ export default function DemoPage() {
                   marginBottom: 40,
                 }}
               >
-                Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall runs lead capture, quoting, scheduling, and follow-ups — so your team can focus on the work.
+                Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall runs lead capture, quoting, scheduling, and follow-ups &mdash; so your team can focus on the work.
               </p>
 
               {/* Trust signals */}
