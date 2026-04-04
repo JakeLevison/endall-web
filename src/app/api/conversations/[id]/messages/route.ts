@@ -8,14 +8,25 @@ function getSupabase() {
   );
 }
 
-/** Get all messages for a conversation. */
+/** Get all messages for a conversation (device-scoped). */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const deviceId = request.headers.get("x-device-id");
+    if (!deviceId) return NextResponse.json({ messages: [] });
     const supabase = getSupabase();
+
+    // Verify the conversation belongs to this device before returning messages
+    const { data: conv } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", id)
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    if (!conv) return NextResponse.json({ messages: [] });
 
     const { data, error } = await supabase
       .from("conversation_messages")
@@ -41,7 +52,18 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json();
+    const deviceId = request.headers.get("x-device-id");
+    if (!deviceId) return NextResponse.json({ error: "device id required" }, { status: 400 });
     const supabase = getSupabase();
+
+    // Verify conversation belongs to this device
+    const { data: conv } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", id)
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    if (!conv) return NextResponse.json({ error: "not found" }, { status: 404 });
 
     const rows = (body.messages || []).map((m: Record<string, unknown>) => ({
       id: m.id,

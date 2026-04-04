@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { deviceFetch } from "@/lib/deviceId";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -183,7 +184,7 @@ export function useChat(options: UseChatOptions = {}) {
 
   // ── Load files ──
   const refreshFiles = useCallback(() => {
-    fetch("/api/chat/files")
+    deviceFetch("/api/chat/files")
       .then((r) => r.json())
       .then((d) => setSavedFiles(d.files || []))
       .catch(() => setSavedFiles([]));
@@ -201,7 +202,7 @@ export function useChat(options: UseChatOptions = {}) {
     async (convId: string, msgs: Message[], title?: string) => {
       try {
         // Ensure conversation exists
-        await fetch("/api/conversations", {
+        await deviceFetch("/api/conversations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -211,7 +212,7 @@ export function useChat(options: UseChatOptions = {}) {
         });
 
         // Sync messages
-        await fetch(`/api/conversations/${convId}/messages`, {
+        await deviceFetch(`/api/conversations/${convId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -235,7 +236,7 @@ export function useChat(options: UseChatOptions = {}) {
   // ── Load conversation list ──
   const loadConversationList = useCallback(async () => {
     try {
-      const resp = await fetch("/api/conversations");
+      const resp = await deviceFetch("/api/conversations");
       const data = await resp.json();
       const list = data.conversations || [];
       setConversations(list);
@@ -262,7 +263,7 @@ export function useChat(options: UseChatOptions = {}) {
 
       // Fall back to Supabase
       try {
-        const resp = await fetch(`/api/conversations/${id}`);
+        const resp = await deviceFetch(`/api/conversations/${id}`);
         const data = await resp.json();
         const msgs: Message[] = (data.messages || []).map(
           (m: Record<string, unknown>) => ({
@@ -299,7 +300,7 @@ export function useChat(options: UseChatOptions = {}) {
     async (id: string) => {
       lsRemove(lsMessages(id));
       try {
-        await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+        await deviceFetch(`/api/conversations/${id}`, { method: "DELETE" });
       } catch { /* best effort */ }
 
       // If we deleted the active conversation, start a new one
@@ -366,7 +367,7 @@ export function useChat(options: UseChatOptions = {}) {
             text,
           );
           try {
-            await fetch("/api/conversations", {
+            await deviceFetch("/api/conversations", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ id: conversationId, title: preTitle }),
@@ -380,7 +381,7 @@ export function useChat(options: UseChatOptions = {}) {
         // - Routes skills actions to the Python bridge (server-to-server, no CORS)
         // - Rewrites download URLs to same-origin /api/chat/download proxy
         // - Handles standard chat via Claude API directly
-        const resp = await fetch("/api/chat", {
+        const resp = await deviceFetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

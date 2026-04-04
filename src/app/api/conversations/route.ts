@@ -10,14 +10,26 @@ function getSupabase() {
   );
 }
 
-/** List conversations for the tenant (newest first, limit 50). */
-export async function GET() {
+function getDeviceId(req: NextRequest): string | null {
+  const id = req.headers.get("x-device-id");
+  return id && id.length > 0 ? id : null;
+}
+
+/** List conversations for this device (newest first, limit 50). */
+export async function GET(request: NextRequest) {
   try {
+    const deviceId = getDeviceId(request);
+    if (!deviceId) {
+      // No device id = no history. Safer than leaking the shared firehose.
+      return NextResponse.json({ conversations: [] });
+    }
+
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("conversations")
       .select("id, title, workflow, created_at, updated_at")
       .eq("tenant_id", TENANT_ID)
+      .eq("device_id", deviceId)
       .order("updated_at", { ascending: false })
       .limit(50);
 
@@ -36,9 +48,16 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const deviceId = getDeviceId(request);
+    if (!deviceId) {
+      return NextResponse.json({ error: "device id required" }, { status: 400 });
+    }
     const supabase = getSupabase();
 
-    const row: Record<string, unknown> = { tenant_id: TENANT_ID };
+    const row: Record<string, unknown> = {
+      tenant_id: TENANT_ID,
+      device_id: deviceId,
+    };
     if (body.id) row.id = body.id;
     if (body.title) row.title = body.title;
     if (body.workflow) row.workflow = body.workflow;

@@ -8,17 +8,29 @@ function getSupabase() {
   );
 }
 
-/** Get a conversation with all its messages. */
+function getDeviceId(req: NextRequest): string | null {
+  const id = req.headers.get("x-device-id");
+  return id && id.length > 0 ? id : null;
+}
+
+/** Get a conversation with all its messages (device-scoped). */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const deviceId = getDeviceId(request);
+    if (!deviceId) return NextResponse.json({ error: "Not found" }, { status: 404 });
     const supabase = getSupabase();
 
     const [convResult, msgsResult] = await Promise.all([
-      supabase.from("conversations").select("*").eq("id", id).single(),
+      supabase
+        .from("conversations")
+        .select("*")
+        .eq("id", id)
+        .eq("device_id", deviceId)
+        .single(),
       supabase
         .from("conversation_messages")
         .select("*")
@@ -48,6 +60,8 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
+    const deviceId = getDeviceId(request);
+    if (!deviceId) return NextResponse.json({ error: "device id required" }, { status: 400 });
     const supabase = getSupabase();
 
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -57,7 +71,8 @@ export async function PATCH(
     const { error } = await supabase
       .from("conversations")
       .update(updates)
-      .eq("id", id);
+      .eq("id", id)
+      .eq("device_id", deviceId);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -71,14 +86,20 @@ export async function PATCH(
 
 /** Delete a conversation (cascades to messages). */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const deviceId = getDeviceId(request);
+    if (!deviceId) return NextResponse.json({ error: "device id required" }, { status: 400 });
     const supabase = getSupabase();
 
-    const { error } = await supabase.from("conversations").delete().eq("id", id);
+    const { error } = await supabase
+      .from("conversations")
+      .delete()
+      .eq("id", id)
+      .eq("device_id", deviceId);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

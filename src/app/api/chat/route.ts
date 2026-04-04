@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
     // -------------------------------------------------------------------
     if (needsSkills) {
       const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
+      const deviceId = request.headers.get("x-device-id") || "";
       try {
         const bridgeResp = await fetch(`${bridgeUrl}/chat`, {
           method: "POST",
@@ -207,6 +208,7 @@ export async function POST(request: NextRequest) {
             action: action || activeWorkflow,
             session_id: session_id || ip,
             tenant_id: TENANT_ID,
+            device_id: deviceId,
           }),
           signal: AbortSignal.timeout(120000), // 2 min - Skills API can be slow
         });
