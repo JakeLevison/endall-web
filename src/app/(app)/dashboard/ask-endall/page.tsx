@@ -18,6 +18,8 @@ import {
   FileEdit,
   Search,
   CheckCircle,
+  Menu,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
@@ -52,6 +54,7 @@ export default function AskEndallPage() {
     setActiveTab, sendMessage, resetChat, loadConversation, deleteConversation,
   } = useChat();
   const [input, setInput] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -80,21 +83,22 @@ export default function AskEndallPage() {
   };
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div style={{ display: "flex", height: "100%", overflow: "hidden", position: "relative" }}>
+      {/* Mobile backdrop — click to close */}
+      {sidebarOpen && (
+        <div
+          className="ae-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       {/* Conversation history sidebar */}
       <div
-        style={{
-          width: 240,
-          flexShrink: 0,
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-          display: "flex",
-          flexDirection: "column",
-          background: "rgba(0,0,0,0.2)",
-        }}
+        className={`ae-sidebar${sidebarOpen ? " ae-sidebar-open" : ""}`}
       >
         <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <button
-            onClick={() => { resetChat(); setActiveTab("chat"); }}
+            onClick={() => { resetChat(); setActiveTab("chat"); setSidebarOpen(false); }}
             style={{
               width: "100%",
               padding: "8px 12px",
@@ -122,7 +126,7 @@ export default function AskEndallPage() {
             conversations.map((conv) => (
               <div
                 key={conv.id}
-                onClick={() => loadConversation(conv.id)}
+                onClick={() => { loadConversation(conv.id); setSidebarOpen(false); }}
                 style={{
                   padding: "8px 12px",
                   cursor: "pointer",
@@ -184,6 +188,22 @@ export default function AskEndallPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            className="ae-hamburger"
+            onClick={() => setSidebarOpen((v) => !v)}
+            aria-label={sidebarOpen ? "Close conversation history" : "Open conversation history"}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#fff",
+              cursor: "pointer",
+              padding: 4,
+              display: "none",
+              alignItems: "center",
+            }}
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
           <Sparkles size={16} style={{ color: "#fff" }} />
           <span
             style={{
@@ -228,7 +248,7 @@ export default function AskEndallPage() {
           </div>
           {(messages.length > 0 || activeTab === "files") && (
             <button
-              onClick={() => { resetChat(); setActiveTab("chat"); }}
+              onClick={() => { resetChat(); setActiveTab("chat"); setSidebarOpen(false); }}
               title="New chat"
               style={{
                 background: "none",
@@ -633,6 +653,49 @@ export default function AskEndallPage() {
         }
         .progress-bar-fill {
           animation: progress-slide 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Conversation history sidebar — responsive */
+        .ae-sidebar {
+          width: 240px;
+          flex-shrink: 0;
+          border-right: 1px solid rgba(255,255,255,0.06);
+          display: flex;
+          flex-direction: column;
+          background: rgba(0,0,0,0.2);
+        }
+        @media (max-width: 767px) {
+          .ae-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            height: 100%;
+            width: 85vw;
+            max-width: 320px;
+            z-index: 50;
+            background: #0a0a0a;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease-out;
+            box-shadow: 0 0 24px rgba(0,0,0,0.5);
+          }
+          .ae-sidebar.ae-sidebar-open {
+            transform: translateX(0);
+          }
+          .ae-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 40;
+            animation: ae-backdrop-in 0.2s ease-out;
+          }
+          .ae-hamburger {
+            display: inline-flex !important;
+          }
+        }
+        @keyframes ae-backdrop-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
       </div>{/* end main chat area */}
