@@ -3,12 +3,12 @@
 export default function SequencesMock() {
   const steps = [
     { icon: "\u2709", title: "Intro Email", status: "Sent \u00b7 94% open", dotColor: "#22c55e" },
-    { icon: "\u23f0", title: "Wait 2 days", status: "", dotColor: "#555" },
-    { icon: "\u2709", title: "Follow-up", status: "Scheduled", dotColor: "#555" },
+    { icon: "\u23f0", title: "Wait 2 days", status: "", dotColor: "var(--text-tertiary)" },
+    { icon: "\u2709", title: "Follow-up", status: "Scheduled", dotColor: "var(--text-tertiary)" },
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ position: "relative", paddingLeft: 20 }}>
         {/* Vertical connecting line */}
         <div
@@ -18,7 +18,7 @@ export default function SequencesMock() {
             top: 8,
             bottom: 8,
             width: 1,
-            background: "#333",
+            background: "var(--text-secondary)",
           }}
         />
         {steps.map((step, i) => (
@@ -40,9 +40,9 @@ export default function SequencesMock() {
             {/* Icon */}
             <span style={{ fontSize: 14, width: 18, textAlign: "center", flexShrink: 0 }}>{step.icon}</span>
             <div>
-              <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>{step.title}</div>
+              <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{step.title}</div>
               {step.status && (
-                <div style={{ fontSize: 11, color: "#888", marginTop: 1 }}>{step.status}</div>
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>{step.status}</div>
               )}
             </div>
           </div>

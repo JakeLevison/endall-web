@@ -36,7 +36,7 @@ export default function AboutPage() {
               fontSize: "clamp(28px, 4vw, 40px)",
               fontWeight: 600,
               letterSpacing: "-0.02em",
-              color: "#ffffff",
+              color: "var(--text-primary)",
               lineHeight: 1.2,
               marginBottom: 48,
             }}
@@ -51,7 +51,7 @@ export default function AboutPage() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: 18,
                 fontWeight: 600,
-                color: "#ffffff",
+                color: "var(--text-primary)",
                 marginBottom: 12,
               }}
             >
@@ -73,7 +73,7 @@ export default function AboutPage() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: 18,
                 fontWeight: 600,
-                color: "#ffffff",
+                color: "var(--text-primary)",
                 marginBottom: 12,
               }}
             >
@@ -96,7 +96,7 @@ export default function AboutPage() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: 18,
                 fontWeight: 600,
-                color: "#ffffff",
+                color: "var(--text-primary)",
                 marginBottom: 12,
               }}
             >
@@ -126,7 +126,7 @@ export default function AboutPage() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: 18,
                 fontWeight: 600,
-                color: "#ffffff",
+                color: "var(--text-primary)",
                 marginBottom: 24,
               }}
             >
@@ -141,7 +141,7 @@ export default function AboutPage() {
                 style={{ borderRadius: "50%", objectFit: "cover" }}
               />
               <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: 18, fontWeight: 600, color: "#ffffff", marginBottom: 4 }}>
+                <p style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>
                   Jake Levison
                 </p>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>
@@ -196,14 +196,14 @@ export default function AboutPage() {
                 padding: "12px 32px",
                 fontSize: 14,
                 fontWeight: 500,
-                color: "#000",
-                backgroundColor: "#fff",
+                color: "var(--text-inverse)",
+                backgroundColor: "var(--surface-inverse)",
                 borderRadius: 8,
                 textDecoration: "none",
                 transition: "background-color 300ms",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
             >
               Partner with us
             </Link>

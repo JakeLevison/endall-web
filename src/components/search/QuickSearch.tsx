@@ -134,20 +134,20 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
 
   return (
     <>
-      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 998 }} />
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "var(--backdrop)", zIndex: 998 }} />
       <div style={{
         position: "fixed",
         top: "20%",
         left: "50%",
         transform: "translateX(-50%)",
         width: "min(500px, 90vw)",
-        background: "#111113",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--surface)",
+        border: "1px solid var(--overlay-medium)",
         borderRadius: 12,
         zIndex: 999,
         overflow: "hidden",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderBottom: "1px solid var(--overlay-soft)" }}>
           <Search className="size-4 text-zinc-500 shrink-0" />
           <input
             ref={inputRef}
@@ -157,7 +157,7 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
             placeholder="Search contacts, companies, deals..."
             style={{
               flex: 1, background: "transparent", border: "none", outline: "none",
-              fontSize: 15, color: "#fff",
+              fontSize: 15, color: "var(--text-primary)",
             }}
           />
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
@@ -173,16 +173,16 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
                 onClick={() => { router.push(r.href); onClose(); }}
                 style={{
                   display: "flex", alignItems: "center", gap: 10, width: "100%",
-                  padding: "10px 16px", background: idx === selectedIdx ? "rgba(255,255,255,0.04)" : "transparent",
+                  padding: "10px 16px", background: idx === selectedIdx ? "var(--overlay-soft)" : "transparent",
                   border: "none", cursor: "pointer", textAlign: "left",
                 }}
               >
                 {typeIcon[r.type]}
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <p style={{ fontSize: 14, color: "#fff", margin: 0 }}>{r.name}</p>
-                  <p style={{ fontSize: 12, color: "#666", margin: 0 }}>{r.subtitle}</p>
+                  <p style={{ fontSize: 14, color: "var(--text-primary)", margin: 0 }}>{r.name}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>{r.subtitle}</p>
                 </div>
-                <span style={{ fontSize: 10, color: "#555", textTransform: "uppercase" }}>{r.type}</span>
+                <span style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase" }}>{r.type}</span>
               </button>
             ))}
           </div>
@@ -190,7 +190,7 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
 
         {query.length >= 2 && results.length === 0 && !loading && (
           <div style={{ padding: "24px 16px", textAlign: "center" }}>
-            <p style={{ fontSize: 13, color: "#666" }}>No results for "{query}"</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No results for "{query}"</p>
           </div>
         )}
       </div>

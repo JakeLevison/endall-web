@@ -88,8 +88,8 @@ function TestimonialsColumn({
                 style={{
                   padding: "28px 24px",
                   borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid var(--overlay-soft)",
+                  background: "var(--overlay-weak)",
                   maxWidth: 320,
                   width: "100%",
                   cursor: "default",
@@ -97,11 +97,11 @@ function TestimonialsColumn({
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor =
-                    "rgba(255,255,255,0.12)";
+                    "var(--overlay-medium)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor =
-                    "rgba(255,255,255,0.06)";
+                    "var(--overlay-soft)";
                 }}
               >
                 <blockquote style={{ margin: 0, padding: 0 }}>
@@ -130,7 +130,7 @@ function TestimonialsColumn({
                         fontSize: 14,
                         fontWeight: 600,
                         fontStyle: "normal",
-                        color: "#ffffff",
+                        color: "var(--text-primary)",
                         letterSpacing: "-0.01em",
                       }}
                     >
@@ -195,7 +195,7 @@ export default function Testimonials() {
             fontSize: 36,
             fontWeight: 600,
             letterSpacing: "-0.02em",
-            color: "#ffffff",
+            color: "var(--text-primary)",
             textAlign: "center",
             marginBottom: 12,
           }}

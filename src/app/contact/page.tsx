@@ -37,7 +37,7 @@ export default function ContactPage() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "clamp(28px, 5vw, 40px)",
               fontWeight: 600,
-              color: "#fff",
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
               lineHeight: 1.15,
               marginBottom: 12,
@@ -61,8 +61,8 @@ export default function ContactPage() {
             <div
               style={{
                 padding: "40px 32px",
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "var(--overlay-weak)",
+                border: "1px solid var(--overlay-soft)",
                 borderRadius: 12,
                 textAlign: "center",
               }}
@@ -72,7 +72,7 @@ export default function ContactPage() {
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 18,
                   fontWeight: 500,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   marginBottom: 8,
                 }}
               >
@@ -125,10 +125,10 @@ export default function ContactPage() {
                     fontFamily: "var(--font-sans), sans-serif",
                     fontSize: 14,
                     padding: "14px 16px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "var(--overlay-soft)",
+                    border: "1px solid var(--overlay-medium)",
                     borderRadius: 8,
-                    color: "#fff",
+                    color: "var(--text-primary)",
                     outline: "none",
                   }}
                 />
@@ -142,10 +142,10 @@ export default function ContactPage() {
                     fontFamily: "var(--font-sans), sans-serif",
                     fontSize: 14,
                     padding: "14px 16px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "var(--overlay-soft)",
+                    border: "1px solid var(--overlay-medium)",
                     borderRadius: 8,
-                    color: "#fff",
+                    color: "var(--text-primary)",
                     outline: "none",
                   }}
                 />
@@ -159,10 +159,10 @@ export default function ContactPage() {
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 14,
                   padding: "14px 16px",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "var(--overlay-soft)",
+                  border: "1px solid var(--overlay-medium)",
                   borderRadius: 8,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   outline: "none",
                   resize: "vertical",
                 }}
@@ -180,16 +180,16 @@ export default function ContactPage() {
                   fontSize: 14,
                   fontWeight: 500,
                   padding: "14px 32px",
-                  background: submitting ? "#888" : "#fff",
-                  color: "#000",
+                  background: submitting ? "var(--text-tertiary)" : "var(--text-primary)",
+                  color: "var(--text-inverse)",
                   border: "none",
                   borderRadius: 8,
                   cursor: submitting ? "not-allowed" : "pointer",
                   alignSelf: "flex-start",
                   transition: "background-color 0.2s ease",
                 }}
-                onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#e5e5e5"; }}
-                onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#ffffff"; }}
+                onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "var(--surface-hover)"; }}
+                onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "var(--surface-inverse)"; }}
               >
                 {submitting ? "Sending..." : "Send Message"}
               </button>
@@ -200,7 +200,7 @@ export default function ContactPage() {
             style={{
               marginTop: 56,
               paddingTop: 32,
-              borderTop: "1px solid rgba(255,255,255,0.06)",
+              borderTop: "1px solid var(--overlay-soft)",
             }}
           >
             <p
@@ -222,7 +222,7 @@ export default function ContactPage() {
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
             >
               jake@endall.ai

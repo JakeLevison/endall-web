@@ -10,7 +10,7 @@ export default function ReportsMock() {
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", height: 80, gap: 8, position: "relative" }}>
         {/* Trend line overlay using SVG */}
         <svg
@@ -27,7 +27,7 @@ export default function ReportsMock() {
               })
               .join(" ")}
             fill="none"
-            stroke="rgba(255,255,255,0.15)"
+            stroke="var(--overlay-strong)"
             strokeWidth="1"
           />
         </svg>
@@ -43,7 +43,7 @@ export default function ReportsMock() {
                 borderRadius: 3,
               }}
             />
-            <span style={{ fontSize: 9, color: "#888" }}>{bar.month}</span>
+            <span style={{ fontSize: 9, color: "var(--text-tertiary)" }}>{bar.month}</span>
           </div>
         ))}
       </div>

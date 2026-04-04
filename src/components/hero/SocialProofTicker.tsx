@@ -42,14 +42,14 @@ export default function SocialProofTicker() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: "15px",
                 fontWeight: 300,
-                color: "rgba(255, 255, 255, 0.25)",
+                color: "var(--overlay-strong)",
                 padding: "0 40px",
                 whiteSpace: "nowrap",
                 transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 cursor: "default",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255, 255, 255, 0.25)")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--overlay-strong)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--overlay-strong)")}
             >
               {name}
             </span>

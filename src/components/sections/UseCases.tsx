@@ -51,7 +51,7 @@ export default function UseCases() {
               fontSize: "36px",
               fontWeight: 600,
               letterSpacing: "-0.02em",
-              color: "#ffffff",
+              color: "var(--text-primary)",
               textAlign: "center",
               marginBottom: "48px",
             }}
@@ -70,8 +70,8 @@ export default function UseCases() {
                   <div
                     style={{
                       padding: "32px 28px",
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: "var(--overlay-weak)",
+                      border: "1px solid var(--overlay-soft)",
                       borderRadius: 12,
                       display: "flex",
                       flexDirection: "column",
@@ -85,8 +85,8 @@ export default function UseCases() {
                           width: 36,
                           height: 36,
                           borderRadius: 8,
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          background: "var(--overlay-soft)",
+                          border: "1px solid var(--overlay-medium)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -102,8 +102,8 @@ export default function UseCases() {
                             fontSize: 9,
                             textTransform: "uppercase",
                             letterSpacing: 2,
-                            color: "rgba(255,255,255,0.4)",
-                            border: "1px solid rgba(255,255,255,0.1)",
+                            color: "var(--overlay-strong)",
+                            border: "1px solid var(--overlay-medium)",
                             borderRadius: 4,
                             padding: "3px 8px",
                           }}
@@ -117,7 +117,7 @@ export default function UseCases() {
                         fontFamily: "var(--font-sans), sans-serif",
                         fontSize: 16,
                         fontWeight: 600,
-                        color: "#ffffff",
+                        color: "var(--text-primary)",
                         lineHeight: 1.3,
                       }}
                     >

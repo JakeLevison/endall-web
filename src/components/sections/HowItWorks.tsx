@@ -40,7 +40,7 @@ export default function HowItWorks() {
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.15em",
-            color: "#666",
+            color: "var(--text-muted)",
             textAlign: "center",
             marginBottom: 48,
           }}
@@ -53,7 +53,7 @@ export default function HowItWorks() {
           fontSize: "36px",
           fontWeight: 600,
           letterSpacing: "-0.02em",
-          color: "#ffffff",
+          color: "var(--text-primary)",
           textAlign: "center",
           marginBottom: "48px",
         }}>
@@ -99,7 +99,7 @@ export default function HowItWorks() {
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 72,
-                  color: "#1a1a1a",
+                  color: "var(--surface-hover)",
                   lineHeight: 1,
                   marginBottom: 8,
                   fontWeight: 400,
@@ -111,7 +111,7 @@ export default function HowItWorks() {
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 24,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   fontWeight: 600,
                   letterSpacing: "-0.02em",
                   marginBottom: 6,
@@ -123,7 +123,7 @@ export default function HowItWorks() {
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 15,
-                  color: "#888",
+                  color: "var(--text-tertiary)",
                   lineHeight: 1.5,
                   margin: 0,
                 }}

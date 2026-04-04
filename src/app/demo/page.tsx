@@ -28,10 +28,10 @@ const inputStyle: React.CSSProperties = {
   fontFamily: "var(--font-sans), sans-serif",
   fontSize: 14,
   padding: "14px 16px",
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.1)",
+  background: "var(--overlay-soft)",
+  border: "1px solid var(--overlay-medium)",
   borderRadius: 8,
-  color: "#fff",
+  color: "var(--text-primary)",
   outline: "none",
   width: "100%",
 };
@@ -100,7 +100,7 @@ export default function DemoPage() {
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: "clamp(28px, 5vw, 40px)",
                   fontWeight: 600,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   letterSpacing: "-0.02em",
                   lineHeight: 1.15,
                   marginBottom: 20,
@@ -150,17 +150,17 @@ export default function DemoPage() {
                   fontSize: 10,
                   textTransform: "uppercase",
                   letterSpacing: 2,
-                  color: "rgba(255,255,255,0.25)",
+                  color: "var(--overlay-strong)",
                   marginBottom: 32,
                 }}
               >
                 <span>Powered by</span>
                 <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
-                <span style={{ color: "rgba(255,255,255,0.4)" }}>Supabase</span>
+                <span style={{ color: "var(--overlay-strong)" }}>Supabase</span>
                 <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
-                <span style={{ color: "rgba(255,255,255,0.4)" }}>Twilio</span>
+                <span style={{ color: "var(--overlay-strong)" }}>Twilio</span>
                 <span style={{ margin: "0 10px", opacity: 0.4 }}>|</span>
-                <span style={{ color: "rgba(255,255,255,0.4)" }}>Anthropic</span>
+                <span style={{ color: "var(--overlay-strong)" }}>Anthropic</span>
               </div>
 
               <p
@@ -209,8 +209,8 @@ export default function DemoPage() {
                         width: 20,
                         height: 20,
                         borderRadius: "50%",
-                        background: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        background: "var(--overlay-soft)",
+                        border: "1px solid var(--overlay-medium)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -219,7 +219,7 @@ export default function DemoPage() {
                       }}
                     >
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M1 4L3.5 6.5L9 1" stroke="var(--text-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                     <div>
@@ -228,7 +228,7 @@ export default function DemoPage() {
                           fontFamily: "var(--font-sans), sans-serif",
                           fontSize: 14,
                           fontWeight: 500,
-                          color: "#fff",
+                          color: "var(--text-primary)",
                           marginBottom: 2,
                         }}
                       >
@@ -290,8 +290,8 @@ export default function DemoPage() {
                     flexDirection: "column",
                     gap: 20,
                     padding: "32px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "var(--overlay-weak)",
+                    border: "1px solid var(--overlay-soft)",
                     borderRadius: 12,
                   }}
                 >
@@ -315,18 +315,18 @@ export default function DemoPage() {
                     <div style={{ flex: "1 1 200px" }}>
                       <label style={labelStyle}>Trade</label>
                       <select name="trade" required style={selectStyle} defaultValue="">
-                        <option value="" disabled style={{ color: "#000", background: "#fff" }}>Select trade</option>
+                        <option value="" disabled style={{ color: "var(--text-inverse)", background: "var(--surface-inverse)" }}>Select trade</option>
                         {TRADE_OPTIONS.map((t) => (
-                          <option key={t} value={t} style={{ color: "#000", background: "#fff" }}>{t}</option>
+                          <option key={t} value={t} style={{ color: "var(--text-inverse)", background: "var(--surface-inverse)" }}>{t}</option>
                         ))}
                       </select>
                     </div>
                     <div style={{ flex: "1 1 200px" }}>
                       <label style={labelStyle}>Team Size</label>
                       <select name="teamSize" required style={selectStyle} defaultValue="">
-                        <option value="" disabled style={{ color: "#000", background: "#fff" }}>Select range</option>
+                        <option value="" disabled style={{ color: "var(--text-inverse)", background: "var(--surface-inverse)" }}>Select range</option>
                         {TEAM_SIZE_OPTIONS.map((s) => (
-                          <option key={s} value={s} style={{ color: "#000", background: "#fff" }}>{s}</option>
+                          <option key={s} value={s} style={{ color: "var(--text-inverse)", background: "var(--surface-inverse)" }}>{s}</option>
                         ))}
                       </select>
                     </div>
@@ -363,16 +363,16 @@ export default function DemoPage() {
                       fontSize: 14,
                       fontWeight: 500,
                       padding: "14px 32px",
-                      background: submitting ? "#999" : "#fff",
-                      color: "#000",
+                      background: submitting ? "var(--text-tertiary)" : "var(--text-primary)",
+                      color: "var(--text-inverse)",
                       border: "none",
                       borderRadius: 8,
                       cursor: submitting ? "not-allowed" : "pointer",
                       transition: "background-color 0.2s ease",
                       width: "100%",
                     }}
-                    onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#e5e5e5"; }}
-                    onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "#ffffff"; }}
+                    onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "var(--surface-hover)"; }}
+                    onMouseLeave={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = "var(--surface-inverse)"; }}
                   >
                     {submitting ? "Submitting..." : "Request a Demo"}
                   </button>

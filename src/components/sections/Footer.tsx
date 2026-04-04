@@ -4,7 +4,7 @@ export default function Footer() {
       style={{
         borderTop: "1px solid #222",
         padding: "24px 16px",
-        background: "#0a0a0a",
+        background: "var(--bg)",
       }}
     >
       <div
@@ -23,7 +23,7 @@ export default function Footer() {
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 16,
-            color: "#fff",
+            color: "var(--text-primary)",
             fontWeight: 400,
           }}
         >
@@ -43,14 +43,14 @@ export default function Footer() {
               style={{
                 fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
                 fontSize: 11,
-                color: "#666",
+                color: "var(--text-muted)",
                 textDecoration: "none",
                 transition: "color 0.2s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#666")}
-              onFocus={(e) => (e.currentTarget.style.color = "#888")}
-              onBlur={(e) => (e.currentTarget.style.color = "#666")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              onFocus={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+              onBlur={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
             >
               {link.label}
             </a>
@@ -62,7 +62,7 @@ export default function Footer() {
           style={{
             fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
             fontSize: 11,
-            color: "#666",
+            color: "var(--text-muted)",
           }}
         >
           &copy; 2026 Endall

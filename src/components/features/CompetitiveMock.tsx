@@ -10,8 +10,8 @@ export default function CompetitiveMock() {
   return (
     <div
       style={{
-        background: "#0a0a0a",
-        border: "1px solid #1a1a1a",
+        background: "var(--bg)",
+        border: "1px solid var(--border)",
         borderRadius: 8,
         padding: 16,
         fontFamily: "var(--font-sans), sans-serif",
@@ -19,15 +19,15 @@ export default function CompetitiveMock() {
     >
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "#fff" }}>Market position</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)" }}>Market position</div>
         <div
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--overlay-soft)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: 6,
             padding: "3px 8px",
             fontSize: 11,
-            color: "#ccc",
+            color: "var(--text-secondary)",
           }}
         >
           3 competitors
@@ -39,13 +39,13 @@ export default function CompetitiveMock() {
         {competitors.map((c) => (
           <div key={c.name}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#ccc" }}>{c.name}</span>
-              <span style={{ fontSize: 11, color: "#888" }}>{c.share}</span>
+              <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{c.name}</span>
+              <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{c.share}</span>
             </div>
             <div
               style={{
                 height: 4,
-                background: "rgba(255,255,255,0.06)",
+                background: "var(--overlay-soft)",
                 borderRadius: 2,
                 overflow: "hidden",
               }}
@@ -75,8 +75,8 @@ export default function CompetitiveMock() {
             key={q.label}
             style={{
               flex: 1,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "var(--overlay-soft)",
+              border: "1px solid var(--overlay-medium)",
               borderRadius: 4,
               padding: "6px 0",
               textAlign: "center",

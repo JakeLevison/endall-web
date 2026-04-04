@@ -20,11 +20,11 @@ export default function TasksMock() {
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", gap: 8 }}>
         {columns.map((col) => (
           <div key={col.title} style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, color: "#888", marginBottom: 6, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 6, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>
               {col.title}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -32,7 +32,7 @@ export default function TasksMock() {
                 <div
                   key={card.text}
                   style={{
-                    background: "#0a0a0a",
+                    background: "var(--bg)",
                     border: "1px solid #222",
                     borderRadius: 6,
                     padding: "6px 8px",
@@ -50,7 +50,7 @@ export default function TasksMock() {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: 10, color: "#ccc", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: 10, color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {card.text}
                   </span>
                 </div>

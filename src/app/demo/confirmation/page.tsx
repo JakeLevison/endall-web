@@ -21,8 +21,8 @@ export default function DemoConfirmation() {
               width: 48,
               height: 48,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "var(--overlay-soft)",
+              border: "1px solid var(--overlay-medium)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -30,7 +30,7 @@ export default function DemoConfirmation() {
             }}
           >
             <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
-              <path d="M2 9L8 15L20 3" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 9L8 15L20 3" stroke="var(--text-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
 
@@ -39,7 +39,7 @@ export default function DemoConfirmation() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "clamp(24px, 5vw, 36px)",
               fontWeight: 600,
-              color: "#fff",
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
               lineHeight: 1.2,
               marginBottom: 12,
@@ -66,8 +66,8 @@ export default function DemoConfirmation() {
             rel="noopener noreferrer"
             style={{
               display: "inline-block",
-              background: "#fff",
-              color: "#000",
+              background: "var(--surface-inverse)",
+              color: "var(--text-inverse)",
               padding: "14px 40px",
               borderRadius: 8,
               fontSize: 14,
@@ -76,8 +76,8 @@ export default function DemoConfirmation() {
               fontFamily: "var(--font-sans), sans-serif",
               transition: "background-color 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
             Schedule Your Demo
           </a>
@@ -97,7 +97,7 @@ export default function DemoConfirmation() {
             style={{
               marginTop: 56,
               paddingTop: 24,
-              borderTop: "1px solid rgba(255,255,255,0.06)",
+              borderTop: "1px solid var(--overlay-soft)",
             }}
           >
             <Link
@@ -109,7 +109,7 @@ export default function DemoConfirmation() {
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
             >
               &larr; Back to endall.ai

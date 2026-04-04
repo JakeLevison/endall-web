@@ -21,14 +21,14 @@ export default function FinalCTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, rgba(255,255,255,0.03), transparent)" }}>
+    <section ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, var(--overlay-weak), transparent)" }}>
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
         {/* Main line — staggered clip reveal per line */}
         <h2
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: "clamp(32px, 6vw, 48px)",
-            color: "#fff",
+            color: "var(--text-primary)",
             fontWeight: 600,
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
@@ -61,7 +61,7 @@ export default function FinalCTA() {
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 18,
-            color: "#888",
+            color: "var(--text-tertiary)",
             marginBottom: 32,
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(20px)",
@@ -83,8 +83,8 @@ export default function FinalCTA() {
             href="/demo"
             style={{
               display: "inline-block",
-              background: "#fff",
-              color: "#000",
+              background: "var(--surface-inverse)",
+              color: "var(--text-inverse)",
               padding: "14px 32px",
               borderRadius: 8,
               fontSize: 14,
@@ -93,8 +93,8 @@ export default function FinalCTA() {
               fontFamily: "var(--font-sans), sans-serif",
               transition: "background-color 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
             Request a Demo
           </a>

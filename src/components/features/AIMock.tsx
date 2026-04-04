@@ -2,19 +2,19 @@
 
 export default function AIMock() {
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif", display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif", display: "flex", flexDirection: "column", gap: 10 }}>
       {/* User message */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <div
           style={{
-            background: "#1a1a1a",
+            background: "var(--surface-hover)",
             border: "1px solid #333",
             borderRadius: "10px 10px 2px 10px",
             padding: "8px 12px",
             maxWidth: "80%",
           }}
         >
-          <span style={{ fontSize: 12, color: "#ccc" }}>Summarize my pipeline</span>
+          <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Summarize my pipeline</span>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ export default function AIMock() {
             maxWidth: "85%",
           }}
         >
-          <span style={{ fontSize: 12, color: "#ccc" }}>
+          <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
             You have 12 active deals worth $284k. 3 closing this week.
           </span>
         </div>
@@ -46,7 +46,7 @@ export default function AIMock() {
                 width: 5,
                 height: 5,
                 borderRadius: "50%",
-                background: "#555",
+                background: "var(--text-tertiary)",
                 animationDelay: `${i * 200}ms`,
               }}
             />

@@ -77,7 +77,7 @@ export default function DashboardMock() {
             style={{
               width: "100px",
               height: "1px",
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)",
+              background: "linear-gradient(90deg, transparent, var(--overlay-strong), transparent)",
               animation: "shimmer 3s linear infinite",
             }}
           />
@@ -98,7 +98,7 @@ export default function DashboardMock() {
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "14px",
-              color: "#ffffff",
+              color: "var(--text-primary)",
             }}
           >
             endall
@@ -110,7 +110,7 @@ export default function DashboardMock() {
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: "11px",
-                  color: tab === "Pipeline" ? "#ffffff" : "var(--text-muted)",
+                  color: tab === "Pipeline" ? "var(--text-primary)" : "var(--text-muted)",
                 }}
               >
                 {tab}
@@ -153,7 +153,7 @@ export default function DashboardMock() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: "22px",
                 fontWeight: 500,
-                color: "#ffffff",
+                color: "var(--text-primary)",
               }}
             >
               $<CountUp target={284} suffix="k" delay={1200} />
@@ -195,7 +195,7 @@ export default function DashboardMock() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: "22px",
                 fontWeight: 500,
-                color: "#ffffff",
+                color: "var(--text-primary)",
               }}
             >
               <CountUp target={47} delay={1200} />
@@ -228,7 +228,7 @@ export default function DashboardMock() {
                 fontFamily: "var(--font-sans), sans-serif",
                 fontSize: "22px",
                 fontWeight: 500,
-                color: "#ffffff",
+                color: "var(--text-primary)",
               }}
             >
               <CountUp target={3812} delay={1200} />
@@ -330,7 +330,7 @@ export default function DashboardMock() {
                             ? "rgba(74, 222, 128, 0.1)"
                             : row.status === "New"
                               ? "rgba(96, 165, 250, 0.1)"
-                              : "rgba(255, 255, 255, 0.05)",
+                              : "var(--overlay-soft)",
                         padding: "3px 8px",
                         borderRadius: "4px",
                       }}
@@ -371,7 +371,7 @@ export default function DashboardMock() {
         }
         .dashboard-mock:hover {
           transform: translateY(-4px);
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 8px 30px var(--overlay-strong);
         }
         @media (hover: none) {
           .dashboard-mock:hover {

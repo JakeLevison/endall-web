@@ -75,7 +75,7 @@ export default function Pricing() {
             fontSize: 36,
             fontWeight: 600,
             letterSpacing: "-0.02em",
-            color: "#fff",
+            color: "var(--text-primary)",
             textAlign: "center",
             marginBottom: 12,
           }}
@@ -112,8 +112,8 @@ export default function Pricing() {
               whileHover={!tier.highlight && !prefersReducedMotion ? { scale: 1.02 } : {}}
               style={{
                 padding: "32px 28px",
-                background: tier.highlight ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
-                border: `1px solid ${tier.highlight ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                background: tier.highlight ? "var(--overlay-soft)" : "var(--overlay-weak)",
+                border: `1px solid ${tier.highlight ? "var(--overlay-medium)" : "var(--overlay-soft)"}`,
                 borderRadius: 12,
                 display: "flex",
                 flexDirection: "column",
@@ -136,7 +136,7 @@ export default function Pricing() {
                   fontFamily: "var(--font-sans), sans-serif",
                   fontSize: 22,
                   fontWeight: 600,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   letterSpacing: "-0.02em",
                   marginBottom: 8,
                 }}
@@ -178,7 +178,7 @@ export default function Pricing() {
                     >
                       <path
                         d="M1 5.5L4.5 9L13 1"
-                        stroke="#888"
+                        stroke="var(--text-tertiary)"
                         strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -201,15 +201,15 @@ export default function Pricing() {
                   borderRadius: 8,
                   textDecoration: "none",
                   transition: "background-color 0.2s ease",
-                  background: tier.highlight ? "#fff" : "rgba(255,255,255,0.06)",
-                  color: tier.highlight ? "#000" : "#fff",
-                  border: tier.highlight ? "none" : "1px solid rgba(255,255,255,0.1)",
+                  background: tier.highlight ? "var(--text-primary)" : "var(--overlay-soft)",
+                  color: tier.highlight ? "var(--text-inverse)" : "var(--text-primary)",
+                  border: tier.highlight ? "none" : "1px solid var(--overlay-medium)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = tier.highlight ? "#e5e5e5" : "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.backgroundColor = tier.highlight ? "var(--surface-hover)" : "var(--overlay-medium)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = tier.highlight ? "#fff" : "rgba(255,255,255,0.06)";
+                  e.currentTarget.style.backgroundColor = tier.highlight ? "var(--text-primary)" : "var(--overlay-soft)";
                 }}
               >
                 {tier.cta}

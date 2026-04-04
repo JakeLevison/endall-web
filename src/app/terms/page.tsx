@@ -32,7 +32,7 @@ export default function TermsPage() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "clamp(28px, 5vw, 40px)",
               fontWeight: 600,
-              color: "#fff",
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
               lineHeight: 1.15,
               marginBottom: 12,
@@ -96,7 +96,7 @@ export default function TermsPage() {
             </Section>
 
             <Section title="10. Contact">
-              <p>Questions about these terms? Email <a href="mailto:jake@endall.ai" style={{ color: "#fff", textDecoration: "underline", textUnderlineOffset: 3 }}>jake@endall.ai</a>.</p>
+              <p>Questions about these terms? Email <a href="mailto:jake@endall.ai" style={{ color: "var(--text-primary)", textDecoration: "underline", textUnderlineOffset: 3 }}>jake@endall.ai</a>.</p>
             </Section>
           </div>
         </div>
@@ -114,7 +114,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           fontFamily: "var(--font-sans), sans-serif",
           fontSize: 18,
           fontWeight: 600,
-          color: "#fff",
+          color: "var(--text-primary)",
           marginBottom: 12,
         }}
       >

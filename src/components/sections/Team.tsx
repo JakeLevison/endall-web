@@ -40,9 +40,9 @@ function MemberCard({ member }: { member: TeamMember }) {
           overflow: "hidden",
           margin: "0 auto 20px",
           cursor: "pointer",
-          border: "2px solid rgba(255,255,255,0.08)",
+          border: "2px solid var(--overlay-medium)",
           transition: "border-color 0.3s",
-          borderColor: hovered ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)",
+          borderColor: hovered ? "var(--overlay-strong)" : "var(--overlay-medium)",
         }}
       >
         <Image
@@ -71,7 +71,7 @@ function MemberCard({ member }: { member: TeamMember }) {
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 20,
             fontWeight: 600,
-            color: "#fff",
+            color: "var(--text-primary)",
             marginBottom: 4,
           }}
         >
@@ -100,18 +100,18 @@ function MemberCard({ member }: { member: TeamMember }) {
               width: 32,
               height: 32,
               borderRadius: "50%",
-              border: "1px solid rgba(255,255,255,0.1)",
+              border: "1px solid var(--overlay-medium)",
               color: "var(--text-muted)",
               textDecoration: "none",
               marginBottom: 6,
               transition: "border-color 0.2s, color 0.2s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.borderColor = "var(--overlay-strong)";
+              e.currentTarget.style.color = "var(--text-primary)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.borderColor = "var(--overlay-medium)";
               e.currentTarget.style.color = "var(--text-muted)";
             }}
           >
@@ -149,8 +149,8 @@ function MemberCard({ member }: { member: TeamMember }) {
           style={{
             marginTop: 12,
             padding: "20px 24px",
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: "var(--overlay-weak)",
+            border: "1px solid var(--overlay-soft)",
             borderRadius: 12,
             textAlign: "left",
           }}

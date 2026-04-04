@@ -160,8 +160,8 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
           style={{
             maxWidth: 480,
             padding: "48px 40px",
-            background: "#111",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--surface)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: 16,
             textAlign: "center",
           }}
@@ -186,7 +186,7 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: 24,
               fontWeight: 600,
-              color: "#fff",
+              color: "var(--text-primary)",
               marginBottom: 12,
             }}
           >
@@ -212,8 +212,8 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
                 alignItems: "center",
                 gap: 8,
                 padding: "12px 24px",
-                background: "#fff",
-                color: "#000",
+                background: "var(--surface-inverse)",
+                color: "var(--text-inverse)",
                 borderRadius: 8,
                 fontSize: 14,
                 fontWeight: 500,
@@ -230,8 +230,8 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
                 gap: 8,
                 padding: "12px 24px",
                 background: "transparent",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.2)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--overlay-strong)",
                 borderRadius: 8,
                 fontSize: 14,
                 fontWeight: 500,
@@ -327,11 +327,11 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
           left: tooltipPos.left,
           width: tooltipWidth,
           zIndex: 10001,
-          background: "#1a1a1b",
-          border: "1px solid rgba(255,255,255,0.12)",
+          background: "var(--surface-hover)",
+          border: "1px solid var(--overlay-medium)",
           borderRadius: 12,
           padding: "20px",
-          boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+          boxShadow: "0 16px 48px var(--backdrop)",
         }}
       >
         {/* Progress indicator */}
@@ -351,7 +351,7 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
                   width: i === currentStep ? 20 : 6,
                   height: 6,
                   borderRadius: 3,
-                  background: i <= currentStep ? "#3b82f6" : "rgba(255,255,255,0.1)",
+                  background: i <= currentStep ? "#3b82f6" : "var(--overlay-medium)",
                   transition: "all 0.2s ease",
                 }}
               />
@@ -374,7 +374,7 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 15,
             fontWeight: 600,
-            color: "#fff",
+            color: "var(--text-primary)",
             marginBottom: 6,
           }}
         >

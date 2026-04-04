@@ -93,7 +93,7 @@ export default function InteractiveDemoPage() {
   }, [simulateNpv]);
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#0A0A0B", color: "#ccc" }}>
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", color: "var(--text-secondary)" }}>
       {/* Top bar */}
       <header
         style={{
@@ -102,13 +102,13 @@ export default function InteractiveDemoPage() {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--overlay-soft)",
           flexShrink: 0,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Sparkles size={16} style={{ color: "#fff" }} />
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>ask endall</span>
+          <Sparkles size={16} style={{ color: "var(--text-primary)" }} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>ask endall</span>
           <span
             style={{
               fontSize: 10,
@@ -137,7 +137,7 @@ export default function InteractiveDemoPage() {
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px", maxWidth: 768, margin: "0 auto", width: "100%" }}>
         {messages.length === 0 && (
           <div style={{ paddingTop: 40 }}>
-            <p style={{ fontSize: 13, color: "#666", marginBottom: 16, textAlign: "center" }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16, textAlign: "center" }}>
               Try any action below to see Endall in action:
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 480, margin: "0 auto" }}>
@@ -151,21 +151,21 @@ export default function InteractiveDemoPage() {
                     alignItems: "center",
                     gap: 10,
                     padding: "10px 12px",
-                    background: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "var(--overlay-weak)",
+                    border: "1px solid var(--overlay-soft)",
                     borderLeft: `3px solid ${action.color}`,
                     borderRadius: 8,
                     cursor: "pointer",
                     textAlign: "left",
                     transition: "background 0.15s",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--overlay-soft)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--overlay-weak)")}
                 >
                   <action.icon size={16} style={{ color: action.color, flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>{action.label}</div>
-                    <div style={{ fontSize: 11, color: "#666" }}>{action.description}</div>
+                    <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>{action.label}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{action.description}</div>
                   </div>
                 </button>
               ))}
@@ -187,11 +187,11 @@ export default function InteractiveDemoPage() {
                 maxWidth: "85%",
                 padding: "10px 14px",
                 borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                background: msg.role === "user" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${msg.role === "user" ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                background: msg.role === "user" ? "var(--overlay-medium)" : "var(--overlay-weak)",
+                border: `1px solid ${msg.role === "user" ? "var(--overlay-medium)" : "var(--overlay-soft)"}`,
               }}
             >
-              <div style={{ fontSize: 15, color: msg.role === "user" ? "#fff" : "#ccc", lineHeight: 1.65 }}>
+              <div style={{ fontSize: 15, color: msg.role === "user" ? "var(--text-primary)" : "var(--text-secondary)", lineHeight: 1.65 }}>
                 <ChatMessage role={msg.role} content={msg.content} />
               </div>
               {msg.files && msg.files.length > 0 && (
@@ -230,8 +230,8 @@ export default function InteractiveDemoPage() {
               style={{
                 padding: "12px 16px",
                 borderRadius: "12px 12px 12px 2px",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "var(--overlay-weak)",
+                border: "1px solid var(--overlay-soft)",
                 display: "flex",
                 flexDirection: "column",
                 gap: 8,
@@ -239,10 +239,10 @@ export default function InteractiveDemoPage() {
               }}
             >
               {loadingPhase && (
-                <div style={{ fontSize: 13, color: "#888", lineHeight: 1.4 }}>{loadingPhase}</div>
+                <div style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4 }}>{loadingPhase}</div>
               )}
-              <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-                <div className="demo-progress-fill" style={{ height: "100%", background: "#fff", borderRadius: 2 }} />
+              <div style={{ height: 3, background: "var(--overlay-medium)", borderRadius: 2, overflow: "hidden" }}>
+                <div className="demo-progress-fill" style={{ height: "100%", background: "var(--surface-inverse)", borderRadius: 2 }} />
               </div>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function InteractiveDemoPage() {
       </div>
 
       {/* Input */}
-      <div style={{ padding: "12px 24px", paddingBottom: "max(12px, env(safe-area-inset-bottom))", borderTop: "1px solid rgba(255,255,255,0.06)", maxWidth: 768, margin: "0 auto", width: "100%", display: "flex", gap: 8 }}>
+      <div style={{ padding: "12px 24px", paddingBottom: "max(12px, env(safe-area-inset-bottom))", borderTop: "1px solid var(--overlay-soft)", maxWidth: 768, margin: "0 auto", width: "100%", display: "flex", gap: 8 }}>
         <textarea
           data-demo="chat-input"
           value={input}
@@ -267,12 +267,12 @@ export default function InteractiveDemoPage() {
           rows={2}
           style={{
             flex: 1,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "var(--overlay-soft)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: 10,
             padding: "10px 14px",
             fontSize: 15,
-            color: "#fff",
+            color: "var(--text-primary)",
             outline: "none",
             resize: "none",
             fontFamily: "inherit",
@@ -283,8 +283,8 @@ export default function InteractiveDemoPage() {
           onClick={handleSendMessage}
           disabled={loading || !input.trim()}
           style={{
-            background: input.trim() ? "#3b82f6" : "rgba(255,255,255,0.06)",
-            color: input.trim() ? "#fff" : "#666",
+            background: input.trim() ? "#3b82f6" : "var(--overlay-soft)",
+            color: input.trim() ? "var(--text-primary)" : "var(--text-muted)",
             border: "none",
             borderRadius: 10,
             padding: "0 16px",

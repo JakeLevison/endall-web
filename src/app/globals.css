@@ -60,6 +60,7 @@
   --bg: #ffffff;
   --surface: #f6f6f7;
   --surface-hover: #ececee;
+  --surface-inverse: #0a0a0a; /* for inverted elements like primary CTAs */
   --border: #e5e5e7;
   --border-hover: #d4d4d8;
   --text-primary: #0a0a0a;
@@ -67,6 +68,13 @@
   --text-tertiary: #555555;
   --text-muted: #777777;
   --text-faint: #aaaaaa;
+  --text-inverse: #ffffff; /* for text on inverted surfaces */
+  /* Translucent overlays (theme-aware) */
+  --overlay-weak: rgba(0, 0, 0, 0.02);
+  --overlay-soft: rgba(0, 0, 0, 0.04);
+  --overlay-medium: rgba(0, 0, 0, 0.08);
+  --overlay-strong: rgba(0, 0, 0, 0.15);
+  --backdrop: rgba(0, 0, 0, 0.5);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -106,6 +114,7 @@
   --bg: #0a0a0a;
   --surface: #111111;
   --surface-hover: #1a1a1a;
+  --surface-inverse: #ffffff;
   --border: #222222;
   --border-hover: #333333;
   --text-primary: #ffffff;
@@ -113,6 +122,12 @@
   --text-tertiary: #888888;
   --text-muted: #666666;
   --text-faint: #444444;
+  --text-inverse: #0a0a0a;
+  --overlay-weak: rgba(255, 255, 255, 0.02);
+  --overlay-soft: rgba(255, 255, 255, 0.04);
+  --overlay-medium: rgba(255, 255, 255, 0.08);
+  --overlay-strong: rgba(255, 255, 255, 0.15);
+  --backdrop: rgba(0, 0, 0, 0.5);
 
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

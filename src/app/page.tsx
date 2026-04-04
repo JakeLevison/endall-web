@@ -143,7 +143,7 @@ export default function Home() {
                     fontSize: "36px",
                     fontWeight: 600,
                     letterSpacing: "-0.02em",
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                     textAlign: "center",
                     marginBottom: "48px",
                   }}

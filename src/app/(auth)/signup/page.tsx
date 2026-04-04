@@ -50,7 +50,7 @@ export default function SignupPage() {
               fontSize: "24px",
               fontWeight: 600,
               letterSpacing: "-0.02em",
-              color: "#fff",
+              color: "var(--text-primary)",
             }}
           >
             endall

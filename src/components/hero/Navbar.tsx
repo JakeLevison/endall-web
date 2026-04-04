@@ -43,7 +43,7 @@ export default function Navbar() {
           background: "rgba(0, 0, 0, 0.7)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid var(--overlay-medium)",
           borderRadius: "16px",
           padding: "10px 16px",
           display: "flex",
@@ -59,7 +59,7 @@ export default function Navbar() {
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "18px",
-              color: "#ffffff",
+              color: "var(--text-primary)",
               textDecoration: "none",
               fontWeight: 600,
               letterSpacing: "-0.02em",
@@ -84,9 +84,9 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             Features
@@ -101,9 +101,9 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             How it Works
@@ -118,9 +118,9 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             About
@@ -135,9 +135,9 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
-            onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
+            onFocus={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
             Contact
@@ -153,8 +153,8 @@ export default function Navbar() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "13px",
               fontWeight: 500,
-              color: "#000000",
-              backgroundColor: "#ffffff",
+              color: "var(--text-inverse)",
+              backgroundColor: "var(--surface-inverse)",
               padding: "0 20px",
               height: "36px",
               display: "inline-flex",
@@ -165,10 +165,10 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
-            onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
             Ask Endall
           </Link>
@@ -197,7 +197,7 @@ export default function Navbar() {
                 display: "block",
                 width: "18px",
                 height: "1.5px",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--surface-inverse)",
                 transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 transform: menuOpen ? "translateY(5.5px) rotate(45deg)" : "none",
               }}
@@ -207,7 +207,7 @@ export default function Navbar() {
                 display: "block",
                 width: "18px",
                 height: "1.5px",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--surface-inverse)",
                 transition: "opacity 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 opacity: menuOpen ? 0 : 1,
               }}
@@ -217,7 +217,7 @@ export default function Navbar() {
                 display: "block",
                 width: "18px",
                 height: "1.5px",
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--surface-inverse)",
                 transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
                 transform: menuOpen ? "translateY(-5.5px) rotate(-45deg)" : "none",
               }}
@@ -249,7 +249,7 @@ export default function Navbar() {
             background: "rgba(0, 0, 0, 0.9)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: "16px",
             padding: "24px",
             display: "flex",

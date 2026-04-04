@@ -10,8 +10,8 @@ export default function EstimateMock() {
   return (
     <div
       style={{
-        background: "#0a0a0a",
-        border: "1px solid #1a1a1a",
+        background: "var(--bg)",
+        border: "1px solid var(--border)",
         borderRadius: 8,
         padding: 16,
         fontFamily: "var(--font-sans), sans-serif",
@@ -20,8 +20,8 @@ export default function EstimateMock() {
       {/* Total row */}
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
         <div>
-          <div style={{ fontSize: 11, color: "#888", marginBottom: 2 }}>Estimate total</div>
-          <div style={{ fontSize: 18, fontWeight: 600, color: "#fff" }}>$45,800</div>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 2 }}>Estimate total</div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)" }}>$45,800</div>
         </div>
         <div
           style={{
@@ -42,13 +42,13 @@ export default function EstimateMock() {
         {lines.map((line) => (
           <div key={line.label}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: "#ccc" }}>{line.label}</span>
-              <span style={{ fontSize: 11, color: "#fff" }}>{line.value}</span>
+              <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{line.label}</span>
+              <span style={{ fontSize: 11, color: "var(--text-primary)" }}>{line.value}</span>
             </div>
             <div
               style={{
                 height: 4,
-                background: "rgba(255,255,255,0.06)",
+                background: "var(--overlay-soft)",
                 borderRadius: 2,
                 overflow: "hidden",
               }}
@@ -57,7 +57,7 @@ export default function EstimateMock() {
                 style={{
                   width: `${line.pct}%`,
                   height: "100%",
-                  background: "#fff",
+                  background: "var(--surface-inverse)",
                   opacity: 0.85,
                   borderRadius: 2,
                 }}
@@ -74,13 +74,13 @@ export default function EstimateMock() {
           alignItems: "center",
           justifyContent: "space-between",
           paddingTop: 10,
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: "1px solid var(--overlay-soft)",
           fontSize: 11,
-          color: "#888",
+          color: "var(--text-tertiary)",
         }}
       >
         <span>Timeline</span>
-        <span style={{ color: "#ccc" }}>12 weeks · 4 phases</span>
+        <span style={{ color: "var(--text-secondary)" }}>12 weeks · 4 phases</span>
       </div>
     </div>
   );

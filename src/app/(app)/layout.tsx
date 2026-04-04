@@ -298,8 +298,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             bottom: 24,
             right: 24,
             zIndex: 1000,
-            background: "#1a1a1b",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "var(--surface-hover)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: 12,
             padding: "14px 18px",
             display: "flex",
@@ -312,10 +312,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         >
           <div style={{ fontSize: 20 }}>📄</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, color: "#fff", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {toast.filename}
             </div>
-            <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>Ready to download</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Ready to download</div>
           </div>
           <a
             href={toast.downloadUrl}
@@ -324,7 +324,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             style={{
               padding: "6px 14px",
               background: "#3b82f6",
-              color: "#fff",
+              color: "var(--text-primary)",
               borderRadius: 6,
               fontSize: 12,
               fontWeight: 500,
@@ -339,7 +339,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             style={{
               background: "none",
               border: "none",
-              color: "#555",
+              color: "var(--text-tertiary)",
               cursor: "pointer",
               padding: 2,
               fontSize: 16,

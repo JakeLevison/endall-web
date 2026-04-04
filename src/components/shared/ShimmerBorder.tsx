@@ -22,7 +22,7 @@ export default function ShimmerBorder({ children, className }: ShimmerBorderProp
           background: linear-gradient(
             90deg,
             transparent 0%,
-            rgba(255, 255, 255, 0.3) 50%,
+            var(--overlay-strong) 50%,
             transparent 100%
           );
           animation: shimmer-slide 4s ease-in-out infinite;

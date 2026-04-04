@@ -22,8 +22,8 @@ export default function FeatureCard({ label, title, description, children }: Fea
       <div
         className="feature-card"
         style={{
-          background: "#111",
-          border: "1px solid #1a1a1a",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
           borderRadius: 12,
           padding: 24,
           transition: "border-color 0.3s ease",
@@ -43,7 +43,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
             fontSize: 11,
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            color: "#666",
+            color: "var(--text-muted)",
             marginBottom: 6,
           }}
         >
@@ -55,7 +55,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 24,
-            color: "#fff",
+            color: "var(--text-primary)",
             marginBottom: 6,
             fontWeight: 600,
             letterSpacing: "-0.02em",
@@ -69,7 +69,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 14,
-            color: "#888",
+            color: "var(--text-tertiary)",
             lineHeight: 1.5,
             margin: 0,
           }}

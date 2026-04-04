@@ -140,7 +140,7 @@ export default function HeroHeadline() {
                     clipPath: "inset(0)",
                     padding: 0,
                     margin: 0,
-                    color: "#ffffff",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {word}
@@ -174,17 +174,17 @@ export default function HeroHeadline() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "14px",
               fontWeight: 500,
-              color: "#000000",
-              backgroundColor: "#ffffff",
+              color: "var(--text-inverse)",
+              backgroundColor: "var(--surface-inverse)",
               padding: "12px 24px",
               borderRadius: "6px",
               textDecoration: "none",
               transition: "background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
-            onFocus={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
-            onBlur={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
             Request a Demo
           </Link>
@@ -195,18 +195,18 @@ export default function HeroHeadline() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "14px",
               fontWeight: 500,
-              color: "#ffffff",
+              color: "var(--text-primary)",
               backgroundColor: "transparent",
               padding: "12px 24px",
               borderRadius: "6px",
               textDecoration: "none",
-              border: "1px solid rgba(255,255,255,0.3)",
+              border: "1px solid var(--overlay-strong)",
               transition: "border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.backgroundColor = "transparent"; }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
           >
             Try Ask Endall Free
           </Link>

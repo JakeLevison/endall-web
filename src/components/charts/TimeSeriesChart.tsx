@@ -48,15 +48,15 @@ export default function TimeSeriesChart({
             <stop offset="95%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--overlay-soft)" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 11, fill: "#666" }}
-          axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+          tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+          axisLine={{ stroke: "var(--overlay-soft)" }}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#666" }}
+          tick={{ fontSize: 11, fill: "var(--text-muted)" }}
           axisLine={false}
           tickLine={false}
           width={50}
@@ -64,14 +64,14 @@ export default function TimeSeriesChart({
         />
         <Tooltip
           contentStyle={{
-            background: "#111",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "var(--surface)",
+            border: "1px solid var(--overlay-medium)",
             borderRadius: 8,
             fontSize: 12,
-            color: "#ccc",
+            color: "var(--text-secondary)",
           }}
           formatter={(value) => [`${valuePrefix}${Number(value).toLocaleString()}${valueSuffix}`, "Value"]}
-          labelStyle={{ color: "#888" }}
+          labelStyle={{ color: "var(--text-tertiary)" }}
         />
         <Area
           type="monotone"

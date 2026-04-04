@@ -25,7 +25,7 @@ const ACTION_COLORS: Record<string, string> = {
 function QuickActionIcon({ name, color }: { name: string; color?: string }) {
   const Icon = ICON_MAP[name];
   if (!Icon) return <span style={{ fontSize: 16 }}>{name}</span>;
-  return <Icon size={16} style={{ color: color || "#888", flexShrink: 0 }} />;
+  return <Icon size={16} style={{ color: color || "var(--text-tertiary)", flexShrink: 0 }} />;
 }
 
 interface ChatPanelProps {
@@ -97,7 +97,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.5)",
+          background: "var(--backdrop)",
           zIndex: 998,
         }}
       />
@@ -110,8 +110,8 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
           right: 0,
           width: expanded ? "min(75vw, 900px)" : "min(480px, 100vw)",
           height: "100dvh",
-          background: "#0A0A0B",
-          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          background: "var(--bg)",
+          borderLeft: "1px solid var(--overlay-soft)",
           zIndex: 999,
           display: "flex",
           flexDirection: "column",
@@ -126,12 +126,12 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
             alignItems: "center",
             justifyContent: "space-between",
             padding: "12px 16px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid var(--overlay-soft)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Sparkles size={16} style={{ color: "#fff" }} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>
+            <Sparkles size={16} style={{ color: "var(--text-primary)" }} />
+            <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
               ask endall
             </span>
           </div>
@@ -145,7 +145,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                   border: "none",
                   cursor: "pointer",
                   padding: 4,
-                  color: "#666",
+                  color: "var(--text-muted)",
                 }}
               >
                 <RotateCcw size={16} />
@@ -166,7 +166,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 border: "none",
                 cursor: "pointer",
                 padding: 4,
-                color: "#666",
+                color: "var(--text-muted)",
               }}
             >
               {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -178,7 +178,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 border: "none",
                 cursor: "pointer",
                 padding: 4,
-                color: "#666",
+                color: "var(--text-muted)",
               }}
             >
               <X size={18} />
@@ -187,7 +187,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
         </div>
 
         {/* Tab bar */}
-        <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid var(--overlay-soft)" }}>
           {(["chat", "files"] as const).map((tab) => (
             <button
               key={tab}
@@ -199,7 +199,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
-                color: activeTab === tab ? "#fff" : "#555",
+                color: activeTab === tab ? "var(--text-primary)" : "var(--text-tertiary)",
                 background: "none",
                 border: "none",
                 borderBottom: activeTab === tab ? "2px solid #3b82f6" : "2px solid transparent",
@@ -216,7 +216,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
         {activeTab === "files" && (
           <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
             {savedFiles.length === 0 ? (
-              <p style={{ fontSize: 13, color: "#555", textAlign: "center", marginTop: 40 }}>
+              <p style={{ fontSize: 13, color: "var(--text-tertiary)", textAlign: "center", marginTop: 40 }}>
                 No files generated yet. Use the Chat tab to create budgets, NPV analyses, and more.
               </p>
             ) : (
@@ -231,21 +231,21 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                       key={f.id}
                       style={{
                         padding: "12px 14px",
-                        background: "rgba(255,255,255,0.02)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        background: "var(--overlay-weak)",
+                        border: "1px solid var(--overlay-soft)",
                         borderRadius: 8,
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <Icon size={18} style={{ color: "#3b82f6", flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, color: "#fff", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {f.file_name}
                           </div>
-                          <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
                             {f.description}
                           </div>
-                          <div style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 2 }}>
                             {new Date(f.created_at).toLocaleString()}
                           </div>
                         </div>
@@ -303,7 +303,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
               <p
                 style={{
                   fontSize: 13,
-                  color: "#666",
+                  color: "var(--text-muted)",
                   marginBottom: 16,
                   textAlign: "center",
                 }}
@@ -321,27 +321,27 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                       alignItems: "center",
                       gap: 10,
                       padding: "10px 12px",
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderLeft: `3px solid ${ACTION_COLORS[action.id] || "#333"}`,
+                      background: "var(--overlay-weak)",
+                      border: "1px solid var(--overlay-soft)",
+                      borderLeft: `3px solid ${ACTION_COLORS[action.id] || "var(--text-secondary)"}`,
                       borderRadius: 8,
                       cursor: "pointer",
                       textAlign: "left",
                       transition: "background 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                      (e.currentTarget.style.background = "var(--overlay-soft)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
+                      (e.currentTarget.style.background = "var(--overlay-weak)")
                     }
                   >
                     <QuickActionIcon name={action.icon} color={ACTION_COLORS[action.id]} />
                     <div>
-                      <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>
+                      <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 500 }}>
                         {action.label}
                       </div>
-                      <div style={{ fontSize: 11, color: "#666" }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
                         {action.description}
                       </div>
                     </div>
@@ -364,14 +364,14 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                   maxWidth: "85%",
                   padding: "10px 14px",
                   borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                  background: msg.role === "user" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${msg.role === "user" ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                  background: msg.role === "user" ? "var(--overlay-medium)" : "var(--overlay-weak)",
+                  border: `1px solid ${msg.role === "user" ? "var(--overlay-medium)" : "var(--overlay-soft)"}`,
                 }}
               >
                 <div
                   style={{
                     fontSize: 15,
-                    color: msg.role === "user" ? "#fff" : "#ccc",
+                    color: msg.role === "user" ? "var(--text-primary)" : "var(--text-secondary)",
                     lineHeight: 1.65,
                   }}
                 >
@@ -379,17 +379,17 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 </div>
                 {msg.previewHtml && (
                   <div style={{ marginTop: 10 }}>
-                    <div style={{ fontSize: 11, color: "#666", marginBottom: 4 }}>Preview</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Preview</div>
                     <div
                       style={{
                         overflowX: "auto",
                         borderRadius: 6,
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        background: "rgba(0,0,0,0.3)",
+                        border: "1px solid var(--overlay-medium)",
+                        background: "var(--overlay-strong)",
                       }}
                       dangerouslySetInnerHTML={{ __html: msg.previewHtml }}
                     />
-                    <div style={{ fontSize: 10, color: "#444", marginTop: 4 }}>
+                    <div style={{ fontSize: 10, color: "var(--text-faint)", marginTop: 4 }}>
                       Full workbook available in the download below
                     </div>
                   </div>
@@ -442,8 +442,8 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 style={{
                   padding: "12px 16px",
                   borderRadius: "12px 12px 12px 2px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "var(--overlay-weak)",
+                  border: "1px solid var(--overlay-soft)",
                   display: "flex",
                   flexDirection: "column",
                   gap: 8,
@@ -451,12 +451,12 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                 }}
               >
                 {loadingPhase && (
-                  <div style={{ fontSize: 13, color: "#888", lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4 }}>
                     {loadingPhase}
                   </div>
                 )}
-                <div className="progress-bar-track" style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-                  <div className="progress-bar-fill" style={{ height: "100%", background: "#fff", borderRadius: 2 }} />
+                <div className="progress-bar-track" style={{ height: 3, background: "var(--overlay-medium)", borderRadius: 2, overflow: "hidden" }}>
+                  <div className="progress-bar-fill" style={{ height: "100%", background: "var(--surface-inverse)", borderRadius: 2 }} />
                 </div>
               </div>
             </div>
@@ -467,9 +467,9 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
 
         {/* Progress bar above input */}
         {loading && activeTab === "chat" && (
-          <div style={{ padding: "0 16px", background: "#0A0A0B" }}>
-            <div className="progress-bar-track" style={{ height: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, overflow: "hidden" }}>
-              <div className="progress-bar-fill" style={{ height: "100%", background: "#fff", borderRadius: 1 }} />
+          <div style={{ padding: "0 16px", background: "var(--bg)" }}>
+            <div className="progress-bar-track" style={{ height: 2, background: "var(--overlay-soft)", borderRadius: 1, overflow: "hidden" }}>
+              <div className="progress-bar-fill" style={{ height: "100%", background: "var(--surface-inverse)", borderRadius: 1 }} />
             </div>
           </div>
         )}
@@ -481,11 +481,11 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
           style={{
             padding: "12px 16px",
             paddingBottom: "max(12px, env(safe-area-inset-bottom))",
-            borderTop: loading ? "none" : "1px solid rgba(255,255,255,0.06)",
+            borderTop: loading ? "none" : "1px solid var(--overlay-soft)",
             display: "flex",
             gap: 8,
             flexShrink: 0,
-            background: "#0A0A0B",
+            background: "var(--bg)",
           }}
         >
           <textarea
@@ -497,12 +497,12 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
             rows={3}
             style={{
               flex: 1,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "var(--overlay-soft)",
+              border: "1px solid var(--overlay-medium)",
               borderRadius: 10,
               padding: "10px 14px",
               fontSize: 15,
-              color: "#fff",
+              color: "var(--text-primary)",
               outline: "none",
               resize: "none",
               minHeight: 72,
@@ -521,8 +521,8 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
             type="submit"
             disabled={loading || !input.trim()}
             style={{
-              background: input.trim() ? "#3b82f6" : "rgba(255,255,255,0.06)",
-              color: input.trim() ? "#fff" : "#666",
+              background: input.trim() ? "#3b82f6" : "var(--overlay-soft)",
+              color: input.trim() ? "var(--text-primary)" : "var(--text-muted)",
               border: "none",
               borderRadius: 10,
               padding: "0 16px",

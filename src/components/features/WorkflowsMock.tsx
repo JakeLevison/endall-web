@@ -8,14 +8,14 @@ export default function WorkflowsMock() {
   ];
 
   return (
-    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
         {nodes.map((node, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, flex: 1 }}>
             {/* Node */}
             <div
               style={{
-                background: "#0a0a0a",
+                background: "var(--bg)",
                 border: "1px solid #333",
                 borderRadius: 8,
                 padding: "8px 10px",
@@ -26,12 +26,12 @@ export default function WorkflowsMock() {
                 whiteSpace: "nowrap",
               }}
             >
-              <span style={{ fontSize: 12, color: "#666" }}>{node.icon}</span>
-              <span style={{ fontSize: 11, color: "#ccc" }}>{node.label}</span>
+              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{node.icon}</span>
+              <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{node.label}</span>
             </div>
             {/* Connecting line with animated dot */}
             {i < nodes.length - 1 && (
-              <div style={{ flex: 1, height: 1, background: "#333", position: "relative", minWidth: 12 }}>
+              <div style={{ flex: 1, height: 1, background: "var(--text-secondary)", position: "relative", minWidth: 12 }}>
                 <div
                   style={{
                     position: "absolute",
