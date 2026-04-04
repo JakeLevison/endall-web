@@ -5,7 +5,6 @@ import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, 
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
 
-const BRIDGE_URL = process.env.NEXT_PUBLIC_ASK_ENDALL_BRIDGE_URL || "https://ask-endall-bridge-production.up.railway.app";
 
 interface ChatPanelProps {
   isOpen: boolean;
@@ -227,7 +226,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                           </div>
                         </div>
                         <a
-                          href={`${BRIDGE_URL}/download/${f.file_path}`}
+                          href={`/api/chat/download?file_id=${f.file_path}&filename=${encodeURIComponent(f.file_name)}`}
                           download={f.file_name}
                           onClick={() => toast.success("File downloaded")}
                           style={{

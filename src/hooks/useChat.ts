@@ -43,12 +43,6 @@ export type SavedFile = {
 // Constants
 // ---------------------------------------------------------------------------
 
-const BRIDGE_URL =
-  typeof window !== "undefined"
-    ? (process.env.NEXT_PUBLIC_ASK_ENDALL_BRIDGE_URL ||
-       "https://ask-endall-bridge-production.up.railway.app")
-    : "";
-
 const SKILLS_ACTIONS = new Set([
   "financial_model", "generate_budget", "capabilities_doc", "npv_analysis",
   "project_estimate", "proposal", "competitive_analysis", "review_financials",
@@ -162,8 +156,8 @@ export function useChat(options: UseChatOptions = {}) {
 
   // ── Load files when Files tab is opened ──
   useEffect(() => {
-    if (activeTab === "files" && BRIDGE_URL) {
-      fetch(`${BRIDGE_URL}/files`)
+    if (activeTab === "files") {
+      fetch("/api/chat/files")
         .then((r) => r.json())
         .then((d) => setSavedFiles(d.files || []))
         .catch(() => setSavedFiles([]));
@@ -330,58 +324,42 @@ export function useChat(options: UseChatOptions = {}) {
       try {
         let data: { reply?: string; error?: string; files?: FileAttachment[]; previewHtml?: string };
 
-        if (isSkillsWorkflow) {
-          const resp = await fetch(`${BRIDGE_URL}/chat`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action: action || currentWorkflow,
-              session_id: conversationId,
-            }),
-          });
+        // All requests go through the Next.js /api/chat proxy which:
+        // - Routes skills actions to the Python bridge (server-to-server, no CORS)
+        // - Rewrites download URLs to same-origin /api/chat/download proxy
+        // - Handles standard chat via Claude API directly
+        const resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: text,
+            action: action || (isSkillsWorkflow ? currentWorkflow : undefined),
+            activeWorkflow: currentWorkflow,
+            session_id: conversationId,
+            recordType,
+            recordId,
+            history: messages.map((m) => ({ role: m.role, content: m.content })),
+          }),
+        });
 
-          if (!resp.ok) {
-            const errText = await resp.text();
-            let parsed: { detail?: string } = {};
-            try { parsed = JSON.parse(errText); } catch { /* not JSON */ }
-            const detail = parsed.detail || errText;
+        if (!resp.ok) {
+          const errBody = await resp.json().catch(() => ({}));
+          const detail = errBody.error || "";
 
-            let userMessage = "Something went wrong generating your file. Try again or ask me to simplify the request.";
-            if (resp.status === 429 || detail.includes("rate_limit")) {
-              userMessage = "We've hit a temporary limit. Please wait 30 seconds and try again.";
-            } else if (detail.includes("timeout") || resp.status === 504) {
-              userMessage = "Your request is taking longer than expected. Try refreshing in 30 seconds, or try again.";
-            }
-            throw new Error(userMessage);
+          let userMessage = "Something went wrong generating your file. Try again or ask me to simplify the request.";
+          if (resp.status === 429 || detail.includes("rate_limit")) {
+            userMessage = "We've hit a temporary limit. Please wait 30 seconds and try again.";
+          } else if (detail.includes("timeout") || resp.status === 504) {
+            userMessage = "Your request is taking longer than expected. Try refreshing in 30 seconds, or try again.";
+          } else if (resp.status === 502) {
+            userMessage = isSkillsWorkflow
+              ? "File generation service is temporarily unavailable. Please try again in a moment."
+              : "AI service is temporarily unavailable. Please try again.";
           }
-
-          const bridgeData = await resp.json();
-          const files = (bridgeData.files || []).map((f: { file_id: string; filename: string }) => ({
-            file_id: f.file_id,
-            filename: f.filename,
-            download_url: `${BRIDGE_URL}/download/${f.file_id}`,
-          }));
-
-          data = {
-            reply: bridgeData.reply,
-            files: files.length > 0 ? files : undefined,
-            previewHtml: bridgeData.preview_html || undefined,
-          };
-        } else {
-          const resp = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: text,
-              action,
-              recordType,
-              recordId,
-              history: messages.map((m) => ({ role: m.role, content: m.content })),
-            }),
-          });
-          data = await resp.json();
+          throw new Error(userMessage);
         }
+
+        data = await resp.json();
 
         const aiMsg: Message = {
           id: generateId(),

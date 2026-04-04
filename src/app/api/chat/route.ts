@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, action, activeWorkflow, recordType, recordId, history } =
+    const { message, action, activeWorkflow, recordType, recordId, history, session_id } =
       await request.json();
 
     if (!message && !action) {
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             message: userPrompt,
             action: action || activeWorkflow,
-            session_id: ip, // one session per IP for now
+            session_id: session_id || ip,
             tenant_id: TENANT_ID,
           }),
           signal: AbortSignal.timeout(120000), // 2 min - Skills API can be slow
@@ -233,6 +233,7 @@ export async function POST(request: NextRequest) {
           reply: bridgeData.reply || "File generation complete.",
           context: crmContext ? true : false,
           files: files.length > 0 ? files : undefined,
+          previewHtml: bridgeData.preview_html || undefined,
           container_id: bridgeData.container_id || undefined,
         });
       } catch (err) {
