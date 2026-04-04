@@ -175,6 +175,28 @@ export default function DemoPage() {
                 Get a 20-minute walkthrough tailored to your trade. We&rsquo;ll show you how Endall runs lead capture, quoting, scheduling, and follow-ups &mdash; so your team can focus on the work.
               </p>
 
+              {/* Interactive demo CTA */}
+              <a
+                href="/demo/interactive"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 20px",
+                  background: "rgba(59,130,246,0.1)",
+                  border: "1px solid rgba(59,130,246,0.3)",
+                  borderRadius: 8,
+                  color: "#60a5fa",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  marginBottom: 32,
+                  transition: "background 0.15s",
+                }}
+              >
+                Or try the interactive demo first
+              </a>
+
               {/* Trust signals */}
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {[
