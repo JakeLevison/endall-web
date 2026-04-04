@@ -79,7 +79,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
 
         <style jsx>{`
           .feature-card:hover {
-            border-color: #333 !important;
+            border-color: var(--border-hover) !important;
           }
         `}</style>
       </div>

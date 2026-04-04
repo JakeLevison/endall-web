@@ -203,9 +203,9 @@ export default function HeroHeadline() {
               border: "1px solid var(--overlay-strong)",
               transition: "border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
           >
             Try Ask Endall Free

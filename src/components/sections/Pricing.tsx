@@ -59,7 +59,7 @@ export default function Pricing() {
         <p
           style={{
             fontFamily: "var(--font-mono), monospace",
-            fontSize: 10,
+            fontSize: 13,
             textTransform: "uppercase",
             letterSpacing: 3,
             color: "var(--text-muted)",
@@ -72,15 +72,16 @@ export default function Pricing() {
         <h2
           style={{
             fontFamily: "var(--font-sans), sans-serif",
-            fontSize: 36,
+            fontSize: "clamp(28px, 5vw, 36px)",
             fontWeight: 600,
             letterSpacing: "-0.02em",
             color: "var(--text-primary)",
             textAlign: "center",
             marginBottom: 12,
+            whiteSpace: "nowrap",
           }}
         >
-          Priced for your team size.
+          Priced for your team.
         </h2>
         <p
           style={{

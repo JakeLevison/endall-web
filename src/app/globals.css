@@ -75,6 +75,11 @@
   --overlay-medium: rgba(0, 0, 0, 0.08);
   --overlay-strong: rgba(0, 0, 0, 0.15);
   --backdrop: rgba(0, 0, 0, 0.5);
+  /* Nav chrome — translucent backdrops that follow theme */
+  --nav-bg: rgba(255, 255, 255, 0.7);
+  --nav-menu-bg: rgba(255, 255, 255, 0.95);
+  --nav-fade: rgba(255, 255, 255, 1);
+  --nav-fade-mid: rgba(255, 255, 255, 0.8);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -128,6 +133,10 @@
   --overlay-medium: rgba(255, 255, 255, 0.08);
   --overlay-strong: rgba(255, 255, 255, 0.15);
   --backdrop: rgba(0, 0, 0, 0.5);
+  --nav-bg: rgba(0, 0, 0, 0.7);
+  --nav-menu-bg: rgba(0, 0, 0, 0.9);
+  --nav-fade: rgba(10, 10, 10, 1);
+  --nav-fade-mid: rgba(10, 10, 10, 0.8);
 
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -200,10 +209,10 @@ button:focus-visible {
 /* Chat markdown rendering */
 .chat-markdown p { margin: 0 0 8px 0; }
 .chat-markdown p:last-child { margin-bottom: 0; }
-.chat-markdown strong { color: #fff; font-weight: 600; }
+.chat-markdown strong { color: var(--text-primary); font-weight: 600; }
 .chat-markdown em { font-style: italic; }
 .chat-markdown h1, .chat-markdown h2, .chat-markdown h3 {
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
   margin: 12px 0 6px 0;
 }
@@ -231,23 +240,23 @@ button:focus-visible {
   width: 100%;
 }
 .chat-markdown th, .chat-markdown td {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--overlay-medium);
   padding: 6px 10px;
   text-align: left;
 }
 .chat-markdown th {
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  background: var(--overlay-soft);
+  color: var(--text-primary);
   font-weight: 500;
 }
 .chat-markdown code {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-medium);
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 13px;
 }
 .chat-markdown pre {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-soft);
   padding: 10px 12px;
   border-radius: 6px;
   overflow-x: auto;
@@ -311,7 +320,7 @@ button:focus-visible {
   left: 0;
   width: 0;
   height: 1px;
-  background: #fff;
+  background: var(--text-primary);
   transition: width 0.2s ease;
 }
 .nav-link-hover:hover::after {

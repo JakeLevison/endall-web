@@ -35,7 +35,7 @@ export default function UseCases() {
           <p
             style={{
               fontFamily: "var(--font-mono), monospace",
-              fontSize: "10px",
+              fontSize: "13px",
               textTransform: "uppercase",
               letterSpacing: "3px",
               color: "var(--text-muted)",
@@ -48,7 +48,7 @@ export default function UseCases() {
           <h2
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "36px",
+              fontSize: "clamp(28px, 5vw, 36px)",
               fontWeight: 600,
               letterSpacing: "-0.02em",
               color: "var(--text-primary)",
@@ -93,7 +93,7 @@ export default function UseCases() {
                           flexShrink: 0,
                         }}
                       >
-                        <Icon size={18} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+                        <Icon size={18} color="var(--text-tertiary)" strokeWidth={1.5} />
                       </div>
                       {s.badge && (
                         <span

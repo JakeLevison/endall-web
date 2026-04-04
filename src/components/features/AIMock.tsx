@@ -2,13 +2,13 @@
 
 export default function AIMock() {
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif", display: "flex", flexDirection: "column", gap: 10 }}>
+    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif", display: "flex", flexDirection: "column", gap: 10 }}>
       {/* User message */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <div
           style={{
             background: "var(--surface-hover)",
-            border: "1px solid #333",
+            border: "1px solid var(--border-hover)",
             borderRadius: "10px 10px 2px 10px",
             padding: "8px 12px",
             maxWidth: "80%",
@@ -22,8 +22,8 @@ export default function AIMock() {
       <div style={{ display: "flex", justifyContent: "flex-start" }}>
         <div
           style={{
-            background: "#151515",
-            border: "1px solid #222",
+            background: "var(--surface-hover)",
+            border: "1px solid var(--border)",
             borderRadius: "10px 10px 10px 2px",
             padding: "8px 12px",
             maxWidth: "85%",

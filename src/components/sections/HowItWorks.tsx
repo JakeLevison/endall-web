@@ -37,7 +37,7 @@ export default function HowItWorks() {
         <p
           style={{
             fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-            fontSize: 11,
+            fontSize: 13,
             textTransform: "uppercase",
             letterSpacing: "0.15em",
             color: "var(--text-muted)",
@@ -50,7 +50,7 @@ export default function HowItWorks() {
 
         <h2 style={{
           fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "36px",
+          fontSize: "clamp(28px, 5vw, 36px)",
           fontWeight: 600,
           letterSpacing: "-0.02em",
           color: "var(--text-primary)",
@@ -149,7 +149,7 @@ export default function HowItWorks() {
           left: 15%;
           right: 15%;
           height: 1px;
-          background: #222;
+          background: var(--border);
           container-type: inline-size;
         }
         .hiw-line-v {
@@ -163,7 +163,7 @@ export default function HowItWorks() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #fff;
+          background: var(--text-primary);
           will-change: transform;
         }
         .hiw-dot-v {
@@ -173,7 +173,7 @@ export default function HowItWorks() {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #fff;
+          background: var(--text-primary);
           will-change: transform;
         }
 
@@ -202,7 +202,7 @@ export default function HowItWorks() {
             top: 36px;
             bottom: 36px;
             width: 1px;
-            background: #222;
+            background: var(--border);
             container-type: size;
           }
         }

@@ -127,7 +127,7 @@ export default function Home() {
                 <p
                   style={{
                     fontFamily: "var(--font-mono), monospace",
-                    fontSize: "10px",
+                    fontSize: "13px",
                     textTransform: "uppercase",
                     letterSpacing: "3px",
                     color: "var(--text-muted)",
@@ -140,7 +140,7 @@ export default function Home() {
                 <h2
                   style={{
                     fontFamily: "var(--font-sans), sans-serif",
-                    fontSize: "36px",
+                    fontSize: "clamp(28px, 5vw, 36px)",
                     fontWeight: 600,
                     letterSpacing: "-0.02em",
                     color: "var(--text-primary)",
