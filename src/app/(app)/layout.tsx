@@ -156,15 +156,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("endall-file-ready", handleFileReady);
   }, []);
 
-  // Auto-open Ask Endall on first app load
-  useEffect(() => {
-    const seen = sessionStorage.getItem("endall-chat-shown");
-    if (!seen) {
-      setChatOpen(true);
-      sessionStorage.setItem("endall-chat-shown", "1");
-    }
-  }, []);
-
   const openChat = useCallback(() => setChatOpen(true), []);
 
   // Cmd+K to open chat
