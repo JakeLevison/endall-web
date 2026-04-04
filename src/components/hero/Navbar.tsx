@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -144,7 +145,8 @@ export default function Navbar() {
         </div>
 
         {/* Right section — fixed width to balance left section */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 160, justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 160, justifyContent: "flex-end" }}>
+          <ThemeToggle />
           <Link
             href="/dashboard/ask-endall"
             style={{

@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
@@ -228,6 +229,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2">
+          <ThemeToggle />
           {/* Compose email button */}
           <button
             onClick={() => setComposeOpen(true)}
