@@ -181,8 +181,7 @@ export default function AboutPage() {
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)" }}>
               Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan Stanley.
               He holds a B.A. in Philosophy, Politics, and Economics from the University
-              of Pennsylvania, where he played Division I baseball, and serves on the
-              Chairman&apos;s Council of New York Restoration Project.
+              of Pennsylvania, where he played Division I baseball.
             </p>
           </section>
 
