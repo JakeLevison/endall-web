@@ -108,7 +108,7 @@ function TestimonialsColumn({
                   <p
                     style={{
                       fontFamily: "var(--font-sans), sans-serif",
-                      fontSize: 14,
+                      fontSize: "clamp(16px, 1.5vw, 18px)",
                       lineHeight: 1.7,
                       color: "var(--text-tertiary)",
                       margin: 0,
@@ -127,7 +127,7 @@ function TestimonialsColumn({
                     <cite
                       style={{
                         fontFamily: "var(--font-sans), sans-serif",
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: 600,
                         fontStyle: "normal",
                         color: "var(--text-primary)",
@@ -139,7 +139,7 @@ function TestimonialsColumn({
                     <span
                       style={{
                         fontFamily: "var(--font-sans), sans-serif",
-                        fontSize: 12,
+                        fontSize: 13,
                         color: "var(--text-muted)",
                       }}
                     >
@@ -205,7 +205,7 @@ export default function Testimonials() {
         <p
           style={{
             fontFamily: "var(--font-sans), sans-serif",
-            fontSize: 16,
+            fontSize: 18,
             color: "var(--text-tertiary)",
             textAlign: "center",
             maxWidth: 480,

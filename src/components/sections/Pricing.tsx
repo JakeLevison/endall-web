@@ -86,7 +86,7 @@ export default function Pricing() {
         <p
           style={{
             fontFamily: "var(--font-sans), sans-serif",
-            fontSize: 16,
+            fontSize: 18,
             color: "var(--text-tertiary)",
             textAlign: "center",
             maxWidth: 480,
@@ -147,7 +147,7 @@ export default function Pricing() {
               <p
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 14,
+                  fontSize: 16,
                   color: "var(--text-tertiary)",
                   lineHeight: 1.6,
                   marginBottom: 24,
@@ -162,7 +162,7 @@ export default function Pricing() {
                     key={feat}
                     style={{
                       fontFamily: "var(--font-sans), sans-serif",
-                      fontSize: 13,
+                      fontSize: 16,
                       color: "var(--text-secondary)",
                       padding: "6px 0",
                       display: "flex",
@@ -196,7 +196,7 @@ export default function Pricing() {
                   display: "block",
                   textAlign: "center",
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: 500,
                   padding: "12px 24px",
                   borderRadius: 8,

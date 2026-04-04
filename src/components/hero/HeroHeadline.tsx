@@ -155,7 +155,7 @@ export default function HeroHeadline() {
         {...fadeUp(0.3)}
         style={{
           fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "clamp(15px, 3vw, 18px)",
+          fontSize: "clamp(16px, 3vw, 20px)",
           color: "var(--text-tertiary)",
           maxWidth: "560px",
           margin: "24px auto 0",
@@ -172,7 +172,7 @@ export default function HeroHeadline() {
             style={{
               display: "inline-block",
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "14px",
+              fontSize: "16px",
               fontWeight: 500,
               color: "var(--text-inverse)",
               backgroundColor: "var(--surface-inverse)",
@@ -193,7 +193,7 @@ export default function HeroHeadline() {
             style={{
               display: "inline-block",
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "14px",
+              fontSize: "16px",
               fontWeight: 500,
               color: "var(--text-primary)",
               backgroundColor: "transparent",

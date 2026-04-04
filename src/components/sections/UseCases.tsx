@@ -115,7 +115,7 @@ export default function UseCases() {
                     <p
                       style={{
                         fontFamily: "var(--font-sans), sans-serif",
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: 600,
                         color: "var(--text-primary)",
                         lineHeight: 1.3,
@@ -126,7 +126,7 @@ export default function UseCases() {
                     <p
                       style={{
                         fontFamily: "var(--font-sans), sans-serif",
-                        fontSize: 14,
+                        fontSize: 16,
                         color: "var(--text-tertiary)",
                         lineHeight: 1.7,
                       }}

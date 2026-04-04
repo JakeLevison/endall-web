@@ -68,7 +68,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
         <p
           style={{
             fontFamily: "var(--font-sans), sans-serif",
-            fontSize: 14,
+            fontSize: 16,
             color: "var(--text-tertiary)",
             lineHeight: 1.5,
             margin: 0,

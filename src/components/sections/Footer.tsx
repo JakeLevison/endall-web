@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        borderTop: "1px solid #222",
+        borderTop: "1px solid var(--border)",
         padding: "24px 16px",
         background: "var(--bg)",
       }}
@@ -42,7 +42,7 @@ export default function Footer() {
               href={link.href}
               style={{
                 fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-                fontSize: 11,
+                fontSize: 14,
                 color: "var(--text-muted)",
                 textDecoration: "none",
                 transition: "color 0.2s ease",
@@ -61,7 +61,7 @@ export default function Footer() {
         <span
           style={{
             fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-            fontSize: 11,
+            fontSize: 14,
             color: "var(--text-muted)",
           }}
         >

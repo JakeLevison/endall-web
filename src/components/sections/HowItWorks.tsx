@@ -122,7 +122,7 @@ export default function HowItWorks() {
               <p
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 15,
+                  fontSize: 17,
                   color: "var(--text-tertiary)",
                   lineHeight: 1.5,
                   margin: 0,

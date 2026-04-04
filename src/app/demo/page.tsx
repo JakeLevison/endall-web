@@ -26,7 +26,7 @@ const TEAM_SIZE_OPTIONS = [
 
 const inputStyle: React.CSSProperties = {
   fontFamily: "var(--font-sans), sans-serif",
-  fontSize: 14,
+  fontSize: 16,
   padding: "14px 16px",
   background: "var(--overlay-soft)",
   border: "1px solid var(--overlay-medium)",
@@ -226,7 +226,7 @@ export default function DemoPage() {
                       <p
                         style={{
                           fontFamily: "var(--font-sans), sans-serif",
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: 500,
                           color: "var(--text-primary)",
                           marginBottom: 2,
@@ -360,7 +360,7 @@ export default function DemoPage() {
                     disabled={submitting}
                     style={{
                       fontFamily: "var(--font-sans), sans-serif",
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: 500,
                       padding: "14px 32px",
                       background: submitting ? "var(--text-tertiary)" : "var(--text-primary)",

@@ -79,7 +79,7 @@ export default function Navbar() {
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
+              fontSize: "16px",
               color: "var(--text-tertiary)",
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -96,7 +96,7 @@ export default function Navbar() {
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
+              fontSize: "16px",
               color: "var(--text-tertiary)",
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -113,7 +113,7 @@ export default function Navbar() {
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
+              fontSize: "16px",
               color: "var(--text-tertiary)",
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -130,7 +130,7 @@ export default function Navbar() {
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
+              fontSize: "16px",
               color: "var(--text-tertiary)",
               textDecoration: "none",
               transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -151,7 +151,7 @@ export default function Navbar() {
             href="/dashboard/ask-endall"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "13px",
+              fontSize: "16px",
               fontWeight: 500,
               color: "var(--text-inverse)",
               backgroundColor: "var(--surface-inverse)",
@@ -262,7 +262,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "15px",
+              fontSize: "16px",
               color: "var(--text-secondary)",
               textDecoration: "none",
               minHeight: "44px",
@@ -277,7 +277,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "15px",
+              fontSize: "16px",
               color: "var(--text-secondary)",
               textDecoration: "none",
               minHeight: "44px",
@@ -292,7 +292,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "15px",
+              fontSize: "16px",
               color: "var(--text-secondary)",
               textDecoration: "none",
               minHeight: "44px",
@@ -307,7 +307,7 @@ export default function Navbar() {
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "15px",
+              fontSize: "16px",
               color: "var(--text-secondary)",
               textDecoration: "none",
               minHeight: "44px",

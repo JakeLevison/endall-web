@@ -81,7 +81,7 @@ export default function ContactPage() {
               <p
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 14,
+                  fontSize: 16,
                   color: "var(--text-tertiary)",
                 }}
               >
@@ -123,7 +123,7 @@ export default function ContactPage() {
                   style={{
                     flex: "1 1 200px",
                     fontFamily: "var(--font-sans), sans-serif",
-                    fontSize: 14,
+                    fontSize: 16,
                     padding: "14px 16px",
                     background: "var(--overlay-soft)",
                     border: "1px solid var(--overlay-medium)",
@@ -140,7 +140,7 @@ export default function ContactPage() {
                   style={{
                     flex: "1 1 200px",
                     fontFamily: "var(--font-sans), sans-serif",
-                    fontSize: 14,
+                    fontSize: 16,
                     padding: "14px 16px",
                     background: "var(--overlay-soft)",
                     border: "1px solid var(--overlay-medium)",
@@ -157,7 +157,7 @@ export default function ContactPage() {
                 rows={5}
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 14,
+                  fontSize: 16,
                   padding: "14px 16px",
                   background: "var(--overlay-soft)",
                   border: "1px solid var(--overlay-medium)",
@@ -177,7 +177,7 @@ export default function ContactPage() {
                 disabled={submitting}
                 style={{
                   fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: 500,
                   padding: "14px 32px",
                   background: submitting ? "var(--text-tertiary)" : "var(--text-primary)",
@@ -217,7 +217,7 @@ export default function ContactPage() {
               href="mailto:jake@endall.ai"
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
-                fontSize: 14,
+                fontSize: 16,
                 color: "var(--text-tertiary)",
                 textDecoration: "none",
                 transition: "color 0.2s",

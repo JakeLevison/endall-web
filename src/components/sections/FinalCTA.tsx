@@ -87,7 +87,7 @@ export default function FinalCTA() {
               color: "var(--text-inverse)",
               padding: "14px 32px",
               borderRadius: 8,
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: 500,
               textDecoration: "none",
               fontFamily: "var(--font-sans), sans-serif",

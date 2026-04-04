@@ -54,7 +54,7 @@ export default function TermsPage() {
           <div
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: 15,
+              fontSize: 16,
               color: "var(--text-secondary)",
               lineHeight: 1.7,
             }}
