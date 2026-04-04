@@ -211,18 +211,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               endall
             </Link>
 
-            {/* AI Chat trigger — pill on mobile, full bar on desktop */}
-            <button
-              onClick={() => setChatOpen(true)}
-              className="flex items-center gap-1.5 text-[13px] transition-colors min-h-[36px] px-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]"
-            >
-              <Sparkles className="size-3.5 shrink-0" />
-              <span className="sm:hidden text-[12px]">AI</span>
-              <span className="hidden sm:inline">ask endall...</span>
-              <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] text-zinc-700 bg-white/[0.03] border border-white/[0.06] rounded ml-1">
-                <span className="text-xs">&#8984;</span>K
-              </kbd>
-            </button>
+            {/* AI Chat trigger — hidden on Ask Endall page (redundant there) */}
+            {!pathname.startsWith("/dashboard/ask-endall") && (
+              <button
+                onClick={() => setChatOpen(true)}
+                className="flex items-center gap-1.5 text-[13px] transition-colors min-h-[36px] px-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]"
+              >
+                <Sparkles className="size-3.5 shrink-0" />
+                <span className="sm:hidden text-[12px]">AI</span>
+                <span className="hidden sm:inline">ask endall...</span>
+                <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] text-zinc-700 bg-white/[0.03] border border-white/[0.06] rounded ml-1">
+                  <span className="text-xs">&#8984;</span>K
+                </kbd>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
