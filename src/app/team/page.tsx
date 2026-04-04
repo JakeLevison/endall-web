@@ -162,12 +162,27 @@ export default function AboutPage() {
                 </a>
               </div>
             </div>
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
               Before founding Endall, Jake spent six years as Director of Business
-              Development at Post Harvest Technologies, leading capital formation, deal
-              origination, and investor relations. Across PHT&apos;s portfolio companies, he
-              saw the same pattern: owners running growing service businesses with no one
-              covering the front office. That gap is what led him to start Endall.
+              Development at Post Harvest Technologies, a private investment and operating
+              platform dedicated to post-harvest infrastructure and logistics. He led
+              capital formation, deal origination, and investor relations {'\u2014'} building
+              institutional relationships and advancing transactions across acquisitions,
+              real estate, and development.
+            </p>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
+              Working closely with PHT&apos;s portfolio companies and their operations teams,
+              he saw the same pattern everywhere: skilled operators losing bids, missing
+              calls, and leaving money on the table because no one was covering the back
+              office. The tools they needed either didn&apos;t exist or cost ten times what a
+              growing service business could justify. That gap is what led him to start
+              Endall.
+            </p>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+              Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan Stanley.
+              He holds a B.A. in Philosophy, Politics, and Economics from the University
+              of Pennsylvania, where he played Division I baseball, and serves on the
+              Chairman&apos;s Council of New York Restoration Project.
             </p>
           </section>
 
