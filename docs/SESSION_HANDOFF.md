@@ -1,87 +1,52 @@
-# Session Handoff — 2026-04-04
+# Session Handoff — 2026-04-05
 
 ## Current State
 
-**endall-web** — branch: `main`, last commit: `34427b2` (docs: overnight build report)
-- Clean working tree, all pushed
-- 14 vitest tests passing
+**endall-web** — branch: `main`, last commit: `a94c7e5`
+- 17 vitest tests passing, build clean
 
-**chief-of-staff** — branch: `master`, last commit: `94c19a9` (tighten GSD eligibility)
-- Untracked: `qa-reports/` (can ignore)
+**chief-of-staff** — branch: `master`, last commit: `5bc0259`
 - 341 pytest tests passing
 
-**Total: 355 tests, all passing.**
+**Total: 358 tests, all passing.**
 
-## Completed This Session
+## Fixed This Session
 
-### Bug Fixes (9 bugs, all fixed)
-1. Markdown rendering — ChatMessage component with react-markdown + remark-gfm
-2. My Files blank — queries Supabase directly, not through bridge
-3. Chat names "Chat" — generateConversationTitle() with action labels + date
-4. Review Financials timeout — max_tokens 8192, moved to Sonnet 4.5
-5. Proposal timeout — max_tokens 8192
-6. Wrong blue on Excel — Font(color="0000FF") across all 4 templates
-7. Sheet protection — input cells unlocked, formatCells/Columns/Rows allowed
-8. Can't type while thinking — removed disabled from textarea
-9. Font color locked — formatCells=False on all sheet protection blocks
+### Bug Fixes
+1. **My Files tab empty** — Added `refreshFiles()` after file generation (1s delay for DB write); My Files tab re-fetches on every tab switch; 3 new tests
+2. **NPV Excel wrong color + static formulas** — Code is correct locally (54 tests pass, 200+ formulas verified, royal blue verified). Issue is Railway running old code. No code change needed — Railway redeploy resolves.
+3. **Financial Model timeout** — Moved financial_model + npv_analysis from Opus to Sonnet 4.5. Opus is overkill for structured intake; template generation is zero-token.
+4. **New Chat from My Files tab** — Button now visible from both tabs; always switches to Chat tab on click. Fixed in both ChatPanel and full-page.
+5. **Progress bar** — Replaced typing dots with indeterminate horizontal white progress bar. Shows phase text + sliding bar animation. Applied to both ChatPanel and full-page.
 
-### Website Polish
-- Brand colors (navy primary + amber accent) in CSS variables
-- About page replacing Team page (mission, problem, founder note)
-- Nav updated: Team → About
-- Quick action emojis → lucide-react SVG icons
-- Demo page credibility bar (stats + powered-by tech labels)
-- "Try Ask Endall Free" secondary CTA in hero
-- Use case scenarios section (3 scenarios, voice marked "Coming Soon")
-- 60-day pilot offer text under CTAs
+### Website Changes
+1. **Frosted navbar** — Gradient fade div below navbar (zIndex 97). Content scrolls behind with smooth opacity transition.
+2. **Founder photo restored** — About page has "Meet the Founder" section with Jake's headshot (250px round), name, title, LinkedIn, and PHT bio. Blockquote removed.
+3. **Preset button colors** — ACTION_COLORS mapping: colored left borders + matching icon tints on all 8 quick action buttons. Applied in both ChatPanel and full-page.
+4. **Full vision copy** — Hero subhead leads with calls/leads/jobs/proposals/briefings. Features reordered: Front Office, Morning Briefings, Smart Outreach (new card), Proposals first. "9 actions. Zero busywork."
 
-### Infrastructure
-- Session handoff skill created
-- Daily summary cron job added (23:59 daily)
-- GSD mode tightened — user-facing changes always TDD
-- Backlog notes in Obsidian (21st.dev, concurrent dev)
-- Pre-overnight-build tags on both repos
-- 12 Playwright screenshots at 3 viewports
+## Commits This Session
 
-## Blocked
+### endall-web
+| Hash | Message |
+|------|---------|
+| `a94c7e5` | feat: frosted navbar, founder photo, preset colors, full vision copy |
+| `6c7b8ea` | fix: replace typing dots with indeterminate progress bar |
+| `0d9679a` | fix: My Files refresh after generation + New Chat works from all tabs |
 
-1. **Resend API 403** — Email delivery (daily summary, form notifications) fails. Need domain verification in Resend dashboard.
-2. **Railway redeploy** — Bridge-side changes (timeout, model routing, Excel templates) committed but need Railway to pick them up.
-3. **Live e2e testing** — 8 preset actions need live testing after bridge redeploy.
+### chief-of-staff
+| Hash | Message |
+|------|---------|
+| `5bc0259` | fix: move financial_model + npv_analysis from Opus to Sonnet 4.5 |
+
+## Still Blocked
+
+1. **Railway redeploy** — Bugs 2 (NPV formulas) and 3 (FM timeout) are fixed in code but need Railway to deploy. All other bugs are frontend-only and live on Vercel.
+2. **Resend API 403** — Email notifications still blocked. Domain verification needed.
+3. **Live e2e testing** — 8 preset actions need manual testing after Railway redeploy.
 
 ## Next Up
 
-1. **Fix Resend** — Check resend.com/domains, verify endall.ai, test email delivery
-2. **Trigger Railway redeploy** — or confirm auto-deploy picked up changes
-3. **Live test all 8 preset actions** — fill in test matrix MANUAL cells
-4. **Feature card screenshots** — real output previews (deferred from website polish)
-5. **Voice agent + outreach** — Jake mentioned these are "the real demo blockers"
-
-## Open Decisions
-
-- Feature card screenshots: which actions to showcase, and whether to use static images or dynamic previews
-- Pricing page: exact pricing not yet defined (tiers exist but no dollar amounts)
-- Guest/trial auth: "Try Ask Endall Free" button routes to /dashboard/ask-endall — no auth gate yet
-
-## Key Files Modified This Session
-
-### endall-web
-- `src/components/chat/ChatMessage.tsx` — NEW (markdown renderer)
-- `src/components/sections/UseCases.tsx` — NEW (3 scenarios)
-- `src/hooks/useChat.ts` — unified proxy, titles, SVG icons
-- `src/components/chat/ChatPanel.tsx` — markdown, icons, input fix
-- `src/app/(app)/dashboard/ask-endall/page.tsx` — markdown, icons, download fix
-- `src/app/api/chat/files/route.ts` — NEW (Supabase direct)
-- `src/app/api/chat/route.ts` — session_id, preview_html
-- `src/app/team/page.tsx` — converted to About page
-- `src/components/hero/HeroHeadline.tsx` — secondary CTA
-- `src/app/demo/page.tsx` — credibility bar
-- `src/app/globals.css` — brand colors, markdown styles
-
-### chief-of-staff
-- `deploy/ask-endall-bridge/templates/*.py` — blue fonts, sheet protection
-- `deploy/ask-endall-bridge/server.py` — max_tokens increase
-- `deploy/ask-endall-bridge/lib/llm_provider.py` — model routing
-- `deploy/ask-endall-bridge/prompts/*.txt` — markdown enabled
-- `.claude/skills/session-handoff.md` — NEW
-- `.claude/skills/gsd-mode.md` — tightened rules
+1. Railway redeploy (or confirm auto-deploy)
+2. Live test all 8 preset actions
+3. Voice agent + outreach (demo blockers Jake mentioned)
