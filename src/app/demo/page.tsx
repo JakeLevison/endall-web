@@ -120,7 +120,7 @@ export default function DemoPage() {
                   marginBottom: 12,
                 }}
               >
-                Built for the $1.5 trillion data center and infrastructure buildout
+                Built for MEP contractors running real operations
               </p>
               <div
                 style={{
@@ -138,7 +138,7 @@ export default function DemoPage() {
                 <span style={{ margin: "0 10px", opacity: 0.4 }}>&middot;</span>
                 <span>Real Excel formulas</span>
                 <span style={{ margin: "0 10px", opacity: 0.4 }}>&middot;</span>
-                <span>60-day free pilot</span>
+                <span>Personalized walkthrough</span>
               </div>
               <div
                 style={{
@@ -200,8 +200,8 @@ export default function DemoPage() {
               {/* Trust signals */}
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                 {[
-                  { label: "Built for MEP contractors", detail: "HVAC, plumbing, electrical, mechanical — not a generic SaaS." },
-                  { label: "Live in under a week", detail: "We take care of setup and data migration." },
+                  { label: "Built for MEP contractors", detail: "Plumbing, electrical, mechanical — not a generic SaaS." },
+                  { label: "Tailored to your operation", detail: "We configure Endall around your trade, team size, and workflow." },
                 ].map((item) => (
                   <div key={item.label} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                     <div

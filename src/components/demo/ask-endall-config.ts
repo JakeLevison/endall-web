@@ -26,10 +26,10 @@ export const askEndallDemo: DemoConfig = {
       id: "enter-data",
       target: "[data-demo='chat-input']",
       title: "Provide project details",
-      description: "Type your project details. We'll use a sample: a $2.4M data center HVAC subcontract.",
+      description: "Type your project details. We'll use a sample: a $2.4M data center mechanical subcontract.",
       placement: "top",
       action: "type",
-      typedText: "Analyze a $2.4M data center HVAC subcontract. 18 months, 30% labor, 25% materials, 20% subs. Discount rate 10%.",
+      typedText: "Analyze a $2.4M data center mechanical subcontract. 18 months, 30% labor, 25% materials, 20% subs. Discount rate 10%.",
     },
     {
       id: "watch-generation",

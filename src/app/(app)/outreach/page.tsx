@@ -285,7 +285,7 @@ export default function OutreachPage() {
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <Send className="size-8 text-zinc-700 mb-3" />
           <p className="text-[13px] text-zinc-500 mb-1">No prospects yet</p>
-          <p className="text-[11px] text-zinc-600">Add HVAC companies to start your outreach campaign.</p>
+          <p className="text-[11px] text-zinc-600">Add companies to start your outreach campaign.</p>
         </div>
       ) : (
         <div className="border border-white/[0.04] rounded-lg overflow-hidden overflow-x-auto">
@@ -350,7 +350,7 @@ export default function OutreachPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Company name</Label>
-              <Input value={newCompany} onChange={(e) => setNewCompany(e.target.value)} placeholder="Greenleaf HVAC" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Input value={newCompany} onChange={(e) => setNewCompany(e.target.value)} placeholder="Greenleaf Mechanical" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
             </div>
             <div>
               <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Contact name</Label>

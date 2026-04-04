@@ -3,7 +3,7 @@
 const teams = [
   "Electrical Contractors",
   "MEP Firms",
-  "HVAC Companies",
+  "Mechanical Contractors",
   "Plumbing Contractors",
   "Fire Protection",
   "Data Center Subcontractors",

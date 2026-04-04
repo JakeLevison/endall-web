@@ -81,7 +81,7 @@ export default function InteractiveDemoPage() {
         id: String(Date.now() + 1),
         role: "assistant",
         content: "Your NPV analysis is ready. Here's what I built:\n\n- **6 tabs**: How to Use, Assumptions, Cash Flow, Sensitivity, Summary, Executive Summary\n- **268 live formulas** — all dynamic, all editable\n- **Go/No-Go recommendation** based on your inputs\n- **Sensitivity analysis** at +10%, +20%, +30% cost overruns\n\nThe file is ready to download below.",
-        files: [{ filename: "NPV_DataCenter_HVAC_2026.xlsx" }],
+        files: [{ filename: "NPV_DataCenter_Mechanical_2026.xlsx" }],
       }]);
     }, 6000);
   }, [input]);

@@ -218,7 +218,7 @@ export default function HeroHeadline() {
             color: "var(--text-muted)",
           }}
         >
-          60-day free pilot. No credit card.
+          Request a demo. See it on your own jobs.
         </p>
       </motion.div>
 

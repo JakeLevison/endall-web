@@ -39,3 +39,21 @@
 - Save outputs to disk, not inline
 - Truncate command output: `| tail -15`
 - YAGNI enforced by TDD -- no speculative code
+
+## UI Copy Hard Rules -- Never Violate
+
+BANNED from all website, dashboard, and demo UI:
+- "60-day free pilot" or any variation
+- "free trial" or "free pilot"
+- "No credit card"
+- "data migration"
+- "Live in under a week"
+- "HVAC" (not part of MEP positioning -- use "mechanical" instead)
+- "$1.5 trillion" or buildout statistics
+- "Endall AI" (always "Endall")
+- "software" (always "platform" or "ops team")
+- "handles/handle/handling"
+
+Pilot offer (60 days free, $199/month after, no contract) appears ONLY in Email 3 of the outreach sequence in chief-of-staff. Never on the website.
+
+Enforced by pre-commit hook in `.husky/pre-commit` -- build will fail if banned phrases appear in src/.

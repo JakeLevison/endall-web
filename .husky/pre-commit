@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Banned marketing copy — pilot offers, positioning violations, and restricted terms.
+# Pilot language is ONLY permitted in Email 3 of the outreach sequence (chief-of-staff repo).
+# See CLAUDE.md "UI Copy Hard Rules" for full rationale.
+
+BANNED="60-day free pilot|60 day free pilot|free trial|free pilot|No credit card|data migration|Live in under a week"
+
+if grep -rE "$BANNED" src/ --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js"; then
+  echo ""
+  echo "❌ Banned marketing copy found in src/. Remove before committing."
+  echo "   See CLAUDE.md → UI Copy Hard Rules for the full list."
+  exit 1
+fi
