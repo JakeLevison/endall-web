@@ -17,6 +17,7 @@ export default function FeatureCard({ label, title, description, children }: Fea
     <motion.div
       whileHover={prefersReducedMotion ? {} : { y: -4 }}
       transition={{ duration: 0.2 }}
+      style={{ height: "100%" }}
     >
       <div
         className="feature-card"
@@ -27,6 +28,9 @@ export default function FeatureCard({ label, title, description, children }: Fea
           padding: 24,
           transition: "border-color 0.3s ease",
           cursor: "default",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* Mock UI */}

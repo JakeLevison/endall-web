@@ -155,7 +155,7 @@ export default function Home() {
                   style={{ gap: "12px" }}
                 >
                   {features.map((feature, i) => (
-                    <ScrollReveal key={feature.label} delay={i * 80}>
+                    <ScrollReveal key={feature.label} delay={i * 80} className="h-full">
                       <FeatureCard
                         label={feature.label}
                         title={feature.title}
