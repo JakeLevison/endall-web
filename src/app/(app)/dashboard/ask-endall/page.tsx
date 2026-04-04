@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
+import ChatMessage from "@/components/chat/ChatMessage";
 
 
 export default function AskEndallPage() {
@@ -429,10 +430,9 @@ export default function AskEndallPage() {
                       fontSize: 15,
                       color: msg.role === "user" ? "#fff" : "#ccc",
                       lineHeight: 1.65,
-                      whiteSpace: "pre-wrap",
                     }}
                   >
-                    {msg.content}
+                    <ChatMessage role={msg.role} content={msg.content} />
                   </div>
                   {msg.previewHtml && (
                     <div style={{ marginTop: 10 }}>

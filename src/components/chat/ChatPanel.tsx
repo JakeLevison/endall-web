@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, FileSpreadsheet, FileText, File } from "lucide-react";
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
+import ChatMessage from "./ChatMessage";
 
 
 interface ChatPanelProps {
@@ -348,10 +349,9 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                     fontSize: 15,
                     color: msg.role === "user" ? "#fff" : "#ccc",
                     lineHeight: 1.65,
-                    whiteSpace: "pre-wrap",
                   }}
                 >
-                  {msg.content}
+                  <ChatMessage role={msg.role} content={msg.content} />
                 </div>
                 {msg.previewHtml && (
                   <div style={{ marginTop: 10 }}>
