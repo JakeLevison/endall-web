@@ -51,3 +51,4 @@ supabase/seed*.py
 /qa-reports/
 /security-reports/
 /screenshots/qa/
+.mcp.json
