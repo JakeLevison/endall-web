@@ -52,6 +52,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || !input.trim()) return;
     sendMessage(input);
     setInput("");
   };
@@ -59,6 +60,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      if (loading || !input.trim()) return;
       sendMessage(input);
       setInput("");
     }
@@ -461,8 +463,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask anything..."
-            disabled={loading}
+            placeholder={loading ? "Type your next message..." : "Ask anything..."}
             rows={3}
             style={{
               flex: 1,
