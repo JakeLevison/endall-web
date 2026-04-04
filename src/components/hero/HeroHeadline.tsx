@@ -151,7 +151,7 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        Financial models, proposals, project estimates, and competitive analysis — plus call answering, lead qualification, and morning briefings. One platform runs your entire operation.
+        Answers your calls. Qualifies leads. Books jobs. Sends proposals. Runs your morning briefing. One platform runs your entire operation.
       </p>
 
       <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>

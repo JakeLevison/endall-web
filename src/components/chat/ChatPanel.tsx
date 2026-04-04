@@ -11,10 +11,21 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: Reac
   BarChart3, Wallet, FileText, TrendingUp, Wrench, FileEdit, Search, CheckCircle,
 };
 
-function QuickActionIcon({ name }: { name: string }) {
+const ACTION_COLORS: Record<string, string> = {
+  financial_model: "#3b82f6",
+  generate_budget: "#10b981",
+  capabilities_doc: "#8b5cf6",
+  npv_analysis: "#f59e0b",
+  project_estimate: "#ef4444",
+  proposal: "#06b6d4",
+  competitive_analysis: "#f97316",
+  review_financials: "#84cc16",
+};
+
+function QuickActionIcon({ name, color }: { name: string; color?: string }) {
   const Icon = ICON_MAP[name];
   if (!Icon) return <span style={{ fontSize: 16 }}>{name}</span>;
-  return <Icon size={16} style={{ color: "#888", flexShrink: 0 }} />;
+  return <Icon size={16} style={{ color: color || "#888", flexShrink: 0 }} />;
 }
 
 interface ChatPanelProps {
@@ -312,6 +323,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                       padding: "10px 12px",
                       background: "rgba(255,255,255,0.02)",
                       border: "1px solid rgba(255,255,255,0.06)",
+                      borderLeft: `3px solid ${ACTION_COLORS[action.id] || "#333"}`,
                       borderRadius: 8,
                       cursor: "pointer",
                       textAlign: "left",
@@ -324,7 +336,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                       (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
                     }
                   >
-                    <QuickActionIcon name={action.icon} />
+                    <QuickActionIcon name={action.icon} color={ACTION_COLORS[action.id]} />
                     <div>
                       <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>
                         {action.label}

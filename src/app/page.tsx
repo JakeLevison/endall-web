@@ -36,6 +36,20 @@ const features = [
     mock: <TasksMock />,
   },
   {
+    label: "Smart Outreach",
+    title: "Automated follow-ups that close jobs.",
+    description:
+      "Sequences that send the right message at the right time. Follow up on open bids, re-engage past customers, and nurture leads without lifting a finger.",
+    mock: <SequencesMock />,
+  },
+  {
+    label: "Proposals",
+    title: "Scoped SOW with pricing in minutes.",
+    description:
+      "Branded DOCX with executive summary, scope of work, timeline, pricing pulled from your estimate, terms, and company info.",
+    mock: <SequencesMock />,
+  },
+  {
     label: "Financial Models",
     title: "P&L, cash flow, job margins, KPI dashboard.",
     description:
@@ -55,13 +69,6 @@ const features = [
     description:
       "Describe the job and get a 4-tab Excel workbook: summary, itemized detail with formulas, schedule, and margin calculations.",
     mock: <WorkflowsMock />,
-  },
-  {
-    label: "Proposals",
-    title: "Scoped SOW with pricing in minutes.",
-    description:
-      "Branded DOCX with executive summary, scope of work, timeline, pricing pulled from your estimate, terms, and company info.",
-    mock: <SequencesMock />,
   },
   {
     label: "Competitive Analysis",
@@ -145,7 +152,7 @@ export default function Home() {
                     marginBottom: "48px",
                   }}
                 >
-                  8 actions. Zero busywork.
+                  9 actions. Zero busywork.
                 </h2>
                 <div
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"

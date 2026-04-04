@@ -3,6 +3,7 @@
 import Navbar from "@/components/hero/Navbar";
 import Footer from "@/components/sections/Footer";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AboutPage() {
   return (
@@ -118,7 +119,7 @@ export default function AboutPage() {
             }}
           />
 
-          {/* Founder note */}
+          {/* Meet the Founder */}
           <section style={{ marginBottom: 48 }}>
             <h2
               style={{
@@ -126,37 +127,48 @@ export default function AboutPage() {
                 fontSize: 18,
                 fontWeight: 600,
                 color: "#ffffff",
-                marginBottom: 16,
+                marginBottom: 24,
               }}
             >
-              A note from the founder
+              Meet the Founder
             </h2>
-            <div
-              style={{
-                padding: "24px",
-                background: "rgba(255, 255, 255, 0.02)",
-                border: "1px solid rgba(255, 255, 255, 0.06)",
-                borderRadius: 12,
-              }}
-            >
-              <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
-                I come from operations and finance. Before Endall, I spent years watching
-                skilled contractors lose time on work that had nothing to do with their
-                trade -- formatting spreadsheets, chasing numbers, writing proposals from
-                scratch every time. The tools they were offered were either too generic or
-                too expensive.
-              </p>
-              <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
-                Endall is the AI ops team I wish those contractors had. It produces real
-                deliverables -- Excel workbooks with live formulas, branded proposals,
-                competitive reports with sources -- not summaries or suggestions. The goal
-                is simple: give every MEP contractor the operational capacity of a firm ten
-                times their size.
-              </p>
-              <p style={{ fontSize: 14, color: "var(--text-tertiary)" }}>
-                -- Jake Levison, Founder
-              </p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 20 }}>
+              <Image
+                src="/jake-headshot.png"
+                alt="Jake Levison"
+                width={250}
+                height={250}
+                style={{ borderRadius: "50%", objectFit: "cover" }}
+              />
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: 18, fontWeight: 600, color: "#ffffff", marginBottom: 4 }}>
+                  Jake Levison
+                </p>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>
+                  Founder
+                </p>
+                <a
+                  href="https://www.linkedin.com/in/jakelevison/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Jake Levison on LinkedIn"
+                  style={{ color: "var(--text-tertiary)", transition: "color 200ms" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#0a66c2")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                </a>
+              </div>
             </div>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+              Before founding Endall, Jake spent six years as Director of Business
+              Development at Post Harvest Technologies, leading capital formation, deal
+              origination, and investor relations. Across PHT&apos;s portfolio companies, he
+              saw the same pattern: owners running growing service businesses with no one
+              covering the front office. That gap is what led him to start Endall.
+            </p>
           </section>
 
           {/* CTA */}
