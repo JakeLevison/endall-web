@@ -186,7 +186,16 @@ button:focus-visible {
   margin: 6px 0;
   padding-left: 20px;
 }
-.chat-markdown li { margin: 2px 0; }
+/* Tailwind v4 preflight strips list-style — restore for markdown output */
+.chat-markdown ul { list-style: disc outside; }
+.chat-markdown ol { list-style: decimal outside; }
+.chat-markdown li { margin: 2px 0; display: list-item; }
+.chat-markdown ul ul, .chat-markdown ol ol,
+.chat-markdown ul ol, .chat-markdown ol ul {
+  margin: 2px 0;
+  padding-left: 20px;
+}
+.chat-markdown ul ul { list-style: circle outside; }
 .chat-markdown table {
   border-collapse: collapse;
   margin: 8px 0;
