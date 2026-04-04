@@ -60,6 +60,33 @@ export const QUICK_ACTIONS = [
   { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
 ];
 
+// Short titles for sidebar conversation naming
+const ACTION_TITLES: Record<string, string> = {
+  financial_model: "Financial Model",
+  generate_budget: "Budget",
+  capabilities_doc: "Capabilities Doc",
+  npv_analysis: "NPV Analysis",
+  project_estimate: "Project Estimate",
+  proposal: "Proposal",
+  competitive_analysis: "Competitive Analysis",
+  review_financials: "Review Financials",
+};
+
+export function generateConversationTitle(action: string | undefined, text: string): string {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  if (action && ACTION_TITLES[action]) {
+    return `${ACTION_TITLES[action]} — ${dateStr}`;
+  }
+
+  if (text.trim()) {
+    return text.trim().slice(0, 40);
+  }
+
+  return `Chat — ${dateStr}`;
+}
+
 // ---------------------------------------------------------------------------
 // localStorage helpers
 // ---------------------------------------------------------------------------
@@ -385,7 +412,7 @@ export function useChat(options: UseChatOptions = {}) {
         }
 
         // Non-blocking Supabase sync
-        const title = newMessages[0]?.content?.replace(/^\[.*?\]\s*/, "").slice(0, 50) || "Chat";
+        const title = generateConversationTitle(action || currentWorkflow || undefined, text);
         syncToSupabase(conversationId, allMessages, title);
       } catch (err) {
         const errorMsg =
