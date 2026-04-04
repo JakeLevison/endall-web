@@ -320,7 +320,7 @@ export function useChat(options: UseChatOptions = {}) {
         id: generateId(),
         role: "user",
         content: action
-          ? `[${QUICK_ACTIONS.find((a) => a.id === action)?.label}] ${text || ""}`
+          ? `${QUICK_ACTIONS.find((a) => a.id === action)?.label}${text ? ` — ${text}` : ""}`
           : text,
         timestamp: new Date().toISOString(),
       };
