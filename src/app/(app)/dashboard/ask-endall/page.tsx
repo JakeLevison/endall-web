@@ -83,7 +83,7 @@ export default function AskEndallPage() {
       >
         <div style={{ padding: "12px 12px 8px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <button
-            onClick={resetChat}
+            onClick={() => { resetChat(); setActiveTab("chat"); }}
             style={{
               width: "100%",
               padding: "8px 12px",
@@ -215,9 +215,9 @@ export default function AskEndallPage() {
               </button>
             ))}
           </div>
-          {messages.length > 0 && (
+          {(messages.length > 0 || activeTab === "files") && (
             <button
-              onClick={resetChat}
+              onClick={() => { resetChat(); setActiveTab("chat"); }}
               title="New chat"
               style={{
                 background: "none",

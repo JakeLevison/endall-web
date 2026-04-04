@@ -181,15 +181,20 @@ export function useChat(options: UseChatOptions = {}) {
     lsSet(LS_ACTIVE_KEY, conversationId);
   }, [messages, conversationId]);
 
-  // ── Load files when Files tab is opened ──
+  // ── Load files ──
+  const refreshFiles = useCallback(() => {
+    fetch("/api/chat/files")
+      .then((r) => r.json())
+      .then((d) => setSavedFiles(d.files || []))
+      .catch(() => setSavedFiles([]));
+  }, []);
+
+  // Fetch when Files tab is opened
   useEffect(() => {
     if (activeTab === "files") {
-      fetch("/api/chat/files")
-        .then((r) => r.json())
-        .then((d) => setSavedFiles(d.files || []))
-        .catch(() => setSavedFiles([]));
+      refreshFiles();
     }
-  }, [activeTab]);
+  }, [activeTab, refreshFiles]);
 
   // ── Supabase sync (non-blocking, after AI response) ──
   const syncToSupabase = useCallback(
@@ -400,7 +405,7 @@ export function useChat(options: UseChatOptions = {}) {
         const allMessages = [...newMessages, aiMsg];
         setMessages(allMessages);
 
-        // Dispatch toast event for file generation
+        // Dispatch toast event for file generation + refresh My Files
         if (data.files && data.files.length > 0) {
           for (const f of data.files) {
             window.dispatchEvent(
@@ -409,6 +414,8 @@ export function useChat(options: UseChatOptions = {}) {
               })
             );
           }
+          // Refresh My Files list so newly generated file appears
+          setTimeout(refreshFiles, 1000);
         }
 
         // Non-blocking Supabase sync
@@ -438,7 +445,7 @@ export function useChat(options: UseChatOptions = {}) {
         setLoading(false);
       }
     },
-    [messages, activeWorkflow, recordType, recordId, conversationId, syncToSupabase]
+    [messages, activeWorkflow, recordType, recordId, conversationId, syncToSupabase, refreshFiles]
   );
 
   return {

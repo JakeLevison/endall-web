@@ -125,9 +125,9 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            {messages.length > 0 && (
+            {(messages.length > 0 || activeTab === "files") && (
               <button
-                onClick={resetChat}
+                onClick={() => { resetChat(); setActiveTab("chat"); }}
                 title="New chat"
                 style={{
                   background: "none",
