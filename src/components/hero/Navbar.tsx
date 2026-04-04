@@ -106,7 +106,7 @@ export default function Navbar() {
             onFocus={(e) => (e.currentTarget.style.color = "#ffffff")}
             onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
           >
-            Team
+            About
           </a>
           <a
             href="/contact"
@@ -281,7 +281,7 @@ export default function Navbar() {
               alignItems: "center",
             }}
           >
-            Team
+            About
           </a>
           <a
             href="/contact"

@@ -1,11 +1,21 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, FileSpreadsheet, FileText, File } from "lucide-react";
+import { X, Send, Sparkles, Loader2, RotateCcw, Download, Maximize2, Minimize2, FileSpreadsheet, FileText, File, BarChart3, Wallet, TrendingUp, Wrench, FileEdit, Search, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
 import ChatMessage from "./ChatMessage";
 
+
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
+  BarChart3, Wallet, FileText, TrendingUp, Wrench, FileEdit, Search, CheckCircle,
+};
+
+function QuickActionIcon({ name }: { name: string }) {
+  const Icon = ICON_MAP[name];
+  if (!Icon) return <span style={{ fontSize: 16 }}>{name}</span>;
+  return <Icon size={16} style={{ color: "#888", flexShrink: 0 }} />;
+}
 
 interface ChatPanelProps {
   isOpen: boolean;
@@ -314,7 +324,7 @@ export default function ChatPanel({ isOpen, onClose, onExpandFullPage, recordTyp
                       (e.currentTarget.style.background = "rgba(255,255,255,0.02)")
                     }
                   >
-                    <span style={{ fontSize: 16 }}>{action.icon}</span>
+                    <QuickActionIcon name={action.icon} />
                     <div>
                       <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>
                         {action.label}

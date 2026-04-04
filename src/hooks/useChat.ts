@@ -50,14 +50,14 @@ const SKILLS_ACTIONS = new Set([
 ]);
 
 export const QUICK_ACTIONS = [
-  { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "📊" },
-  { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "💰" },
-  { id: "capabilities_doc", label: "Create a capabilities doc", description: "Professional deck from your company profile", icon: "📄" },
-  { id: "npv_analysis", label: "Analyze project returns", description: "NPV, IRR, sensitivity analysis on a specific bid", icon: "📈" },
-  { id: "project_estimate", label: "Estimate a project", description: "Labor, materials, subs, timeline, margins", icon: "🔧" },
-  { id: "proposal", label: "Draft a proposal", description: "Scoped SOW with pricing for a specific job", icon: "📝" },
-  { id: "competitive_analysis", label: "Research competitors", description: "Report on competitors in your market", icon: "🔍" },
-  { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "✅" },
+  { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: "BarChart3" },
+  { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: "Wallet" },
+  { id: "capabilities_doc", label: "Create a capabilities doc", description: "Professional deck from your company profile", icon: "FileText" },
+  { id: "npv_analysis", label: "Analyze project returns", description: "NPV, IRR, sensitivity analysis on a specific bid", icon: "TrendingUp" },
+  { id: "project_estimate", label: "Estimate a project", description: "Labor, materials, subs, timeline, margins", icon: "Wrench" },
+  { id: "proposal", label: "Draft a proposal", description: "Scoped SOW with pricing for a specific job", icon: "FileEdit" },
+  { id: "competitive_analysis", label: "Research competitors", description: "Report on competitors in your market", icon: "Search" },
+  { id: "review_financials", label: "Review my financials", description: "Monthly financial review with action items", icon: "CheckCircle" },
 ];
 
 // Short titles for sidebar conversation naming
