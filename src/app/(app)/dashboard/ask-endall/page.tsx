@@ -59,10 +59,21 @@ export default function AskEndallPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
+    // Pin the window to the top on mount — a child scrollIntoView
+    // or mobile textarea focus can drag the viewport down otherwise.
+    window.scrollTo(0, 0);
+    // Skip auto-focus on mobile: focusing a textarea triggers the soft
+    // keyboard AND scrolls the input into view, pulling the page down.
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
   }, []);
 
   useEffect(() => {
+    // Only scroll on new messages — skip the initial empty render so the
+    // page loads at the top on first paint.
+    if (messages.length === 0) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
