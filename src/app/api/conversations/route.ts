@@ -43,9 +43,11 @@ export async function POST(request: NextRequest) {
     if (body.title) row.title = body.title;
     if (body.workflow) row.workflow = body.workflow;
 
+    // Upsert so repeat calls (from both sendMessage and syncToSupabase)
+    // are idempotent — no unique-key violation on the conversation id.
     const { data, error } = await supabase
       .from("conversations")
-      .insert(row)
+      .upsert(row, { onConflict: "id" })
       .select("id, title, workflow, created_at, updated_at")
       .single();
 

@@ -356,6 +356,26 @@ export function useChat(options: UseChatOptions = {}) {
       try {
         let data: { reply?: string; error?: string; files?: FileAttachment[]; previewHtml?: string };
 
+        // Ensure the conversation row exists BEFORE the bridge runs.
+        // The bridge inserts generated_files with a FK to conversations.id —
+        // if the conversation doesn't exist yet, the insert silently fails
+        // and files never show up in My Files. Await this before /api/chat.
+        if (isSkillsWorkflow) {
+          const preTitle = generateConversationTitle(
+            action || currentWorkflow || undefined,
+            text,
+          );
+          try {
+            await fetch("/api/conversations", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: conversationId, title: preTitle }),
+            });
+          } catch {
+            // Non-blocking — the bridge will skip conversation_id if FK fails
+          }
+        }
+
         // All requests go through the Next.js /api/chat proxy which:
         // - Routes skills actions to the Python bridge (server-to-server, no CORS)
         // - Rewrites download URLs to same-origin /api/chat/download proxy
