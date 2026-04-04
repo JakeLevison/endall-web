@@ -47,7 +47,7 @@ const features = [
   },
   {
     label: "Proposals",
-    title: "Scoped SOW with pricing in minutes.",
+    title: "Branded proposals. Ready to send.",
     description:
       "Branded DOCX with executive summary, scope of work, timeline, pricing pulled from your estimate, terms, and company info.",
     mock: <WorkflowsMock />,
