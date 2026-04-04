@@ -14,6 +14,7 @@ import WorkflowsMock from "@/components/features/WorkflowsMock";
 import TasksMock from "@/components/features/TasksMock";
 import AIMock from "@/components/features/AIMock";
 import ReportsMock from "@/components/features/ReportsMock";
+import Testimonials from "@/components/sections/Testimonials";
 import UseCases from "@/components/sections/UseCases";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/Pricing";
@@ -47,7 +48,7 @@ const features = [
     title: "Scoped SOW with pricing in minutes.",
     description:
       "Branded DOCX with executive summary, scope of work, timeline, pricing pulled from your estimate, terms, and company info.",
-    mock: <SequencesMock />,
+    mock: <WorkflowsMock />,
   },
   {
     label: "Financial Models",
@@ -68,21 +69,14 @@ const features = [
     title: "Labor, materials, subs, timeline, margins.",
     description:
       "Describe the job and get a 4-tab Excel workbook: summary, itemized detail with formulas, schedule, and margin calculations.",
-    mock: <WorkflowsMock />,
+    mock: <TasksMock />,
   },
   {
     label: "Competitive Analysis",
     title: "Know your market. Name your competitors.",
     description:
       "Competitor profiles with strengths, weaknesses, and sources. SWOT analysis. Positioning recommendations. All in a branded report.",
-    mock: <ReportsMock />,
-  },
-  {
-    label: "Capabilities & Reviews",
-    title: "Professional docs from your company profile.",
-    description:
-      "Capabilities docs with verified certifications and key projects. Monthly financial reviews with revenue, cost, cash flow, and action items.",
-    mock: <AIMock />,
+    mock: <CRMMock />,
   },
 ];
 
@@ -152,7 +146,7 @@ export default function Home() {
                     marginBottom: "48px",
                   }}
                 >
-                  9 actions. Zero busywork.
+                  8 actions. Zero busywork.
                 </h2>
                 <div
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
@@ -173,6 +167,16 @@ export default function Home() {
               </div>
             </section>
           </ScrollReveal>
+
+          {/* Testimonials */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <Testimonials />
 
           {/* Use Cases */}
           <div
