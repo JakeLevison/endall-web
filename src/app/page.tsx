@@ -14,6 +14,8 @@ import WorkflowsMock from "@/components/features/WorkflowsMock";
 import TasksMock from "@/components/features/TasksMock";
 import AIMock from "@/components/features/AIMock";
 import ReportsMock from "@/components/features/ReportsMock";
+import CompetitiveMock from "@/components/features/CompetitiveMock";
+import EstimateMock from "@/components/features/EstimateMock";
 import Testimonials from "@/components/sections/Testimonials";
 import UseCases from "@/components/sections/UseCases";
 import HowItWorks from "@/components/sections/HowItWorks";
@@ -69,14 +71,14 @@ const features = [
     title: "Labor, materials, subs, timeline, margins.",
     description:
       "Describe the job and get a 4-tab Excel workbook: summary, itemized detail with formulas, schedule, and margin calculations.",
-    mock: <TasksMock />,
+    mock: <EstimateMock />,
   },
   {
     label: "Competitive Analysis",
     title: "Know your market. Name your competitors.",
     description:
       "Competitor profiles with strengths, weaknesses, and sources. SWOT analysis. Positioning recommendations. All in a branded report.",
-    mock: <CRMMock />,
+    mock: <CompetitiveMock />,
   },
 ];
 
