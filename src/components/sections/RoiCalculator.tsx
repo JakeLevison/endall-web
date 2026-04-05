@@ -17,8 +17,9 @@ export default function RoiCalculator() {
   const [monthlyCost, setMonthlyCost] = useState(4000);
   const [missedCalls, setMissedCalls] = useState(5);
 
+  const adminCost = staff > 0 ? monthlyCost : 0;
   const lostRevenue = missedCalls * WEEKS_PER_MONTH * AVG_JOB_VALUE * CLOSE_RATE;
-  const total = monthlyCost + lostRevenue;
+  const total = adminCost + lostRevenue;
 
   return (
     <ScrollReveal>
@@ -56,13 +57,14 @@ export default function RoiCalculator() {
               onChange={setStaff}
             />
             <SliderRow
-              label="What do you pay them per month, total?"
+              label="What do you pay them per month in total (all staff combined)?"
               value={monthlyCost}
               min={0}
               max={15000}
               step={500}
-              display={`$${fmt(monthlyCost)}`}
+              display={staff === 0 ? "$0" : `$${fmt(monthlyCost)}`}
               onChange={setMonthlyCost}
+              disabled={staff === 0}
             />
             <SliderRow
               label="How many calls do you miss per week?"
@@ -84,7 +86,7 @@ export default function RoiCalculator() {
                 gap: "10px",
               }}
             >
-              <OutputRow label="Current admin cost" value={`$${fmt(monthlyCost)}/month`} />
+              <OutputRow label="Current admin cost" value={`$${fmt(adminCost)}/month`} />
               <OutputRow
                 label="Estimated lost revenue from missed calls"
                 value={`$${fmt(lostRevenue)}/month`}
@@ -228,6 +230,7 @@ function SliderRow({
   step,
   display,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: number;
@@ -236,9 +239,10 @@ function SliderRow({
   step: number;
   display: string;
   onChange: (v: number) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div style={{ marginBottom: "24px" }}>
+    <div style={{ marginBottom: "24px", opacity: disabled ? 0.4 : 1 }}>
       <div
         style={{
           display: "flex",
@@ -275,11 +279,12 @@ function SliderRow({
         max={max}
         step={step}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))}
         style={{
           width: "100%",
           accentColor: "var(--brand-accent-light)",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
           minHeight: "44px",
         }}
       />
