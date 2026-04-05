@@ -162,7 +162,7 @@ export default function DashboardMock() {
               style={{
                 fontFamily: "var(--font-mono), monospace",
                 fontSize: "10px",
-                color: "#4ade80",
+                color: "var(--brand-accent-light)",
                 marginTop: "4px",
               }}
             >

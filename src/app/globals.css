@@ -2,6 +2,69 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* =============================================================================
+ * ENDALL COLOR SCHEMA
+ * =============================================================================
+ *
+ * The palette is intentionally sparse: near-monochrome (black / white / grays)
+ * with a single warm amber accent. Roughly 90% neutral / 10% accent. The goal
+ * is to feel premium and industrial - closer to Linear or Mercury than to a
+ * consumer SaaS - while giving the contractor a clear visual path to the
+ * things that matter (CTAs, key numbers, open states).
+ *
+ * NEUTRAL SCALE (dark + light themes in sync)
+ *   --bg                page background (black in dark, white in light)
+ *   --surface-inverse   for CTAs + inverted surfaces (opposite of --bg)
+ *   --text-primary      body headings + key copy (max contrast on --bg)
+ *   --text-secondary    body paragraphs (softer)
+ *   --text-tertiary     supporting copy, captions
+ *   --text-muted        labels, eyebrows, metadata
+ *   --overlay-weak/soft/medium/strong
+ *     Translucent scrims used for card backgrounds, borders, dividers.
+ *     They stack: --overlay-soft for subtle surfaces, --overlay-medium for
+ *     borders, --overlay-strong for strongest card chrome.
+ *   --border, --border-hover
+ *     Explicit 1px dividers between sections.
+ *
+ * ACCENT (single color - amber)
+ *   --brand-accent        #d97706  (darker amber, for light-mode hover states)
+ *   --brand-accent-light  #f59e0b  (warmer amber, the primary accent used
+ *                                    everywhere on the site)
+ *
+ *   Where amber appears - intentionally limited:
+ *     - Hero/Final CTA primary button (fill)
+ *     - $170K stat + ROI annual-cost number + +23% trend in dashboard mock
+ *     - Open accordion card: left icon + border tint
+ *     - Autonomy tier: active-mode pill fill, icon, bullet dots, "hook" line
+ *     - ROI calculator slider thumbs (via accent-color CSS prop)
+ *     - Anchor underlines on hover (if/when added)
+ *
+ *   Where amber does NOT appear:
+ *     - Body text (always neutral - readability comes first)
+ *     - Navbar logo (neutral - logo is its own brand mark)
+ *     - Secondary CTAs (ghost / text-only on neutral)
+ *     - Section dividers + card borders when idle (neutral overlays)
+ *     - Anything that would force a section to compete with the accent elements
+ *
+ *   Why amber, not blue/green:
+ *     - Construction/industrial context (safety-vest warmth, hazard amber)
+ *     - Distinct from generic SaaS blue, and from the green already used for
+ *       success states in shadcn defaults
+ *     - Readable on both light and dark backgrounds with the same token
+ *     - Feels premium without looking "consumer-techy"
+ *
+ * DARK/LIGHT MODE
+ *   All neutral tokens flip between the :root and .dark selectors further
+ *   down. The accent stays the same in both modes by design: --brand-accent-
+ *   light reads as a warm gold on black and a warm amber on white, so there's
+ *   no per-mode override.
+ *
+ * DO NOT introduce a second accent without first revisiting this file. If a
+ * color is needed for a success/warning/error state, use shadcn's --destructive
+ * / --chart-* tokens - those are scoped to product UI (toasts, badges), not
+ * the marketing surface.
+ * ============================================================================= */
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

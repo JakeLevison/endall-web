@@ -12,7 +12,6 @@ import AutonomyTiers from "@/components/sections/AutonomyTiers";
 import DashboardPreview from "@/components/sections/DashboardPreview";
 import RoiCalculator from "@/components/sections/RoiCalculator";
 import Testimonials from "@/components/sections/Testimonials";
-import Pricing from "@/components/sections/Pricing";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
 
@@ -103,16 +102,6 @@ export default function Home() {
             }}
           />
           <Testimonials />
-
-          {/* Pricing */}
-          <div
-            style={{
-              maxWidth: "1100px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-            }}
-          />
-          <Pricing />
 
           {/* 6. Final CTA */}
           <div
