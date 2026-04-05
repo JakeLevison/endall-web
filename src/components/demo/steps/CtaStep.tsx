@@ -129,7 +129,7 @@ export default function CtaStep() {
               lineHeight: 1.5,
             }}
           >
-            $199/month. 60-day onboarding. No contract.
+            Set up in days, not months.
           </p>
         </motion.div>
 
@@ -165,7 +165,7 @@ export default function CtaStep() {
               (e.currentTarget.style.background = "var(--surface-inverse)")
             }
           >
-            Start your pilot
+            Request a demo
           </Link>
 
           <Link
