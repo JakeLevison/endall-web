@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
-const words = ["Operations", "Proposals", "Budgets", "Estimates", "Front Office", "Follow-ups", "Calls"];
+// Rotating words picked for emotional resonance with contractors - these
+// are the pain points they feel every day, not abstract operational functions.
+const words = ["Calls", "Office", "Mornings", "Pipeline", "Paperwork", "Crew"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -31,21 +33,26 @@ export default function HeroHeadline() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // Build pixel-accurate keyframes from the measured step height.
-  // 7 words + 1 duplicate for seamless loop = 8 positions.
-  const totalH = stepPx * 8;
-  const keyframes = stepPx > 0 ? `
-    @keyframes cycle-words-px {
-      0%, 9%     { transform: translateY(0); }
-      12%, 21%   { transform: translateY(-${stepPx}px); }
-      24%, 33%   { transform: translateY(-${stepPx * 2}px); }
-      36%, 45%   { transform: translateY(-${stepPx * 3}px); }
-      48%, 57%   { transform: translateY(-${stepPx * 4}px); }
-      60%, 69%   { transform: translateY(-${stepPx * 5}px); }
-      72%, 81%   { transform: translateY(-${stepPx * 6}px); }
-      84%, 100%  { transform: translateY(-${stepPx * 7}px); }
-    }
-  ` : "";
+  // Build pixel-accurate keyframes from the measured step height. We show
+  // N words + 1 duplicate of the first word for a seamless wraparound. Each
+  // word holds for ~75% of its slot then slides for the remaining ~25%.
+  const slots = words.length + 1; // +1 for the wraparound dup
+  const slotPct = 100 / slots;
+  const holdPct = slotPct * 0.75;
+  const keyframes =
+    stepPx > 0
+      ? `@keyframes cycle-words-px {\n` +
+        Array.from({ length: slots }, (_, i) => {
+          const startPct = (i * slotPct).toFixed(2);
+          const holdEndPct = (i * slotPct + holdPct).toFixed(2);
+          const y = -stepPx * i;
+          return `  ${startPct}%, ${holdEndPct}% { transform: translateY(${y}px); }`;
+        }).join("\n") +
+        `\n}`
+      : "";
+
+  // Slightly longer total duration so each visceral word reads clearly.
+  const cycleSeconds = (slots * 1.6).toFixed(2);
 
   return (
     <section
@@ -125,7 +132,7 @@ export default function HeroHeadline() {
             <span
               style={{
                 display: "block",
-                animation: "cycle-words-px 12.5s cubic-bezier(0.16, 1, 0.3, 1) infinite",
+                animation: `cycle-words-px ${cycleSeconds}s cubic-bezier(0.16, 1, 0.3, 1) infinite`,
                 willChange: "transform",
               }}
             >
@@ -211,15 +218,6 @@ export default function HeroHeadline() {
             Try Ask Endall
           </Link>
         </div>
-        <p
-          style={{
-            fontFamily: "var(--font-sans), sans-serif",
-            fontSize: "12px",
-            color: "var(--text-muted)",
-          }}
-        >
-          See it in action. Run it on your own jobs.
-        </p>
       </motion.div>
 
       {keyframes && <style dangerouslySetInnerHTML={{ __html: keyframes }} />}
