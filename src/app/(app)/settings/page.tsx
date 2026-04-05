@@ -16,6 +16,7 @@ import {
   Check,
   Plus,
   Loader2,
+  Building2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,245 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+
+/* ─── Company Tab ─────────────────────────────────────────────────── */
+//
+// Demo-time company switcher. Reads + writes to the bridge's
+// /settings/company endpoint (company_settings table). When Jake changes
+// "Patriot Electric" to "Mercer HVAC" here, the next voice call uses
+// that name without a Railway redeploy.
+
+type CompanySettings = {
+  company_id: string;
+  company_name: string;
+  phone_greeting: string;
+  owner_name: string;
+  owner_email: string;
+  owner_phone: string;
+  timezone: string;
+  industry: string;
+  city: string;
+  state: string;
+  corridor: string;
+  briefing_email: string;
+  briefing_time: string;
+};
+
+const EMPTY_COMPANY: CompanySettings = {
+  company_id: "default",
+  company_name: "",
+  phone_greeting: "",
+  owner_name: "",
+  owner_email: "",
+  owner_phone: "",
+  timezone: "America/New_York",
+  industry: "",
+  city: "",
+  state: "",
+  corridor: "",
+  briefing_email: "",
+  briefing_time: "06:00",
+};
+
+function CompanyTab() {
+  const [data, setData] = useState<CompanySettings>(EMPTY_COMPANY);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const resp = await fetch("/api/settings/company?company_id=default", {
+          cache: "no-store",
+        });
+        const body = await resp.json();
+        if (!resp.ok) {
+          setError(body.detail || body.error || "Could not load company settings");
+        } else {
+          setData({ ...EMPTY_COMPANY, ...body });
+        }
+      } catch (e) {
+        setError(String(e));
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const handleChange = (key: keyof CompanySettings) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setData((prev) => ({ ...prev, [key]: e.target.value }));
+    setSaved(false);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const resp = await fetch("/api/settings/company", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const body = await resp.json();
+      if (!resp.ok) {
+        setError(body.detail || body.error || "Save failed");
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+        // update local state from server-returned row if provided
+        if (body.settings) {
+          setData({ ...EMPTY_COMPANY, ...body.settings });
+        }
+      }
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center">
+        <Loader2 className="size-4 animate-spin text-zinc-600 mx-auto" />
+      </div>
+    );
+  }
+
+  const field = (
+    key: keyof CompanySettings,
+    label: string,
+    placeholder?: string,
+    disabled = false
+  ) => (
+    <div className="space-y-1.5">
+      <Label className="text-[11px] uppercase tracking-wide text-zinc-500">
+        {label}
+      </Label>
+      <Input
+        value={(data[key] as string) || ""}
+        onChange={handleChange(key)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-white/10 disabled:opacity-60"
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h2 className="text-[13px] font-medium text-white mb-1">Company</h2>
+        <p className="text-[11px] text-zinc-500">
+          Controls what the voice agent says, which address the briefing ships
+          to, and what Ask Endall calls your business. Saved instantly — takes
+          effect on the next call or briefing.
+        </p>
+      </div>
+      <Separator className="bg-white/[0.04]" />
+
+      {error && (
+        <div className="px-3 py-2 rounded-md border border-red-500/30 bg-red-500/10 text-[12px] text-red-300">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {field("company_name", "Company name", "Patriot Electric")}
+          {field("company_id", "Company ID", "default", true)}
+          {field("industry", "Industry", "electrical")}
+          {field("timezone", "Timezone", "America/New_York")}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-[11px] uppercase tracking-wide text-zinc-500">
+            Phone greeting
+          </Label>
+          <Input
+            value={data.phone_greeting || ""}
+            onChange={handleChange("phone_greeting")}
+            placeholder="Thanks for calling {{company_name}}, how can I help?"
+            className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-white/10"
+          />
+          <p className="text-[10px] text-zinc-600">
+            {"{{company_name}}"} is replaced at call time.
+          </p>
+        </div>
+
+        <Separator className="bg-white/[0.04]" />
+
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-zinc-500 mb-3">
+            Owner
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {field("owner_name", "Owner name", "Jake Levison")}
+            {field("owner_email", "Owner email", "jake@endall.ai")}
+            {field("owner_phone", "Owner phone", "(203) 610-9399")}
+          </div>
+        </div>
+
+        <Separator className="bg-white/[0.04]" />
+
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-zinc-500 mb-3">
+            Location
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {field("city", "City", "Ashburn")}
+            {field("state", "State", "VA")}
+            {field("corridor", "Corridor", "northern_virginia")}
+          </div>
+        </div>
+
+        <Separator className="bg-white/[0.04]" />
+
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-zinc-500 mb-3">
+            Daily briefing
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {field("briefing_email", "Briefing email", "jake@endall.ai")}
+            {field("briefing_time", "Briefing time", "06:00")}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 pt-2">
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-4 disabled:opacity-60"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin mr-1" />
+              Saving...
+            </>
+          ) : saved ? (
+            <>
+              <Check className="size-3.5 mr-1" />
+              Saved
+            </>
+          ) : (
+            "Save changes"
+          )}
+        </Button>
+        {saved && (
+          <span className="text-[11px] text-emerald-400 animate-in fade-in">
+            Live on the next call.
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /* ─── Profile Tab ─────────────────────────────────────────────────── */
 
@@ -596,6 +836,7 @@ function CustomFieldsTab() {
 /* ─── Settings Page ───────────────────────────────────────────────── */
 
 const tabs = [
+  { value: "company", label: "Company", icon: Building2 },
   { value: "profile", label: "Profile", icon: User },
   { value: "team", label: "Team", icon: Users },
   { value: "integrations", label: "Integrations", icon: Plug },
@@ -608,7 +849,7 @@ export default function SettingsPage() {
     <div className="p-6 bg-[#0A0A0B] min-h-full">
       <h1 className="text-[15px] font-medium text-white mb-6">Settings</h1>
 
-      <Tabs defaultValue="profile">
+      <Tabs defaultValue="company">
         <TabsList className="bg-white/[0.03] border border-white/[0.04] h-8 mb-6">
           {tabs.map((tab) => (
             <TabsTrigger
@@ -622,6 +863,9 @@ export default function SettingsPage() {
           ))}
         </TabsList>
 
+        <TabsContent value="company">
+          <CompanyTab />
+        </TabsContent>
         <TabsContent value="profile">
           <ProfileTab />
         </TabsContent>
