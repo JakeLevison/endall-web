@@ -74,6 +74,7 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          overflow: "hidden",
           transition: "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
@@ -173,7 +174,7 @@ export default function Navbar() {
         </div>
 
         {/* Right section — fixed width to balance left section */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 220, justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "flex-end", overflow: "hidden" }}>
           <ThemeToggle />
           <Link
             href="/dashboard/ask-endall"
@@ -202,6 +203,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/contact?intent=book_demo"
+            className="hidden sm:inline-flex"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "15px",
@@ -210,7 +212,6 @@ export default function Navbar() {
               backgroundColor: "var(--brand-accent-light)",
               padding: "0 16px",
               height: "36px",
-              display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
               lineHeight: 1,

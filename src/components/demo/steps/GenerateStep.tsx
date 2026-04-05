@@ -28,7 +28,11 @@ const DEMO_NPV_FILE = {
 
 export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepProps) {
   const [phase, setPhase] = useState<Phase>("form");
-  const [companyName, setCompanyName] = useState("");
+  const [companyName, setCompanyName] = useState(() => {
+    if (typeof window === "undefined") return "";
+    try { return localStorage.getItem("endall_demo_company") || ""; }
+    catch { return ""; }
+  });
   const [contractValue, setContractValue] = useState(350000);
   const [loadingMsg, setLoadingMsg] = useState(LOADING_MESSAGES[0]);
   const [error] = useState("");

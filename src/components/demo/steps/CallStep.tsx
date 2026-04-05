@@ -77,7 +77,7 @@ export default function CallStep({ onNext }: CallStepProps) {
             marginBottom: 16,
           }}
         >
-          Call this number from your phone.
+          Call this number from{"\u00A0"}your{"\u00A0"}phone.
         </h2>
 
         <p

@@ -44,6 +44,7 @@ export default function DemoGate({ onComplete }: { onComplete: () => void }) {
       if (!res.ok) throw new Error("failed");
       try {
         localStorage.setItem("endall_demo_gate_filled", "1");
+        localStorage.setItem("endall_demo_company", String(payload.company));
       } catch {
         // ignore localStorage failures (private mode, etc.)
       }

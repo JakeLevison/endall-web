@@ -2,7 +2,9 @@
 """Generate static demo files for /public/demo-files/.
 
 Outputs realistic-looking workbooks, proposals, and reports for
-Patriot Electric (Ashburn, VA - data center subcontractor).
+the demo sample company (Patriot Electric, Ashburn VA). The frontend
+resolves the company name dynamically via localStorage — the static
+files are the underlying sample data.
 """
 
 from pathlib import Path

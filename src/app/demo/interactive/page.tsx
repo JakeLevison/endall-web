@@ -5,7 +5,7 @@ import { Sparkles, BarChart3, Wallet, FileText, TrendingUp, Wrench, FileEdit, Se
 import DemoOverlay from "@/components/demo/DemoOverlay";
 import DemoProgressBar from "@/components/demo/DemoProgressBar";
 import { askEndallDemo } from "@/components/demo/ask-endall-config";
-import { DEMO_PRESETS, type DemoFile } from "@/data/demo-presets";
+import { getDemoPresets, type DemoFile } from "@/data/demo-presets";
 import ChatMessage from "@/components/chat/ChatMessage";
 
 // Preset quick actions (mirrors real QUICK_ACTIONS). Each ID maps to a cached
@@ -45,7 +45,7 @@ export default function InteractiveDemoPage() {
   // and we fire `done` after the preset's renderDelayMs to let the staged
   // bar look like real work.
   const runPreset = useCallback((presetId: string) => {
-    const preset = DEMO_PRESETS[presetId];
+    const preset = getDemoPresets()[presetId];
     if (!preset) return;
 
     // 1. user bubble
@@ -110,7 +110,8 @@ export default function InteractiveDemoPage() {
       ["capabilities_doc", ["capabilities", "deck", "company profile"]],
     ];
     const matched = keywordMatch.find(([, kws]) => kws.some((k) => q.includes(k)));
-    const preset = matched ? DEMO_PRESETS[matched[0]] : null;
+    const presets = getDemoPresets();
+    const preset = matched ? presets[matched[0]] : null;
 
     setProgressDone(false);
     pendingRef.current = preset
