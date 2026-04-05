@@ -71,32 +71,54 @@ export default function FinalCTA() {
           See how Endall works for your shop.
         </p>
 
-        {/* CTA Button */}
+        {/* CTAs */}
         <div
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(20px)",
             transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 700ms",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "14px",
           }}
         >
           <a
-            href="/contact"
+            href="/demo"
             style={{
               display: "inline-block",
-              background: "var(--surface-inverse)",
-              color: "var(--text-inverse)",
+              background: "var(--brand-accent-light)",
+              color: "#1a1a1a",
               padding: "14px 32px",
               borderRadius: 8,
               fontSize: 16,
-              fontWeight: 500,
+              fontWeight: 600,
               textDecoration: "none",
               fontFamily: "var(--font-sans), sans-serif",
-              transition: "background-color 0.2s ease",
+              transition: "background-color 0.2s ease, transform 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--brand-accent)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--brand-accent-light)";
+            }}
           >
-            Get started
+            Try the interactive demo
+          </a>
+          <a
+            href="/contact"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: 14,
+              color: "var(--text-tertiary)",
+              textDecoration: "none",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          >
+            Talk to us →
           </a>
         </div>
       </div>

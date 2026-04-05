@@ -21,6 +21,18 @@ export default function Navbar() {
     }
   };
 
+  // Nav anchor links. On "/" we smooth-scroll to the section; on any other
+  // page we navigate to /#anchor so the URL is always resolvable.
+  const handleAnchorClick =
+    (anchor: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (pathname === "/") {
+        e.preventDefault();
+        const el = document.getElementById(anchor);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      // otherwise let the browser navigate to /#anchor
+    };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -89,7 +101,8 @@ export default function Navbar() {
           style={{ flex: 1 }}
         >
           <a
-            href="#features"
+            href="/#features"
+            onClick={handleAnchorClick("features")}
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
@@ -106,7 +119,8 @@ export default function Navbar() {
             Features
           </a>
           <a
-            href="#how-it-works"
+            href="/#how-it-works"
+            onClick={handleAnchorClick("how-it-works")}
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
@@ -272,8 +286,8 @@ export default function Navbar() {
           }}
         >
           <a
-            href="#features"
-            onClick={() => setMenuOpen(false)}
+            href="/#features"
+            onClick={(e) => { setMenuOpen(false); handleAnchorClick("features")(e); }}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "16px",
@@ -287,8 +301,8 @@ export default function Navbar() {
             Features
           </a>
           <a
-            href="#how-it-works"
-            onClick={() => setMenuOpen(false)}
+            href="/#how-it-works"
+            onClick={(e) => { setMenuOpen(false); handleAnchorClick("how-it-works")(e); }}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "16px",

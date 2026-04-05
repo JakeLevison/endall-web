@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Download, TrendingUp, CheckCircle } from "lucide-react";
-import { deviceFetch } from "@/lib/deviceId";
 import DemoCoach from "@/components/demo/DemoCoach";
 
 interface GenerateStepProps {
@@ -18,35 +17,21 @@ const LOADING_MESSAGES = [
   "Running NPV and IRR calculations...",
   "Applying sensitivity analysis...",
   "Formatting with live Excel formulas...",
-  "Finalizing — almost there...",
+  "Ready.",
 ];
 
-function genId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function buildPrompt(companyName: string, contractValue: number): string {
-  // Feeds the NPV skill pre-populated industry benchmarks so only 2 inputs
-  // from the user are required. Defaults match the spec.
-  return [
-    `Company: ${companyName}`,
-    `Project: ${companyName} — Contract bid analysis`,
-    `Total contract value: $${contractValue.toLocaleString()}`,
-    `Duration: 6 months`,
-    `Cost breakdown: 30% labor, 25% materials, 15% subcontractors, 3% equipment`,
-    `Discount rate: 10%`,
-    `Payment terms: monthly billing aligned with costs`,
-    `Use MEP industry benchmarks for anything not specified above.`,
-  ].join("\n");
-}
+// Pre-generated NPV workbook (static asset). See public/demo-files/.
+const DEMO_NPV_FILE = {
+  filename: "NPV_Analysis_Demo.xlsx",
+  download_url: "/demo-files/Patriot_Electric_NPV.xlsx",
+};
 
 export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepProps) {
   const [phase, setPhase] = useState<Phase>("form");
   const [companyName, setCompanyName] = useState("");
   const [contractValue, setContractValue] = useState(350000);
   const [loadingMsg, setLoadingMsg] = useState(LOADING_MESSAGES[0]);
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [file, setFile] = useState<{ filename: string; download_url: string } | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -57,44 +42,23 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
   const generate = async () => {
     if (!companyName.trim()) return;
     setPhase("generating");
-    setError("");
 
-    // Cycle loading messages while the bridge runs
+    // Serve the pre-generated NPV workbook from /public/demo-files/ with
+    // staged loading messages so it still feels computed. Total time from
+    // click to downloadable file: ~3.2 seconds.
     LOADING_MESSAGES.forEach((msg, i) => {
-      timers.current.push(setTimeout(() => setLoadingMsg(msg), i * 18000));
+      timers.current.push(setTimeout(() => setLoadingMsg(msg), i * 650));
     });
 
-    try {
-      const resp = await deviceFetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: buildPrompt(companyName.trim(), contractValue),
-          action: "npv_analysis",
-          activeWorkflow: "npv_analysis",
-          session_id: `demo-gen-${genId()}`,
-          history: [],
-        }),
-      });
-
-      if (!resp.ok) {
-        throw new Error("File generation service unavailable");
-      }
-
-      const data = await resp.json();
-      if (data.files && data.files.length > 0) {
-        setFile(data.files[0]);
+    timers.current.push(
+      setTimeout(() => {
+        setFile({
+          filename: `NPV_${companyName.trim().replace(/\s+/g, "_")}.xlsx`,
+          download_url: DEMO_NPV_FILE.download_url,
+        });
         setPhase("ready");
-      } else {
-        throw new Error("No file returned");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-      setPhase("error");
-    } finally {
-      timers.current.forEach(clearTimeout);
-      timers.current = [];
-    }
+      }, 3200)
+    );
   };
 
   return (

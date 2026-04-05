@@ -91,37 +91,75 @@ export default function RoiCalculator() {
               />
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
                   marginTop: "10px",
                   paddingTop: "14px",
                   borderTop: "1px dashed var(--overlay-medium)",
-                  gap: "16px",
-                  flexWrap: "wrap",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
                 }}
               >
-                <span
+                <div
                   style={{
-                    fontFamily: "var(--font-sans), sans-serif",
-                    fontSize: "15px",
-                    color: "var(--text-secondary)",
-                    fontWeight: 500,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: "16px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  Total monthly cost of not automating
-                </span>
-                <span
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: "14px",
+                      color: "var(--text-tertiary)",
+                    }}
+                  >
+                    Monthly cost of not automating
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    ${fmt(total)}
+                  </span>
+                </div>
+                <div
                   style={{
-                    fontFamily: "var(--font-sans), sans-serif",
-                    fontSize: "clamp(28px, 5vw, 36px)",
-                    fontWeight: 600,
-                    color: "#10b981",
-                    letterSpacing: "-0.02em",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: "16px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  ${fmt(total)}
-                </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: "15px",
+                      color: "var(--text-secondary)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Annual cost of not automating
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans), sans-serif",
+                      fontSize: "clamp(32px, 6vw, 44px)",
+                      fontWeight: 700,
+                      color: "var(--brand-accent-light)",
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1,
+                    }}
+                  >
+                    ${fmt(total * 12)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -240,7 +278,7 @@ function SliderRow({
         onChange={(e) => onChange(Number(e.target.value))}
         style={{
           width: "100%",
-          accentColor: "#10b981",
+          accentColor: "var(--brand-accent-light)",
           cursor: "pointer",
           minHeight: "44px",
         }}

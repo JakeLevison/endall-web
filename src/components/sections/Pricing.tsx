@@ -5,45 +5,46 @@ import { motion, useInView, useReducedMotion } from "framer-motion";
 
 const tiers = [
   {
-    name: "Starter",
-    team: "1-10 employees",
-    description: "Front office + Ask Endall with all 8 document actions. Perfect for owner-operators.",
+    name: "Radar",
+    team: "Monitoring mode",
+    description:
+      "Visibility and intel without automated action. You still run the office, Endall gives you eyes on everything.",
     features: [
-      "Call answering & lead qualification",
-      "Morning briefings",
-      "Financial models & budgets",
-      "Project estimates & proposals",
-      "Competitive analysis",
-      "Capabilities docs & financial reviews",
+      "Calls logged and summarized",
+      "Daily briefings with action items",
+      "Competitive + pipeline intel",
+      "Ask Endall for analysis on demand",
     ],
-    cta: "Get started",
+    cta: "Talk to us",
     href: "/contact",
   },
   {
-    name: "Growth",
-    team: "11-50 employees",
-    description: "Everything in Starter, plus higher call volume, priority setup, and dedicated onboarding.",
+    name: "Co-Pilot",
+    team: "Recommended",
+    description:
+      "Endall drafts every email, proposal, and follow-up. You approve before anything goes out.",
     features: [
-      "Everything in Starter",
-      "Higher call volume capacity",
-      "Priority onboarding",
-      "Dedicated setup specialist",
+      "Everything in Radar",
+      "Calls answered + qualified in real time",
+      "Drafts for every client touchpoint",
+      "One-click approve, edit, or reject",
     ],
-    cta: "Get started",
+    cta: "Talk to us",
     href: "/contact",
     highlight: true,
   },
   {
-    name: "Enterprise",
-    team: "50+ employees",
-    description: "Custom configuration for multi-location or multi-trade operations.",
+    name: "Autopilot",
+    team: "Fully autonomous",
+    description:
+      "Endall runs the office end-to-end. Calls answered, jobs booked, proposals sent, follow-ups handled, all without your touch.",
     features: [
-      "Everything in Growth",
-      "Multi-location support",
-      "Custom integrations",
-      "Dedicated account manager",
+      "Everything in Co-Pilot",
+      "Proposals + follow-ups auto-send",
+      "Outreach sequences on autopilot",
+      "Weekly check-in, not daily approval",
     ],
-    cta: "Contact Us",
+    cta: "Talk to us",
     href: "/contact",
   },
 ];
@@ -81,7 +82,7 @@ export default function Pricing() {
             whiteSpace: "nowrap",
           }}
         >
-          Priced for your team.
+          Three modes. One platform.
         </h2>
         <p
           style={{
@@ -89,12 +90,12 @@ export default function Pricing() {
             fontSize: 18,
             color: "var(--text-tertiary)",
             textAlign: "center",
-            maxWidth: 480,
+            maxWidth: 560,
             margin: "0 auto 48px",
             lineHeight: 1.6,
           }}
         >
-          Every plan includes all 8 Ask Endall actions, call answering, and morning briefings. We&rsquo;ll walk through pricing in your demo.
+          Every mode includes all Ask Endall actions and the full briefing engine. Pricing walked through in the demo.
         </p>
 
         <div

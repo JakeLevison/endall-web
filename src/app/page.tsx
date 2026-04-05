@@ -8,10 +8,10 @@ import SocialProofTicker from "@/components/hero/SocialProofTicker";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import ValuePropSection from "@/components/sections/ValuePropSection";
 import CapabilityAccordion from "@/components/sections/CapabilityAccordion";
+import AutonomyTiers from "@/components/sections/AutonomyTiers";
 import DashboardPreview from "@/components/sections/DashboardPreview";
 import RoiCalculator from "@/components/sections/RoiCalculator";
 import Testimonials from "@/components/sections/Testimonials";
-import UseCases from "@/components/sections/UseCases";
 import Pricing from "@/components/sections/Pricing";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
@@ -61,6 +61,16 @@ export default function Home() {
             <CapabilityAccordion />
           </ScrollReveal>
 
+          {/* 3b. Autonomy tiers — "You decide how much Endall takes off your plate" */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <AutonomyTiers />
+
           {/* 4. Proof — "Your entire operation. One screen." */}
           <div
             style={{
@@ -93,15 +103,6 @@ export default function Home() {
             }}
           />
           <Testimonials />
-
-          <div
-            style={{
-              maxWidth: "1100px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-            }}
-          />
-          <UseCases />
 
           {/* Pricing */}
           <div

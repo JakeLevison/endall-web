@@ -53,7 +53,7 @@ import { createClient } from "@/lib/supabase/client";
 //
 // Demo-time company switcher. Reads + writes to the bridge's
 // /settings/company endpoint (company_settings table). When Jake changes
-// "Patriot Electric" to "Mercer HVAC" here, the next voice call uses
+// "Patriot Electric" to "Mercer Mechanical" here, the next voice call uses
 // that name without a Railway redeploy.
 
 type CompanySettings = {

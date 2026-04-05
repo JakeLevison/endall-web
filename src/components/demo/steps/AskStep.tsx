@@ -3,15 +3,26 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
-import { deviceFetch } from "@/lib/deviceId";
 import ChatMessage from "@/components/chat/ChatMessage";
 import DemoCoach from "@/components/demo/DemoCoach";
+import { WALKTHROUGH_PRESETS, WALKTHROUGH_FALLBACK } from "@/data/demo-walkthrough";
 
-const SUGGESTIONS = [
-  "What should I charge for a 200A panel upgrade?",
-  "How do I price a data center electrical bid?",
-  "What's a good profit margin for commercial HVAC work?",
-];
+const SUGGESTIONS = WALKTHROUGH_PRESETS.map((p) => p.question);
+
+// Match a question (or close paraphrase) to a cached preset. Case- and
+// whitespace-insensitive, with a simple keyword backoff.
+function findCachedResponse(question: string): { response: string; typingDelayMs: number } | null {
+  const q = question.toLowerCase().trim();
+  // Exact suggestion match first
+  for (const p of WALKTHROUGH_PRESETS) {
+    if (p.question.toLowerCase().trim() === q) return p;
+  }
+  // Keyword backoff - catches light paraphrases of the suggestions
+  if (q.includes("200a") || q.includes("panel upgrade")) return WALKTHROUGH_PRESETS[0];
+  if (q.includes("data center")) return WALKTHROUGH_PRESETS[1];
+  if (q.includes("profit margin") || q.includes("commercial mechanical")) return WALKTHROUGH_PRESETS[2];
+  return null;
+}
 
 type Msg = { id: string; role: "user" | "assistant"; content: string };
 
@@ -45,36 +56,30 @@ export default function AskStep({ onNext, onSuggestionChosen }: AskStepProps) {
     setInput("");
     setLoading(true);
 
-    try {
-      const resp = await deviceFetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          session_id: sessionId.current,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-      const data = await resp.json();
-      const aiMsg: Msg = {
-        id: genId(),
-        role: "assistant",
-        content: data.reply || data.error || "Something went wrong.",
-      };
-      setMessages([...next, aiMsg]);
-      setResponseReceived(true);
-    } catch {
+    // Demo-mode cache: answer the 3 suggested questions (and close
+    // paraphrases) in under 1.5s from a static file, skipping /api/chat.
+    const cached = findCachedResponse(text);
+    if (cached) {
+      await new Promise((r) => setTimeout(r, cached.typingDelayMs));
       setMessages([
         ...next,
-        {
-          id: genId(),
-          role: "assistant",
-          content: "Couldn't reach the AI service. Try again in a moment.",
-        },
+        { id: genId(), role: "assistant", content: cached.response },
       ]);
-    } finally {
+      setResponseReceived(true);
       setLoading(false);
+      return;
     }
+
+    // Free-text fallback: light typing delay + generic response. We do NOT
+    // hit /api/chat here because the demo promise is "sub-1.5s" and live
+    // Claude calls regularly take 8-12s.
+    await new Promise((r) => setTimeout(r, 800));
+    setMessages([
+      ...next,
+      { id: genId(), role: "assistant", content: WALKTHROUGH_FALLBACK },
+    ]);
+    setResponseReceived(true);
+    setLoading(false);
   };
 
   const chooseSuggestion = (s: string) => {

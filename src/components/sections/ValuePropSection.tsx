@@ -1,8 +1,7 @@
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
-// Sits right after the hero. Bridges "we run your ___" to the capability
-// cards below. Goal: the contractor says "that's me" before they see any
-// product details.
+// Shorter, punchier block. One paragraph that lands the pain, then the
+// $170K stat as the hero visual element of this section.
 export default function ValuePropSection() {
   return (
     <ScrollReveal>
@@ -22,69 +21,59 @@ export default function ValuePropSection() {
               textTransform: "uppercase",
               letterSpacing: "3px",
               color: "var(--text-muted)",
-              marginBottom: "32px",
-            }}
-          >
-            Sound familiar?
-          </p>
-
-          <p
-            style={{
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "clamp(20px, 3.2vw, 26px)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.55,
               marginBottom: "28px",
-              letterSpacing: "-0.01em",
             }}
           >
-            You started this company to do the work. Now you spend half your day
-            answering phones, chasing invoices, and wondering which leads fell
-            through the cracks. You can&rsquo;t afford a full-time office
-            manager, and the ones you&rsquo;ve tried don&rsquo;t last. Meanwhile
-            your phone rings at 7 PM and nobody&rsquo;s there to pick it up.
-            That lead is gone.
+            The math
           </p>
 
           <p
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "clamp(20px, 3.2vw, 26px)",
-              color: "var(--text-primary)",
-              lineHeight: 1.55,
+              fontSize: "clamp(20px, 3vw, 24px)",
+              color: "var(--text-secondary)",
+              lineHeight: 1.5,
               marginBottom: "48px",
               letterSpacing: "-0.01em",
-              fontWeight: 500,
             }}
           >
-            Endall is your AI ops team. It answers every call, qualifies every
-            lead, books every job, runs your morning briefing, sends your
-            proposals, and tracks your numbers. No hiring. No training. Live in
-            48 hours.
+            You started this company to do the work - not to answer phones,
+            chase invoices, and write proposals at 10 PM. Endall runs the
+            office so you don&rsquo;t have to.
           </p>
 
-          {/* Stat callout */}
+          {/* $170K stat - hero of this section */}
           <div
             style={{
-              borderLeft: "2px solid var(--text-primary)",
-              paddingLeft: "20px",
-              marginTop: "40px",
+              borderLeft: "3px solid var(--brand-accent-light)",
+              paddingLeft: "24px",
             }}
           >
             <p
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
-                fontSize: "clamp(16px, 2.4vw, 19px)",
-                color: "var(--text-tertiary)",
-                lineHeight: 1.55,
-                margin: 0,
+                fontSize: "clamp(44px, 8vw, 72px)",
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1,
+                margin: "0 0 12px",
               }}
             >
-              The average 15-technician contractor spends roughly{" "}
-              <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                $170K a year
-              </span>{" "}
-              on back-office staff. Endall replaces all of it.
+              $170K<span style={{ color: "var(--brand-accent-light)" }}>/yr</span>
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: "clamp(17px, 2.4vw, 20px)",
+                color: "var(--text-secondary)",
+                lineHeight: 1.5,
+                margin: 0,
+                fontWeight: 500,
+              }}
+            >
+              Average back-office spend for a 15-tech contractor. Endall
+              replaces it.
             </p>
             <p
               style={{
@@ -95,8 +84,8 @@ export default function ValuePropSection() {
                 lineHeight: 1.5,
               }}
             >
-              Based on industry salary data for office manager, bookkeeper, and
-              sales coordinator roles, including benefits and overhead.
+              Industry salary data: office manager + bookkeeper + sales
+              coordinator, loaded with benefits and overhead.
             </p>
           </div>
         </div>
