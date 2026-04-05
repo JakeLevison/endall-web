@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import ScrollRestoration from "@/components/shared/ScrollRestoration";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -48,6 +49,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-[family-name:var(--font-sans)]">
         <ThemeProvider>
+          <ScrollRestoration />
           {children}
           <Toaster position="bottom-right" />
         </ThemeProvider>
