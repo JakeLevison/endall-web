@@ -1,4 +1,21 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+
 export default function Footer() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <footer
       style={{
@@ -19,16 +36,19 @@ export default function Footer() {
         }}
       >
         {/* Logo */}
-        <span
+        <Link
+          href="/"
+          onClick={handleLogoClick}
           style={{
             fontFamily: "var(--font-sans), sans-serif",
             fontSize: 16,
             color: "var(--text-primary)",
             fontWeight: 400,
+            textDecoration: "none",
           }}
         >
           endall
-        </span>
+        </Link>
 
         {/* Links */}
         <div style={{ display: "flex", gap: 20 }}>

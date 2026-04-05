@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Sparkles, BarChart3, Wallet, FileText, TrendingUp, Wrench, FileEdit, Search, CheckCircle, Download, Send } from "lucide-react";
 import DemoOverlay from "@/components/demo/DemoOverlay";
+import DemoProgressBar from "@/components/demo/DemoProgressBar";
 import { askEndallDemo } from "@/components/demo/ask-endall-config";
+import { DEMO_PRESETS, type DemoFile } from "@/data/demo-presets";
 import ChatMessage from "@/components/chat/ChatMessage";
 
-// Simulated quick actions (mirrors real QUICK_ACTIONS)
+// Preset quick actions (mirrors real QUICK_ACTIONS). Each ID maps to a cached
+// response in DEMO_PRESETS so the demo feels instant.
 const DEMO_ACTIONS = [
   { id: "financial_model", label: "Build a financial model", description: "P&L, cash flow, job margins, KPI dashboard", icon: BarChart3, color: "#3b82f6" },
   { id: "generate_budget", label: "Generate a budget", description: "Monthly budget with targets and tracking", icon: Wallet, color: "#10b981" },
@@ -22,7 +25,7 @@ type SimMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  files?: { filename: string }[];
+  files?: DemoFile[];
 };
 
 export default function InteractiveDemoPage() {
@@ -30,32 +33,62 @@ export default function InteractiveDemoPage() {
   const [messages, setMessages] = useState<SimMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState("");
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [progressDone, setProgressDone] = useState(false);
+  const pendingRef = useRef<SimMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
 
-  // Simulate the NPV flow for the demo
-  const simulateNpv = useCallback(async () => {
-    setSelectedAction("npv_analysis");
-    setMessages([{
-      id: "1",
-      role: "user",
-      content: "[Analyze project returns]",
-    }]);
-    setLoading(true);
+  // Render a cached preset response. The progress bar animates in parallel
+  // and we fire `done` after the preset's renderDelayMs to let the staged
+  // bar look like real work.
+  const runPreset = useCallback((presetId: string) => {
+    const preset = DEMO_PRESETS[presetId];
+    if (!preset) return;
 
-    // Phase 1: asking for details
-    await new Promise((r) => setTimeout(r, 1500));
-    setMessages((prev) => [...prev, {
-      id: "2",
-      role: "assistant",
-      content: "I'll build an NPV analysis for you. I need a few details:\n\n1. **Project name** and type\n2. **Total contract value**\n3. **Duration** (months)\n4. **Cost breakdown** — labor %, materials %, subs %\n5. **Discount rate** (or I'll use 10%)\n\nGive me what you have and I'll fill in MEP industry benchmarks for the rest.",
-    }]);
+    // 1. user bubble
+    setMessages([{ id: "u-" + presetId, role: "user", content: preset.userMessage }]);
+
+    // 2. optional intro reply (fires quickly, no progress bar)
+    const kickoff = () => {
+      if (preset.intro) {
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            { id: "i-" + presetId, role: "assistant", content: preset.intro! },
+          ]);
+          showFinal();
+        }, 600);
+      } else {
+        showFinal();
+      }
+    };
+
+    // 3. show progress bar, then deliver final response + files
+    const showFinal = () => {
+      setProgressDone(false);
+      pendingRef.current = {
+        id: "r-" + presetId,
+        role: "assistant",
+        content: preset.response,
+        files: preset.files,
+      };
+      setLoading(true);
+      const delay = preset.renderDelayMs ?? 1000;
+      setTimeout(() => setProgressDone(true), delay);
+    };
+
+    kickoff();
+  }, []);
+
+  const onProgressFinished = useCallback(() => {
     setLoading(false);
+    if (pendingRef.current) {
+      setMessages((prev) => [...prev, pendingRef.current!]);
+      pendingRef.current = null;
+    }
   }, []);
 
   const handleSendMessage = useCallback(() => {
@@ -63,34 +96,46 @@ export default function InteractiveDemoPage() {
     const userMsg: SimMessage = { id: String(Date.now()), role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setLoading(true);
 
-    // Simulate generation phases
-    const phases = [
-      { delay: 0, msg: "Building your document..." },
-      { delay: 2000, msg: "Running calculations..." },
-      { delay: 4000, msg: "Formatting workbook and applying formulas..." },
+    // Pick the closest preset by keyword; fallback to a generic response.
+    const q = userMsg.content.toLowerCase();
+    const keywordMatch: Array<[string, string[]]> = [
+      ["npv_analysis", ["npv", "return", "irr"]],
+      ["project_estimate", ["estimate", "bid", "cost"]],
+      ["proposal", ["proposal", "sow"]],
+      ["generate_budget", ["budget"]],
+      ["financial_model", ["financial model", "p&l", "model"]],
+      ["review_financials", ["review", "financials", "variance"]],
+      ["competitive_analysis", ["competitor", "market", "competitive"]],
+      ["capabilities_doc", ["capabilities", "deck", "company profile"]],
     ];
-    phases.forEach((p) => setTimeout(() => setLoadingPhase(p.msg), p.delay));
+    const matched = keywordMatch.find(([, kws]) => kws.some((k) => q.includes(k)));
+    const preset = matched ? DEMO_PRESETS[matched[0]] : null;
 
-    // Simulate completion
-    setTimeout(() => {
-      setLoading(false);
-      setLoadingPhase("");
-      setMessages((prev) => [...prev, {
-        id: String(Date.now() + 1),
-        role: "assistant",
-        content: "Your NPV analysis is ready. Here's what I built:\n\n- **6 tabs**: How to Use, Assumptions, Cash Flow, Sensitivity, Summary, Executive Summary\n- **268 live formulas** — all dynamic, all editable\n- **Go/No-Go recommendation** based on your inputs\n- **Sensitivity analysis** at +10%, +20%, +30% cost overruns\n\nThe file is ready to download below.",
-        files: [{ filename: "NPV_DataCenter_Mechanical_2026.xlsx" }],
-      }]);
-    }, 6000);
+    setProgressDone(false);
+    pendingRef.current = preset
+      ? {
+          id: "r-" + Date.now(),
+          role: "assistant",
+          content: preset.response,
+          files: preset.files,
+        }
+      : {
+          id: "r-" + Date.now(),
+          role: "assistant",
+          content:
+            "That's a great question. In the full product, Endall would pull your actual pipeline, crew data, and financials to answer this. Try one of the preset actions to see a complete example.",
+        };
+    setLoading(true);
+    setTimeout(() => setProgressDone(true), preset?.renderDelayMs ?? 1600);
   }, [input]);
 
-  const handleActionClick = useCallback((actionId: string) => {
-    if (actionId === "npv_analysis") {
-      simulateNpv();
-    }
-  }, [simulateNpv]);
+  const handleActionClick = useCallback(
+    (actionId: string) => {
+      runPreset(actionId);
+    },
+    [runPreset]
+  );
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", color: "var(--text-secondary)" }}>
@@ -197,8 +242,10 @@ export default function InteractiveDemoPage() {
               {msg.files && msg.files.length > 0 && (
                 <div data-demo="file-download" style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                   {msg.files.map((f) => (
-                    <div
+                    <a
                       key={f.filename}
+                      href={f.url}
+                      download={f.filename}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -211,11 +258,15 @@ export default function InteractiveDemoPage() {
                         fontSize: 13,
                         fontWeight: 500,
                         cursor: "pointer",
+                        textDecoration: "none",
+                        transition: "background 0.15s",
                       }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(59,130,246,0.2)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(59,130,246,0.1)")}
                     >
                       <Download size={14} />
                       <span>{f.filename}</span>
-                    </div>
+                    </a>
                   ))}
                 </div>
               )}
@@ -225,26 +276,7 @@ export default function InteractiveDemoPage() {
 
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 12 }}>
-            <div
-              data-demo="progress-bar"
-              style={{
-                padding: "12px 16px",
-                borderRadius: "12px 12px 12px 2px",
-                background: "var(--overlay-weak)",
-                border: "1px solid var(--overlay-soft)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                minWidth: 200,
-              }}
-            >
-              {loadingPhase && (
-                <div style={{ fontSize: 13, color: "var(--text-tertiary)", lineHeight: 1.4 }}>{loadingPhase}</div>
-              )}
-              <div style={{ height: 3, background: "var(--overlay-medium)", borderRadius: 2, overflow: "hidden" }}>
-                <div className="demo-progress-fill" style={{ height: "100%", background: "var(--surface-inverse)", borderRadius: 2 }} />
-              </div>
-            </div>
+            <DemoProgressBar done={progressDone} onFinished={onProgressFinished} />
           </div>
         )}
 
@@ -308,17 +340,6 @@ export default function InteractiveDemoPage() {
           onExit={() => setDemoActive(false)}
         />
       )}
-
-      <style jsx>{`
-        @keyframes demo-progress-slide {
-          0% { transform: translateX(-100%); width: 40%; }
-          50% { width: 60%; }
-          100% { transform: translateX(300%); width: 40%; }
-        }
-        .demo-progress-fill {
-          animation: demo-progress-slide 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-      `}</style>
     </div>
   );
 }

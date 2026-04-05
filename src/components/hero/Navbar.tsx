@@ -2,11 +2,24 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      e.preventDefault();
+      router.push("/");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,6 +69,7 @@ export default function Navbar() {
         <div style={{ minWidth: 160 }}>
           <Link
             href="/"
+            onClick={handleLogoClick}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "18px",
