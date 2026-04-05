@@ -183,7 +183,7 @@ export default function CallStep({ onNext }: CallStepProps) {
             e.currentTarget.style.borderColor = "var(--border)";
           }}
         >
-          I&rsquo;ve heard enough →
+          Skip this step →
         </button>
       </motion.div>
     </div>

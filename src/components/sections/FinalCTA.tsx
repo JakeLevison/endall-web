@@ -80,7 +80,7 @@ export default function FinalCTA() {
           }}
         >
           <a
-            href="/demo"
+            href="/contact"
             style={{
               display: "inline-block",
               background: "var(--surface-inverse)",
@@ -96,7 +96,7 @@ export default function FinalCTA() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
-            Request a Demo
+            Get started
           </a>
         </div>
       </div>

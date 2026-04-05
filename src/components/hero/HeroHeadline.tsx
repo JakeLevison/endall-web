@@ -186,7 +186,7 @@ export default function HeroHeadline() {
             onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
             onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
           >
-            Request a Demo
+            See it in action
           </Link>
           <Link
             href="/dashboard/ask-endall"
@@ -208,7 +208,7 @@ export default function HeroHeadline() {
             onFocus={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
           >
-            Try Ask Endall Free
+            Try Ask Endall
           </Link>
         </div>
         <p
@@ -218,7 +218,7 @@ export default function HeroHeadline() {
             color: "var(--text-muted)",
           }}
         >
-          Request a demo. See it on your own jobs.
+          See it in action. Run it on your own jobs.
         </p>
       </motion.div>
 

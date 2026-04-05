@@ -297,6 +297,27 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
           >
             Build my NPV analysis
           </button>
+
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <button
+              type="button"
+              onClick={onNext}
+              style={{
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: 14,
+                color: "var(--text-muted)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "6px 0",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+            >
+              Skip this step →
+            </button>
+          </div>
         </motion.div>
       )}
 

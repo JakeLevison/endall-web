@@ -224,11 +224,31 @@ export default function AskStep({ onNext, onSuggestionChosen }: AskStepProps) {
           bottom: 0,
           left: 0,
           right: 0,
-          padding: "16px 20px calc(env(safe-area-inset-bottom) + 16px)",
+          padding: "12px 20px calc(env(safe-area-inset-bottom) + 16px)",
           background: "var(--bg)",
           borderTop: "1px solid var(--border)",
         }}
       >
+        <div style={{ maxWidth: 720, margin: "0 auto 8px", textAlign: "right" }}>
+          <button
+            type="button"
+            onClick={onNext}
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: 13,
+              color: "var(--text-muted)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px 0",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+          >
+            Skip this step →
+          </button>
+        </div>
         <div
           style={{
             maxWidth: 720,

@@ -165,7 +165,7 @@ export default function CtaStep() {
               (e.currentTarget.style.background = "var(--surface-inverse)")
             }
           >
-            Request a demo
+            Get started
           </Link>
 
           <Link
@@ -179,7 +179,7 @@ export default function CtaStep() {
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
           >
-            Try it yourself →
+            Keep exploring →
           </Link>
         </motion.div>
       </div>

@@ -16,8 +16,8 @@ const tiers = [
       "Competitive analysis",
       "Capabilities docs & financial reviews",
     ],
-    cta: "Request a Demo",
-    href: "/demo",
+    cta: "Get started",
+    href: "/contact",
   },
   {
     name: "Growth",
@@ -29,8 +29,8 @@ const tiers = [
       "Priority onboarding",
       "Dedicated setup specialist",
     ],
-    cta: "Request a Demo",
-    href: "/demo",
+    cta: "Get started",
+    href: "/contact",
     highlight: true,
   },
   {
