@@ -6,7 +6,11 @@ import { motion, useReducedMotion } from "framer-motion";
 
 // Rotating words picked for emotional resonance with contractors - these
 // are the pain points they feel every day, not abstract operational functions.
-const words = ["Calls", "Office", "Mornings", "Pipeline", "Paperwork", "Crew"];
+// Ordered so the most universally painful / least self-selecting words lead.
+// "Calls" used to be first, but a contractor who answers their own phone will
+// self-select out before the second rotation. By the time Calls appears (5th),
+// they've already bought the premise.
+const words = ["Office", "Paperwork", "Pipeline", "Mornings", "Calls", "Crew"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);

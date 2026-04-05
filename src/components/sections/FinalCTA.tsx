@@ -21,7 +21,7 @@ export default function FinalCTA() {
   }, []);
 
   return (
-    <section ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, var(--overlay-weak), transparent)" }}>
+    <section id="final-cta" ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, var(--overlay-weak), transparent)" }}>
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
         {/* Main line — staggered clip reveal per line */}
         <h2

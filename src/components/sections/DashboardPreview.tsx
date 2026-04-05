@@ -12,7 +12,7 @@ export default function DashboardPreview() {
             maxWidth: "1100px",
             margin: "0 auto",
             textAlign: "center",
-            marginBottom: "40px",
+            marginBottom: "56px",
           }}
         >
           <h2
@@ -40,16 +40,17 @@ export default function DashboardPreview() {
             Every call, every lead, every job, every dollar - visible at a glance.
           </p>
         </div>
-        {/* Contained panel behind the screenshot — subtle depth, rounded, floating */}
+        {/* Contained panel behind the screenshot — sits on a shelf (shadow
+            weighted to the bottom), noticeably lighter than the page bg */}
         <div
           style={{
             maxWidth: "980px",
             margin: "0 auto",
-            padding: "clamp(20px, 4vw, 40px)",
-            background: "var(--overlay-weak)",
+            padding: "clamp(24px, 4vw, 48px)",
+            background: "var(--panel-surface)",
             border: "1px solid var(--overlay-medium)",
             borderRadius: "20px",
-            boxShadow: "var(--shadow-elevated)",
+            boxShadow: "var(--shadow-shelf)",
           }}
         >
           <DashboardMock />

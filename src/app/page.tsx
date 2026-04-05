@@ -14,6 +14,8 @@ import RoiCalculator from "@/components/sections/RoiCalculator";
 import Testimonials from "@/components/sections/Testimonials";
 import FinalCTA from "@/components/sections/FinalCTA";
 import Footer from "@/components/sections/Footer";
+import InlineCTA from "@/components/sections/InlineCTA";
+import MobileStickyCTA from "@/components/shared/MobileStickyCTA";
 
 export default function Home() {
   const [entranceDone, setEntranceDone] = useState(false);
@@ -60,6 +62,12 @@ export default function Home() {
             <CapabilityAccordion />
           </ScrollReveal>
 
+          <InlineCTA
+            lead="Want to see this in action?"
+            cta="Book a demo"
+            href="/contact?intent=book_demo"
+          />
+
           {/* 3b. Autonomy tiers — "You decide how much Endall takes off your plate" */}
           <div
             style={{
@@ -69,6 +77,12 @@ export default function Home() {
             }}
           />
           <AutonomyTiers />
+
+          <InlineCTA
+            lead="Ready to choose your mode?"
+            cta="Talk to us"
+            href="/contact?intent=talk_sales"
+          />
 
           {/* 4. Proof — "Your entire operation. One screen." */}
           <div
@@ -116,6 +130,7 @@ export default function Home() {
           {/* Footer */}
           <Footer />
         </main>
+        <MobileStickyCTA />
       </div>
     </div>
   );

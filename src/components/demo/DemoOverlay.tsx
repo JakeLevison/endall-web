@@ -3,6 +3,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { X, ChevronRight, SkipForward, RotateCcw } from "lucide-react";
 import type { DemoStep, DemoConfig } from "./types";
+import DemoGate from "./DemoGate";
+
+// Gate kicks in before step index 2 (the third step). Before that point,
+// users get a free taste; past that point we personalize the rest of the
+// demo, which is the pretext for collecting 4 qualifying fields.
+const GATE_BEFORE_STEP_INDEX = 2;
+
+function isGateAlreadyFilled(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem("endall_demo_gate_filled") === "1";
+  } catch {
+    return false;
+  }
+}
 
 interface DemoOverlayProps {
   config: DemoConfig;
@@ -74,6 +89,7 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const step = config.steps[currentStep];
   const totalSteps = config.steps.length;
@@ -97,22 +113,33 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
     };
   }, [updateRect]);
 
-  // Auto-advance for "wait" and "observe" steps
-  useEffect(() => {
-    if (!step || completed) return;
-    if (step.action === "wait" || step.action === "observe") {
-      const timer = setTimeout(() => advance(), step.waitMs || 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep, step, completed]);
-
   const advance = useCallback(() => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
+      const next = currentStep + 1;
+      // Intercept: if crossing into a gated step, show gate first.
+      if (next === GATE_BEFORE_STEP_INDEX && !isGateAlreadyFilled()) {
+        setGateOpen(true);
+        return;
+      }
+      setCurrentStep(next);
     } else {
       setCompleted(true);
     }
   }, [currentStep, totalSteps]);
+
+  // Auto-advance for "wait" and "observe" steps (paused while gate is open)
+  useEffect(() => {
+    if (!step || completed || gateOpen) return;
+    if (step.action === "wait" || step.action === "observe") {
+      const timer = setTimeout(() => advance(), step.waitMs || 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, step, completed, gateOpen, advance]);
+
+  const handleGateComplete = useCallback(() => {
+    setGateOpen(false);
+    setCurrentStep(GATE_BEFORE_STEP_INDEX);
+  }, []);
 
   const skip = useCallback(() => {
     advance();
@@ -248,6 +275,7 @@ export default function DemoOverlay({ config, onComplete, onExit }: DemoOverlayP
 
   return (
     <>
+      {gateOpen && <DemoGate onComplete={handleGateComplete} />}
       {/* Spotlight overlay */}
       <svg
         style={{

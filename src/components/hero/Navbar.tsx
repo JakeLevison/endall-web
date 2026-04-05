@@ -173,19 +173,19 @@ export default function Navbar() {
         </div>
 
         {/* Right section — fixed width to balance left section */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 160, justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 220, justifyContent: "flex-end" }}>
           <ThemeToggle />
           <Link
             href="/dashboard/ask-endall"
+            className="hidden sm:inline-flex"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: 500,
-              color: "var(--text-inverse)",
-              backgroundColor: "var(--surface-inverse)",
-              padding: "0 20px",
+              color: "var(--text-primary)",
+              backgroundColor: "transparent",
+              padding: "0 14px",
               height: "36px",
-              display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
               lineHeight: 1,
@@ -193,12 +193,38 @@ export default function Navbar() {
               textDecoration: "none",
               transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
-            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-            onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--overlay-soft)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--overlay-soft)")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             Ask Endall
+          </Link>
+          <Link
+            href="/contact?intent=book_demo"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#1a1a1a",
+              backgroundColor: "var(--brand-accent-light)",
+              padding: "0 16px",
+              height: "36px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+              borderRadius: "8px",
+              textDecoration: "none",
+              transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 200ms ease",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--brand-accent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--brand-accent-light)")}
+            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--brand-accent)")}
+            onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--brand-accent-light)")}
+          >
+            Book a Demo
           </Link>
 
           {/* Mobile hamburger */}
@@ -344,6 +370,27 @@ export default function Navbar() {
             }}
           >
             Contact
+          </a>
+          <a
+            href="/contact?intent=book_demo"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "16px",
+              fontWeight: 600,
+              color: "#1a1a1a",
+              backgroundColor: "var(--brand-accent-light)",
+              textDecoration: "none",
+              minHeight: "44px",
+              padding: "0 16px",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "4px",
+            }}
+          >
+            Book a Demo
           </a>
         </div>
         </>

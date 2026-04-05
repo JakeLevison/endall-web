@@ -1,22 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
 const AVG_JOB_VALUE = 2500;
 const CLOSE_RATE = 0.15;
 const WEEKS_PER_MONTH = 4.3;
+const PAY_PER_STAFF = 4000; // default monthly admin pay per head
+const PAY_STEP = 500;
+const PAY_MAX = 25000;
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
+// Round to the slider's step grid so the default value always lands on a valid tick.
+function snapToStep(n: number, step: number) {
+  return Math.round(n / step) * step;
+}
+
+function suggestedPay(staff: number): number {
+  if (staff <= 0) return 0;
+  return snapToStep(Math.min(PAY_MAX, staff * PAY_PER_STAFF), PAY_STEP);
+}
+
 export default function RoiCalculator() {
   const [staff, setStaff] = useState(1);
-  const [monthlyCost, setMonthlyCost] = useState(4000);
+  const [monthlyCost, setMonthlyCost] = useState(() => suggestedPay(1));
   const [missedCalls, setMissedCalls] = useState(5);
+  const userTouchedPay = useRef(false);
 
+  // Update pay slider alongside staff changes. While the user hasn't touched
+  // pay, it tracks N × $4,000. Once they drag it, we leave it alone — except
+  // moving back to 0 staff forces pay to $0 and re-arms auto-tracking.
+  const handleStaffChange = (n: number) => {
+    setStaff(n);
+    if (n === 0) {
+      setMonthlyCost(0);
+      userTouchedPay.current = false;
+      return;
+    }
+    if (!userTouchedPay.current) {
+      setMonthlyCost(suggestedPay(n));
+    }
+  };
+
+  const handlePayChange = (v: number) => {
+    userTouchedPay.current = true;
+    setMonthlyCost(v);
+  };
+
+  // Admin cost === whatever the pay slider shows (it already represents total
+  // admin spend across all staff). Zero when no staff.
   const adminCost = staff > 0 ? monthlyCost : 0;
   const lostRevenue = missedCalls * WEEKS_PER_MONTH * AVG_JOB_VALUE * CLOSE_RATE;
   const total = adminCost + lostRevenue;
@@ -55,16 +91,16 @@ export default function RoiCalculator() {
               max={5}
               step={1}
               display={staff === 1 ? "1 person" : `${staff} people`}
-              onChange={setStaff}
+              onChange={handleStaffChange}
             />
             <SliderRow
               label="What do you pay them per month in total (all staff combined)?"
               value={monthlyCost}
               min={0}
-              max={15000}
-              step={500}
+              max={PAY_MAX}
+              step={PAY_STEP}
               display={staff === 0 ? "$0" : `$${fmt(monthlyCost)}`}
-              onChange={setMonthlyCost}
+              onChange={handlePayChange}
               disabled={staff === 0}
             />
             <SliderRow
@@ -182,11 +218,12 @@ export default function RoiCalculator() {
 
           <div
             style={{
-              marginTop: "32px",
+              marginTop: "48px",
+              paddingBottom: "16px",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "12px",
+              gap: "14px",
             }}
           >
             <Link

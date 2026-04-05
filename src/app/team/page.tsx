@@ -45,7 +45,7 @@ export default function AboutPage() {
           </h1>
 
           {/* Mission */}
-          <section style={{ marginBottom: 40 }}>
+          <section style={{ marginBottom: 56 }}>
             <h2
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
@@ -57,7 +57,7 @@ export default function AboutPage() {
             >
               Our mission
             </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
               Endall exists to give mechanical, electrical, and plumbing contractors the
               operational firepower that only large general contractors can afford today.
               We build AI that does the back-office work -- financial models, budgets,
@@ -67,7 +67,7 @@ export default function AboutPage() {
           </section>
 
           {/* Problem */}
-          <section style={{ marginBottom: 40 }}>
+          <section style={{ marginBottom: 56 }}>
             <h2
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
@@ -79,7 +79,7 @@ export default function AboutPage() {
             >
               The problem we solve
             </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
               Most MEP contractors run their operations on spreadsheets, phone calls, and
               gut instinct. They lose bids because they can&apos;t turn around estimates fast
               enough. They leave money on the table because nobody has time to build a real
@@ -102,7 +102,7 @@ export default function AboutPage() {
             >
               Why MEP contractors
             </h2>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
               MEP is the backbone of every building, but the trade is underserved by
               technology. These are technically sophisticated businesses that deserve
               modern operational tools. We chose this market because the impact is
@@ -162,7 +162,7 @@ export default function AboutPage() {
                 </a>
               </div>
             </div>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
               Before founding Endall, Jake spent six years as Director of Business
               Development at Post Harvest Technologies, a private investment and operating
               platform dedicated to post-harvest infrastructure and logistics. He led
@@ -170,7 +170,7 @@ export default function AboutPage() {
               institutional relationships and advancing transactions across acquisitions,
               real estate, and development.
             </p>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)", marginBottom: 16 }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
               Working closely with PHT&apos;s portfolio companies and their operations teams,
               he saw the same pattern everywhere: skilled operators losing bids, missing
               calls, and leaving money on the table because no one was covering the back
@@ -178,7 +178,7 @@ export default function AboutPage() {
               growing service business could justify. That gap is what led him to start
               Endall.
             </p>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
               Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan Stanley.
               He holds a B.A. in Philosophy, Politics, and Economics from the University
               of Pennsylvania, where he played Division I baseball.
