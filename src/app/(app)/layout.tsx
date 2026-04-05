@@ -58,11 +58,11 @@ function NavLink({ item, pathname }: { item: { href: string; label: string; icon
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
-        isActive
-          ? "bg-white/[0.06] text-white"
-          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
-      }`}
+      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
+      style={{
+        background: isActive ? "var(--overlay-soft)" : "transparent",
+        color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+      }}
     >
       <item.icon className="size-4 shrink-0" />
       {item.label}
@@ -82,7 +82,7 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
       <div className="px-4 py-4">
         <Link
           href="/"
-          className="text-[15px] font-medium tracking-[-0.01em] text-white"
+          className="text-[15px] font-medium tracking-[-0.01em]" style={{ color: "var(--text-primary)" }}
         >
           endall
         </Link>
@@ -93,10 +93,11 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
         ))}
 
         {/* Collapsible CRM section */}
-        <div className="pt-3 mt-3 border-t border-white/[0.04]">
+        <div className="pt-3 mt-3" style={{ borderTop: "1px solid var(--border)" }}>
           <button
             onClick={() => setMoreOpen((prev) => !prev)}
-            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] text-zinc-600 hover:text-zinc-400 transition-colors w-full"
+            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors w-full"
+            style={{ color: "var(--text-muted)" }}
           >
             <ChevronDown
               className="size-3.5 shrink-0 transition-transform"
@@ -122,11 +123,11 @@ function SidebarContent({ pathname, onOpenChat }: { pathname: string; onOpenChat
       <div className="px-2 pb-4">
         <Link
           href="/settings"
-          className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors ${
-            pathname === "/settings"
-              ? "bg-white/[0.06] text-white"
-              : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]"
-          }`}
+          className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
+          style={{
+            background: pathname === "/settings" ? "var(--overlay-soft)" : "transparent",
+            color: pathname === "/settings" ? "var(--text-primary)" : "var(--text-muted)",
+          }}
         >
           <Settings className="size-4 shrink-0" />
           Settings
@@ -181,34 +182,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <div className="flex h-screen bg-[#0A0A0B] text-zinc-300">
+    <div className="flex h-screen text-zinc-300 dark:text-zinc-300" style={{ background: "var(--bg)", color: "var(--text-secondary)" }}>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-white/[0.04]">
+      <aside className="hidden md:flex w-56 shrink-0 flex-col" style={{ borderRight: "1px solid var(--border)" }}>
         <SidebarContent pathname={pathname} onOpenChat={openChat} />
       </aside>
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-12 shrink-0 border-b border-white/[0.04] flex items-center justify-between px-4">
+        <header className="h-12 shrink-0 flex items-center justify-between px-4" style={{ borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-3">
             {/* Mobile menu */}
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
-                <button className="md:hidden text-zinc-500 hover:text-zinc-300">
+                <button className="md:hidden" style={{ color: "var(--text-muted)" }}>
                   <Menu className="size-5" />
                 </button>
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-56 p-0 bg-[#0A0A0B] border-white/[0.04]"
+                className="w-56 p-0" style={{ background: "var(--bg)", borderColor: "var(--border)" }}
               >
                 <SidebarContent pathname={pathname} onOpenChat={openChat} />
               </SheetContent>
             </Sheet>
 
             {/* Logo — mobile only, links to landing page */}
-            <Link href="/" className="md:hidden text-[15px] font-semibold text-white tracking-[-0.02em] px-3 py-2 min-h-[36px] flex items-center">
+            <Link href="/" className="md:hidden text-[15px] font-semibold tracking-[-0.02em] px-3 py-2 min-h-[36px] flex items-center" style={{ color: "var(--text-primary)" }}>
               endall
             </Link>
 
@@ -216,12 +217,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {!pathname.startsWith("/dashboard/ask-endall") && (
               <button
                 onClick={() => setChatOpen(true)}
-                className="flex items-center gap-1.5 text-[13px] transition-colors min-h-[36px] px-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]"
+                className="flex items-center gap-1.5 text-[13px] transition-colors min-h-[36px] px-3 rounded-full"
+                style={{ background: "var(--overlay-soft)", border: "1px solid var(--overlay-medium)", color: "var(--text-muted)" }}
               >
                 <Sparkles className="size-3.5 shrink-0" />
                 <span className="sm:hidden text-[12px]">AI</span>
                 <span className="hidden sm:inline">ask endall...</span>
-                <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] text-zinc-700 bg-white/[0.03] border border-white/[0.06] rounded ml-1">
+                <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] rounded ml-1" style={{ color: "var(--text-faint)", background: "var(--overlay-weak)", border: "1px solid var(--overlay-medium)" }}>
                   <span className="text-xs">&#8984;</span>K
                 </kbd>
               </button>
@@ -233,7 +235,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Compose email button */}
           <button
             onClick={() => setComposeOpen(true)}
-            className="text-zinc-500 hover:text-zinc-300 transition-colors p-1.5"
+            className="transition-colors p-1.5" style={{ color: "var(--text-muted)" }}
             title="Compose email"
           >
             <Mail className="size-4" />
@@ -244,7 +246,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <button className="outline-none">
                 <Avatar className="size-7">
-                  <AvatarFallback className="bg-white/[0.06] text-[11px] text-zinc-400">
+                  <AvatarFallback className="text-[11px]" style={{ background: "var(--overlay-soft)", color: "var(--text-muted)" }}>
                     JK
                   </AvatarFallback>
                 </Avatar>
@@ -252,16 +254,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-48 bg-[#111113] border-white/[0.06]"
+              className="w-48" style={{ background: "var(--surface)", borderColor: "var(--border)" }}
             >
-              <DropdownMenuItem className="text-[13px] text-zinc-400">
+              <DropdownMenuItem className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-[13px] text-zinc-400">
+              <DropdownMenuItem className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/[0.04]" />
-              <DropdownMenuItem className="text-[13px] text-zinc-400">
+              <DropdownMenuSeparator style={{ background: "var(--border)" }} />
+              <DropdownMenuItem className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
