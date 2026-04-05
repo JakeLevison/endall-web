@@ -40,7 +40,20 @@ export default function DashboardPreview() {
             Every call, every lead, every job, every dollar - visible at a glance.
           </p>
         </div>
-        <DashboardMock />
+        {/* Contained panel behind the screenshot — subtle depth, rounded, floating */}
+        <div
+          style={{
+            maxWidth: "980px",
+            margin: "0 auto",
+            padding: "clamp(20px, 4vw, 40px)",
+            background: "var(--overlay-weak)",
+            border: "1px solid var(--overlay-medium)",
+            borderRadius: "20px",
+            boxShadow: "var(--shadow-elevated)",
+          }}
+        >
+          <DashboardMock />
+        </div>
       </section>
     </ScrollReveal>
   );

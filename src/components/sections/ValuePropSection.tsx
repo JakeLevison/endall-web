@@ -32,9 +32,9 @@ export default function ValuePropSection() {
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "clamp(20px, 3vw, 24px)",
               color: "var(--text-secondary)",
-              lineHeight: 1.5,
+              lineHeight: 1.6,
               marginBottom: "48px",
-              letterSpacing: "-0.01em",
+              letterSpacing: "-0.005em",
             }}
           >
             You started this company to do the work - not to answer phones,

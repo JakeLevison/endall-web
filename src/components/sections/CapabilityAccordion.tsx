@@ -111,8 +111,9 @@ export default function CapabilityAccordion() {
                     borderRadius: "12px",
                     background: isOpen ? "var(--overlay-weak)" : "var(--overlay-soft)",
                     overflow: "hidden",
-                    transition: "background 200ms ease, border-color 200ms ease",
+                    transition: "background 200ms ease, border-color 200ms ease, box-shadow 240ms ease",
                     borderColor: isOpen ? "var(--brand-accent-light)" : "var(--overlay-medium)",
+                    boxShadow: isOpen ? "var(--shadow-card)" : "none",
                   }}
                 >
                   <button

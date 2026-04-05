@@ -45,6 +45,7 @@ export default function RoiCalculator() {
               border: "1px solid var(--overlay-medium)",
               borderRadius: "16px",
               padding: "32px",
+              boxShadow: "var(--shadow-elevated)",
             }}
           >
             <SliderRow

@@ -126,6 +126,7 @@ export default function AutonomyTiers() {
               marginBottom: "32px",
               maxWidth: "560px",
               marginInline: "auto",
+              boxShadow: "var(--shadow-inset)",
             }}
           >
             {TIERS.map((tier) => {
@@ -170,6 +171,7 @@ export default function AutonomyTiers() {
               borderRadius: "16px",
               padding: "28px 28px 24px",
               background: "var(--overlay-weak)",
+              boxShadow: "var(--shadow-card)",
               animation: "tier-fade 300ms ease-out",
             }}
           >
