@@ -23,6 +23,7 @@ import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import CommandCenter from "@/components/command-center/CommandCenter";
+import { posthog } from "@/lib/posthog";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -339,6 +340,7 @@ export default function DashboardPage() {
     }
 
     fetchDashboard();
+    posthog.capture("command_center_viewed");
   }, []);
 
   if (loading) {

@@ -75,3 +75,55 @@ No module operates in isolation. The front desk feeds the SDR. The SDR feeds the
 - Voice/calls is never the lead feature — always position as one part of a larger ops replacement
 - Jake's public title: "Founder" (not Co-Founder)
 - Email signature: Jake Levison / Founder, Endall / (203) 610-9399 / endall.ai
+
+---
+
+## Production URL Map
+
+| Service | URL | Env Var |
+|---------|-----|---------|
+| **Vercel (frontend)** | `https://endall.ai` | — (production domain) |
+| **Ask Endall Bridge (Railway)** | `https://ask-endall-bridge-production.up.railway.app` | `ASK_ENDALL_BRIDGE_URL`, `NEXT_PUBLIC_OPS_API_URL` |
+| **Chief-of-Staff API (Railway)** | TBD — set via env var | `COS_API_URL` |
+| **ElevenLabs** | Via SDK (API key auth) | `ELEVENLABS_API_KEY` |
+| **Twilio** | Via SDK (account SID + auth token) | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` |
+| **Supabase** | `https://jqvtrbyzgccmedsqopyd.supabase.co` | `NEXT_PUBLIC_SUPABASE_URL` |
+| **Resend (email)** | Via SDK | `RESEND_API_KEY` |
+| **Cloudflare Turnstile** | Via widget + server verify | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` |
+
+All backend URLs must be set via environment variables in Vercel. Localhost fallbacks exist for local development only. See `docs/PRODUCTION_URL_AUDIT.md` for the full audit.
+
+---
+
+## PostHog Analytics
+
+### Project Setup
+- **Provider:** PostHog Cloud (US region — `https://us.i.posthog.com`)
+- **Integration:** `posthog-js` client-side, initialized in `src/lib/posthog.ts`
+- **Provider wrapper:** `src/components/providers/PostHogProvider.tsx` (mounted in root layout)
+- **Page views:** Automatic via PostHog `capture_pageview: true`
+
+### Tracked Events
+| Event | Trigger | Properties |
+|-------|---------|------------|
+| `page_view` | Automatic (all pages) | — |
+| `demo_form_started` | User lands on `/demo/request` | — |
+| `demo_form_completed` | Successful demo form submission | `trade`, `team_size` |
+| `demo_form_abandoned` | User leaves `/demo/request` without submitting | — |
+| `command_center_viewed` | Dashboard page loads | — |
+| `ask_endall_query` | User submits a question in Ask Endall | `query_length` |
+
+### Rules
+- No session replay, feature flags, or advanced PostHog features without explicit approval
+- Only add new events through a PR with Jake's sign-off
+- Never capture PII (names, emails, phone numbers) in event properties
+
+---
+
+## Environment Variables Added (PostHog)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_POSTHOG_KEY` | Yes (for analytics) | PostHog project API key. Leave empty to disable tracking. |
+
+Full env var reference: `.env.example`

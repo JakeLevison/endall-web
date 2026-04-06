@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { useChat, QUICK_ACTIONS, type Message } from "@/hooks/useChat";
 import ChatMessage from "@/components/chat/ChatMessage";
+import { posthog } from "@/lib/posthog";
 
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
@@ -80,6 +81,7 @@ export default function AskEndallPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (loading || !input.trim()) return;
+    posthog.capture("ask_endall_query", { query_length: input.trim().length });
     sendMessage(input);
     setInput("");
   };
@@ -88,6 +90,7 @@ export default function AskEndallPage() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (loading || !input.trim()) return;
+      posthog.capture("ask_endall_query", { query_length: input.trim().length });
       sendMessage(input);
       setInput("");
     }

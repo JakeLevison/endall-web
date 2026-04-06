@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { posthog } from "@/lib/posthog";
 import Navbar from "@/components/hero/Navbar";
 import Footer from "@/components/sections/Footer";
 
@@ -64,6 +65,16 @@ export default function DemoPage() {
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
+  const submittedRef = useRef(false);
+
+  useEffect(() => {
+    posthog.capture("demo_form_started");
+    return () => {
+      if (!submittedRef.current) {
+        posthog.capture("demo_form_abandoned");
+      }
+    };
+  }, []);
 
   return (
     <div
@@ -283,6 +294,11 @@ export default function DemoPage() {
                         throw new Error(body.error || "Something went wrong");
                       }
 
+                      submittedRef.current = true;
+                      posthog.capture("demo_form_completed", {
+                        trade: payload.trade,
+                        team_size: payload.team_size,
+                      });
                       router.push("/demo/confirmation");
                     } catch (err) {
                       setError(err instanceof Error ? err.message : "Something went wrong");
