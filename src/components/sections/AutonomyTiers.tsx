@@ -23,7 +23,7 @@ const TIERS: Tier[] = [
     summary:
       "Full 360 management. Endall runs outreach, sends proposals, follows up with leads, books jobs, runs briefings, and answers every call.",
     bullets: [
-      "Outreach + follow-ups fully automated",
+      "Outreach + follow-ups sent without you touching them",
       "Proposals sent without your approval",
       "Daily briefings + action items delivered",
       "Calls answered and qualified end-to-end",

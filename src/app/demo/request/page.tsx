@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Navbar from "@/components/hero/Navbar";
 import Footer from "@/components/sections/Footer";
 
@@ -61,6 +62,8 @@ export default function DemoPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   return (
     <div
@@ -265,6 +268,7 @@ export default function DemoPage() {
                       trade: data.get("trade") as string,
                       team_size: data.get("teamSize") as string,
                       notes: data.get("notes") as string,
+                      turnstile_token: turnstileToken,
                     };
 
                     try {
@@ -283,6 +287,7 @@ export default function DemoPage() {
                     } catch (err) {
                       setError(err instanceof Error ? err.message : "Something went wrong");
                       setSubmitting(false);
+                      turnstileRef.current?.reset();
                     }
                   }}
                   style={{
@@ -341,6 +346,15 @@ export default function DemoPage() {
                       style={{ ...inputStyle, resize: "vertical" }}
                     />
                   </div>
+
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA"}
+                    onSuccess={setTurnstileToken}
+                    onError={() => setTurnstileToken(null)}
+                    onExpire={() => setTurnstileToken(null)}
+                    options={{ theme: "auto", size: "normal" }}
+                  />
 
                   {error && (
                     <p

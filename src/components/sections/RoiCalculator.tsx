@@ -154,7 +154,7 @@ export default function RoiCalculator() {
                       color: "var(--text-tertiary)",
                     }}
                   >
-                    Monthly cost of not automating
+                    Monthly cost without an ops team
                   </span>
                   <span
                     style={{
@@ -184,7 +184,7 @@ export default function RoiCalculator() {
                       fontWeight: 500,
                     }}
                   >
-                    Annual cost of not automating
+                    Annual cost without an ops team
                   </span>
                   <span
                     style={{

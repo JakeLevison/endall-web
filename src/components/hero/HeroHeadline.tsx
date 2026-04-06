@@ -173,9 +173,9 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        Endall is an AI operations team for MEP contractors. It replaces your
-        office manager, bookkeeper, and sales coordinator — so you can focus on
-        the work, not the office.
+        Endall is an AI operations team for MEP contractors. It covers your
+        office manager, bookkeeper, and sales coordinator roles — so you can
+        focus on the work, not the office.
       </motion.p>
 
       <motion.div {...fadeUp(0.45)} style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>

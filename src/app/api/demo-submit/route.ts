@@ -7,13 +7,46 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, work_email, company, trade, team_size, notes } = body;
+    const { name, work_email, company, trade, team_size, notes, turnstile_token } = body;
 
     if (!name || !work_email || !company || !trade || !team_size) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // Verify Turnstile token
+    let lead_quality = "unknown";
+    let turnstile_score: number | null = null;
+
+    if (turnstile_token) {
+      try {
+        const verifyRes = await fetch(
+          "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              secret: process.env.TURNSTILE_SECRET_KEY ?? "1x0000000000000000000000000000000AA",
+              response: turnstile_token,
+              remoteip: request.headers.get("x-forwarded-for") ?? "",
+            }),
+          }
+        );
+        const verifyData = await verifyRes.json();
+        if (verifyData.success) {
+          lead_quality = "warm";
+          turnstile_score = verifyData.score ?? null;
+        } else {
+          lead_quality = "bot_suspected";
+        }
+      } catch (verifyErr) {
+        console.error("Turnstile verification error:", verifyErr);
+        lead_quality = "bot_suspected";
+      }
+    } else {
+      lead_quality = "bot_suspected";
     }
 
     // DB insert — best effort (table may not exist yet)
@@ -29,12 +62,19 @@ export async function POST(request: NextRequest) {
         trade,
         team_size,
         notes: notes || null,
+        lead_quality,
+        turnstile_score,
       });
       if (error) {
         console.error("demo_requests insert error:", error);
       }
     } catch (dbErr) {
       console.error("demo_requests DB error:", dbErr);
+    }
+
+    // If bot suspected, skip downstream SDR actions
+    if (lead_quality === "bot_suspected") {
+      return NextResponse.json({ success: true });
     }
 
     // Email notification — independent of DB

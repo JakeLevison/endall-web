@@ -1,6 +1,6 @@
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
-// "What Endall replaces" — concrete role replacement, then $170K stat.
+// "What Endall covers" — concrete capacity multiplication, then $170K stat.
 export default function ValuePropSection() {
   return (
     <ScrollReveal>
@@ -23,7 +23,7 @@ export default function ValuePropSection() {
               marginBottom: "28px",
             }}
           >
-            What Endall replaces
+            What Endall covers
           </p>
 
           {/* Role replacement — 3-column on desktop, stacked on mobile */}
@@ -130,7 +130,7 @@ export default function ValuePropSection() {
               }}
             >
               Average back-office spend for a 15-tech contractor. Endall
-              replaces it.
+              covers it for a fraction of the cost.
             </p>
             <p
               style={{

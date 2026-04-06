@@ -41,7 +41,7 @@ const CARDS: Card[] = [
     id: "financial-ops",
     icon: <LineChart size={18} />,
     title: "Financial Ops",
-    collapsed: "Your automated CFO. Margins, invoices, cash flow — always visible.",
+    collapsed: "Your back-office finance team. Margins, invoices, cash flow — always visible.",
     expanded:
       "Endall connects to QuickBooks and becomes your back-office finance team. It tracks margin on every job — estimated vs. actual — and flags jobs bleeding money before they finish. It shows you who's paid, who's overdue, and how much is outstanding. It forecasts cash flow weekly. Ask Endall: 'Am I profitable this month?' 'Which jobs are losing money?' 'Who hasn't paid me?' — you get the real answer, from real data.",
   },
