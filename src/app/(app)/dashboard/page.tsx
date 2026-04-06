@@ -19,6 +19,7 @@ import UpcomingEvents from "@/components/calendar/UpcomingEvents";
 import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import CommandCenter from "@/components/command-center/CommandCenter";
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -244,7 +245,11 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-[15px] font-medium text-white">Dashboard</h1>
+      <h1
+        style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)" }}
+      >
+        Dashboard
+      </h1>
 
       {/* Onboarding wizard — shows until dismissed */}
       <WelcomeWizard
@@ -255,7 +260,10 @@ export default function DashboardPage() {
         }}
       />
 
-      {/* ── Stats Row ─────────────────────────────────────────────── */}
+      {/* ── Agent Command Center ─────────────────────────────────── */}
+      <CommandCenter />
+
+      {/* ── CRM: Stats Row ───────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           {
