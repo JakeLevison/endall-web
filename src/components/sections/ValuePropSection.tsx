@@ -1,13 +1,12 @@
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
-// Shorter, punchier block. One paragraph that lands the pain, then the
-// $170K stat as the hero visual element of this section.
+// "What Endall replaces" — concrete role replacement, then $170K stat.
 export default function ValuePropSection() {
   return (
     <ScrollReveal>
       <section
         style={{
-          padding: "100px 16px",
+          padding: "48px 16px 48px",
           borderTop: "1px solid var(--border)",
           maxWidth: "1100px",
           margin: "0 auto",
@@ -24,22 +23,112 @@ export default function ValuePropSection() {
               marginBottom: "28px",
             }}
           >
-            The math
+            What Endall replaces
           </p>
+
+          {/* Role replacement — two-column on desktop, stacked on mobile */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "32px",
+              marginBottom: "48px",
+            }}
+          >
+            <div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(18px, 2.5vw, 22px)",
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: "10px",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Your office manager
+              </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(15px, 2vw, 17px)",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                Endall answers every call, qualifies every lead, and books jobs
+                to your calendar. Nothing falls through.
+              </p>
+            </div>
+
+            <div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(18px, 2.5vw, 22px)",
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: "10px",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Your bookkeeper
+              </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(15px, 2vw, 17px)",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                Track revenue, job costs, and crew utilization from a single
+                dashboard. Morning briefings land before your first coffee.
+              </p>
+            </div>
+
+            <div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(18px, 2.5vw, 22px)",
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: "10px",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Your sales coordinator
+              </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "clamp(15px, 2vw, 17px)",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.65,
+                  margin: 0,
+                }}
+              >
+                Endall prospects for you — finds opportunities, sends proposals,
+                follows up automatically. You close. It does the rest.
+              </p>
+            </div>
+          </div>
 
           <p
             style={{
               fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "clamp(20px, 3vw, 24px)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
+              fontSize: "clamp(17px, 2.4vw, 20px)",
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              textAlign: "center",
               marginBottom: "48px",
-              letterSpacing: "-0.005em",
+              letterSpacing: "-0.01em",
             }}
           >
-            You started this company to do the work - not to answer phones,
-            chase invoices, and write proposals at 10 PM. Endall runs the
-            office so you don&rsquo;t have to.
+            One AI ops team. A fraction of the cost. Up and running fast.
           </p>
 
           {/* $170K stat - hero of this section */}

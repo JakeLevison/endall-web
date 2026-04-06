@@ -21,12 +21,12 @@ const TIERS: Tier[] = [
     hook: "Endall runs everything.",
     icon: Zap,
     summary:
-      "Full 360 management. Endall answers calls, books jobs, sends proposals, follows up with leads, runs briefings, and manages outreach.",
+      "Full 360 management. Endall runs outreach, sends proposals, follows up with leads, books jobs, runs briefings, and answers every call.",
     bullets: [
-      "Calls answered and qualified end-to-end",
-      "Proposals sent without your approval",
       "Outreach + follow-ups fully automated",
+      "Proposals sent without your approval",
       "Daily briefings + action items delivered",
+      "Calls answered and qualified end-to-end",
     ],
     best: "For contractors who want to stop thinking about admin entirely.",
   },
@@ -40,8 +40,8 @@ const TIERS: Tier[] = [
     bullets: [
       "Endall drafts every email, proposal, follow-up",
       "One-click approve or edit before send",
-      "Calls still answered in real time",
       "Briefings + intel still delivered daily",
+      "Calls still answered in real time",
     ],
     best: "For contractors who want control over client touchpoints, not a blank inbox.",
   },

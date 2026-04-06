@@ -10,7 +10,7 @@ import { motion, useReducedMotion } from "framer-motion";
 // "Calls" used to be first, but a contractor who answers their own phone will
 // self-select out before the second rotation. By the time Calls appears (5th),
 // they've already bought the premise.
-const words = ["Office", "Paperwork", "Pipeline", "Mornings", "Calls", "Crew"];
+const words = ["Back Office", "Operations", "Paperwork", "Pipeline", "Outreach", "Calls"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -166,14 +166,16 @@ export default function HeroHeadline() {
         {...fadeUp(0.3)}
         style={{
           fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "clamp(16px, 3vw, 20px)",
+          fontSize: "clamp(16px, 2.5vw, 20px)",
           color: "var(--text-tertiary)",
-          maxWidth: "560px",
+          maxWidth: "680px",
           margin: "24px auto 0",
           lineHeight: 1.6,
         }}
       >
-        Answers your calls. Qualifies leads. Books jobs. Sends proposals. Runs your morning briefing. One platform runs your entire operation.
+        Endall is an AI operations team for MEP contractors. It replaces your
+        office manager, bookkeeper, and sales coordinator — so you can focus on
+        the work, not the office.
       </motion.p>
 
       <motion.div {...fadeUp(0.45)} style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
