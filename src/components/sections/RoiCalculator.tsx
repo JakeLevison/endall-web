@@ -72,7 +72,7 @@ export default function RoiCalculator() {
               marginBottom: "48px",
             }}
           >
-            Do the math.
+            Run your numbers.
           </h2>
 
           <div
