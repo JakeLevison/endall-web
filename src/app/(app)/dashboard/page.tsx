@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Users,
   HandCoins,
@@ -11,6 +12,8 @@ import {
   Building2,
   ClipboardList,
   CheckSquare,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
@@ -86,6 +89,11 @@ function formatAmount(amount: number): string {
   return "$" + amount.toLocaleString("en-US");
 }
 
+function daysInStage(createdAt: string, updatedAt?: string): number {
+  const ref = updatedAt || createdAt;
+  return Math.max(0, Math.floor((Date.now() - new Date(ref).getTime()) / 86_400_000));
+}
+
 function activityIcon(type: string) {
   switch (type?.toLowerCase()) {
     case "email":
@@ -107,6 +115,16 @@ function activityIcon(type: string) {
 
 type StageCount = { stage: string; count: number };
 
+type StageDeal = {
+  id: string;
+  name: string;
+  company: string;
+  contactName: string;
+  contactId: string | null;
+  amount: number;
+  daysInStage: number;
+};
+
 type UpcomingDeal = {
   id: string;
   name: string;
@@ -121,7 +139,23 @@ type RecentActivity = {
   type: string;
   subject: string;
   contactName: string;
+  contactId: string | null;
+  dealId: string | null;
   createdAt: string;
+};
+
+type RecentCompanyCard = {
+  id: string;
+  name: string;
+  lastActivity: string;
+  dealCount: number;
+};
+
+type RecentContactCard = {
+  id: string;
+  name: string;
+  company: string;
+  lastTouch: string;
 };
 
 // ── component ────────────────────────────────────────────────────────
@@ -134,33 +168,48 @@ export default function DashboardPage() {
   const [wonThisMonth, setWonThisMonth] = useState(0);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [stageCounts, setStageCounts] = useState<StageCount[]>([]);
+  const [stageDealsMap, setStageDealsMap] = useState<Record<string, StageDeal[]>>({});
   const [upcomingDeals, setUpcomingDeals] = useState<UpcomingDeal[]>([]);
+  const [expandedStage, setExpandedStage] = useState<string | null>(null);
+  const [recentCompanies, setRecentCompanies] = useState<RecentCompanyCard[]>([]);
+  const [recentContacts, setRecentContacts] = useState<RecentContactCard[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
 
     async function fetchDashboard() {
       try {
-        // Fetch all data in parallel
         const [
           contactsRes,
           dealsRes,
           activitiesRes,
+          recentCompaniesRes,
+          recentContactsRes,
         ] = await Promise.all([
           supabase.from("contacts").select("id", { count: "exact", head: true }),
-          supabase.from("deals").select("*, companies(name)"),
+          supabase.from("deals").select("*, companies(name), contacts(id, first_name, last_name)"),
           supabase
             .from("activities")
             .select("*, contacts(first_name, last_name)")
             .order("created_at", { ascending: false })
             .limit(10),
+          supabase
+            .from("companies")
+            .select("id, name, updated_at")
+            .order("updated_at", { ascending: false })
+            .limit(6),
+          supabase
+            .from("contacts")
+            .select("id, first_name, last_name, updated_at, companies(name)")
+            .order("updated_at", { ascending: false })
+            .limit(6),
         ]);
 
         // Total contacts
         setTotalContacts(contactsRes.count ?? 0);
 
         // Process deals
-        const deals: Deal[] = dealsRes.data ?? [];
+        const deals: (Deal & { contacts?: { id: string; first_name: string; last_name: string } | null })[] = dealsRes.data ?? [];
         const open = deals.filter(
           (d) => d.stage !== "Closed Won" && d.stage !== "Closed Lost"
         );
@@ -177,15 +226,33 @@ export default function DashboardPage() {
         );
         setWonThisMonth(wonDeals.length);
 
-        // Stage counts (only non-zero stages)
+        // Stage counts + deals per stage
         const counts: Record<string, number> = {};
-        for (const s of stages) counts[s] = 0;
+        const dealsPerStage: Record<string, StageDeal[]> = {};
+        for (const s of stages) {
+          counts[s] = 0;
+          dealsPerStage[s] = [];
+        }
         for (const d of deals) {
-          if (counts[d.stage] !== undefined) counts[d.stage]++;
+          if (counts[d.stage] !== undefined) {
+            counts[d.stage]++;
+            dealsPerStage[d.stage].push({
+              id: d.id,
+              name: d.name || "",
+              company: d.companies?.name || "",
+              contactName: d.contacts
+                ? `${d.contacts.first_name} ${d.contacts.last_name}`.trim()
+                : "",
+              contactId: d.contacts?.id || null,
+              amount: d.amount || 0,
+              daysInStage: daysInStage(d.created_at, d.updated_at),
+            });
+          }
         }
         setStageCounts(
           stages.map((s) => ({ stage: s, count: counts[s] })).filter((s) => s.count > 0)
         );
+        setStageDealsMap(dealsPerStage);
 
         // Upcoming close dates (next 30 days)
         const in30 = new Date();
@@ -219,10 +286,51 @@ export default function DashboardPage() {
             contactName: a.contacts
               ? `${a.contacts.first_name} ${a.contacts.last_name}`.trim()
               : "",
+            contactId: a.contact_id,
+            dealId: a.deal_id,
             createdAt: a.created_at,
           })
         );
         setActivities(acts);
+
+        // Recent companies — get deal counts
+        const companyData = recentCompaniesRes.data ?? [];
+        if (companyData.length > 0) {
+          const companyIds = companyData.map((c: { id: string }) => c.id);
+          const { data: companyDeals } = await supabase
+            .from("deals")
+            .select("company_id")
+            .in("company_id", companyIds);
+
+          const dealCounts: Record<string, number> = {};
+          for (const d of companyDeals || []) {
+            dealCounts[d.company_id] = (dealCounts[d.company_id] || 0) + 1;
+          }
+
+          setRecentCompanies(
+            companyData.map((c: { id: string; name: string; updated_at: string }) => ({
+              id: c.id,
+              name: c.name || "",
+              lastActivity: c.updated_at ? relativeTime(c.updated_at) : "",
+              dealCount: dealCounts[c.id] || 0,
+            }))
+          );
+        }
+
+        // Recent contacts
+        setRecentContacts(
+          (recentContactsRes.data ?? []).map(
+            (c: Record<string, unknown>) => {
+              const co = c.companies as unknown as { name: string } | null;
+              return {
+                id: c.id as string,
+                name: `${c.first_name} ${c.last_name}`.trim(),
+                company: co?.name || "",
+                lastTouch: c.updated_at ? relativeTime(c.updated_at as string) : "",
+              };
+            }
+          )
+        );
       } catch {
         // Supabase unavailable — everything stays at default zeros/empty
       } finally {
@@ -245,17 +353,21 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1
-        style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)" }}
-      >
-        Dashboard
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1
+          style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)" }}
+        >
+          Dashboard
+        </h1>
+        <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] rounded" style={{ color: "var(--text-faint)", background: "var(--overlay-weak)", border: "1px solid var(--overlay-medium)" }}>
+          <span className="text-xs">&#8984;</span>K search
+        </kbd>
+      </div>
 
       {/* Onboarding wizard — shows until dismissed */}
       <WelcomeWizard
         completedSteps={[]}
         onDismiss={() => {
-          // Could save dismiss state to localStorage or Supabase
           localStorage.setItem("endall-onboarding-dismissed", "1");
         }}
       />
@@ -270,26 +382,31 @@ export default function DashboardPage() {
             icon: Users,
             label: "Total Contacts",
             value: totalContacts.toLocaleString(),
+            href: "/contacts",
           },
           {
             icon: HandCoins,
             label: "Open Deals",
             value: openDeals.toLocaleString(),
+            href: "/deals",
           },
           {
             icon: DollarSign,
             label: "Pipeline Value",
             value: formatPipelineValue(pipelineValue),
+            href: "/deals",
           },
           {
             icon: Trophy,
             label: "Won This Month",
             value: wonThisMonth.toLocaleString(),
+            href: "/deals",
           },
         ].map((stat) => (
-          <div
+          <Link
             key={stat.label}
-            className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4"
+            href={stat.href}
+            className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4 hover:bg-[var(--overlay-soft)] transition-colors"
           >
             <div className="flex items-center gap-2 mb-3">
               <stat.icon className="size-3.5 text-[var(--text-muted)]" />
@@ -300,13 +417,13 @@ export default function DashboardPage() {
             <p className="text-[24px] font-medium text-[var(--text-primary)] leading-none">
               {stat.value}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 
       {/* ── Two-column body ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Recent Activity */}
+        {/* Recent Activity — linked to entities */}
         <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
           <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
             Recent Activity
@@ -315,55 +432,211 @@ export default function DashboardPage() {
             <p className="text-[13px] text-[var(--text-muted)]">No recent activity.</p>
           ) : (
             <div className="space-y-1">
-              {activities.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-start gap-3 py-2 border-b border-[var(--border)] last:border-0"
-                >
-                  <div className="mt-0.5 shrink-0 size-6 rounded-md bg-[var(--overlay-soft)] flex items-center justify-center text-[var(--text-muted)]">
-                    {activityIcon(a.type)}
+              {activities.map((a) => {
+                // Determine link target: calls→contact, emails→deal or contact, else→contact
+                let href: string | null = null;
+                if (a.type === "call" && a.contactId) href = `/contacts/${a.contactId}`;
+                else if (a.type === "email" && a.dealId) href = `/deals/${a.dealId}`;
+                else if (a.type === "email" && a.contactId) href = `/contacts/${a.contactId}`;
+                else if (a.contactId) href = `/contacts/${a.contactId}`;
+                else if (a.dealId) href = `/deals/${a.dealId}`;
+
+                const inner = (
+                  <>
+                    <div className="mt-0.5 shrink-0 size-6 rounded-md bg-[var(--overlay-soft)] flex items-center justify-center text-[var(--text-muted)]">
+                      {activityIcon(a.type)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] text-[var(--text-secondary)] truncate">
+                        {a.subject}
+                      </p>
+                      {a.contactName && (
+                        <p className="text-[11px] text-[var(--text-muted)]">{a.contactName}</p>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-[var(--text-faint)] shrink-0 mt-0.5">
+                      {relativeTime(a.createdAt)}
+                    </span>
+                  </>
+                );
+
+                return href ? (
+                  <Link
+                    key={a.id}
+                    href={href}
+                    className="flex items-start gap-3 py-2 border-b border-[var(--border)] last:border-0 hover:bg-[var(--overlay-soft)] rounded-md px-1 -mx-1 transition-colors"
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  <div
+                    key={a.id}
+                    className="flex items-start gap-3 py-2 border-b border-[var(--border)] last:border-0"
+                  >
+                    {inner}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] text-[var(--text-secondary)] truncate">
-                      {a.subject}
-                    </p>
-                    {a.contactName && (
-                      <p className="text-[11px] text-[var(--text-muted)]">{a.contactName}</p>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Deals by Stage — clickable drill-down */}
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
+          <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
+            Pipeline
+          </h2>
+          {stageCounts.length === 0 ? (
+            <p className="text-[13px] text-[var(--text-muted)]">No deals yet.</p>
+          ) : (
+            <div className="space-y-1">
+              {stageCounts.map((s) => {
+                const isExpanded = expandedStage === s.stage;
+                const dealsInStage = stageDealsMap[s.stage] || [];
+                return (
+                  <div key={s.stage}>
+                    <button
+                      onClick={() => setExpandedStage(isExpanded ? null : s.stage)}
+                      className="w-full text-left hover:bg-[var(--overlay-soft)] rounded-md px-2 py-2 -mx-2 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          {isExpanded ? (
+                            <ChevronDown className="size-3 text-[var(--text-muted)]" />
+                          ) : (
+                            <ChevronRight className="size-3 text-[var(--text-muted)]" />
+                          )}
+                          <span className="text-[13px] text-[var(--text-tertiary)]">{s.stage}</span>
+                        </div>
+                        <span className="text-[13px] text-[var(--text-muted)]">{s.count}</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-[var(--overlay-soft)] ml-4.5">
+                        <div
+                          className={`h-1.5 rounded-full ${stageBarColor[s.stage] ?? "bg-zinc-500"}`}
+                          style={{
+                            width: `${(s.count / maxStageCount) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </button>
+
+                    {/* Expanded deal rows */}
+                    {isExpanded && dealsInStage.length > 0 && (
+                      <div className="ml-4 mt-1 mb-2 border-l-2 border-[var(--overlay-soft)] pl-3 space-y-0.5">
+                        {dealsInStage.map((deal) => (
+                          <Link
+                            key={deal.id}
+                            href={`/deals/${deal.id}`}
+                            className="flex items-center gap-3 py-1.5 px-2 rounded-md hover:bg-[var(--overlay-soft)] transition-colors group"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[13px] text-[var(--text-primary)] truncate group-hover:text-[var(--text-primary)]">
+                                {deal.name}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {deal.company && (
+                                  <span className="text-[11px] text-[var(--text-muted)] truncate">{deal.company}</span>
+                                )}
+                                {deal.contactName && (
+                                  <>
+                                    <span className="text-[11px] text-[var(--text-faint)]">·</span>
+                                    <span className="text-[11px] text-[var(--text-muted)] truncate">{deal.contactName}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-[13px] text-[var(--text-secondary)] font-medium">
+                                {formatAmount(deal.amount)}
+                              </p>
+                              <p className="text-[11px] text-[var(--text-faint)]">
+                                {deal.daysInStage}d in stage
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {isExpanded && dealsInStage.length === 0 && (
+                      <p className="ml-4 pl-3 text-[11px] text-[var(--text-faint)] py-1">No deals</p>
                     )}
                   </div>
-                  <span className="text-[11px] text-[var(--text-faint)] shrink-0 mt-0.5">
-                    {relativeTime(a.createdAt)}
-                  </span>
-                </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Recent Companies & Contacts ──────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Recent Companies */}
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-medium text-[var(--text-primary)]">Recent Companies</h2>
+            <Link href="/companies" className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+              View all
+            </Link>
+          </div>
+          {recentCompanies.length === 0 ? (
+            <p className="text-[13px] text-[var(--text-muted)]">No companies yet.</p>
+          ) : (
+            <div className="space-y-0.5">
+              {recentCompanies.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/companies/${c.id}`}
+                  className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-md hover:bg-[var(--overlay-soft)] transition-colors"
+                >
+                  <div className="size-8 rounded-md bg-[var(--overlay-soft)] flex items-center justify-center shrink-0">
+                    <Building2 className="size-3.5 text-[var(--text-muted)]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] text-[var(--text-primary)] truncate">{c.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[11px] text-[var(--text-muted)]">{c.dealCount} deal{c.dealCount !== 1 ? "s" : ""}</span>
+                      <span className="text-[11px] text-[var(--text-faint)]">·</span>
+                      <span className="text-[11px] text-[var(--text-faint)]">{c.lastActivity}</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="size-3 text-[var(--text-faint)] shrink-0" />
+                </Link>
               ))}
             </div>
           )}
         </div>
 
-        {/* Deals by Stage */}
+        {/* Recent Contacts */}
         <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
-          <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
-            Deals by Stage
-          </h2>
-          {stageCounts.length === 0 ? (
-            <p className="text-[13px] text-[var(--text-muted)]">No deals yet.</p>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-medium text-[var(--text-primary)]">Recent Contacts</h2>
+            <Link href="/contacts" className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+              View all
+            </Link>
+          </div>
+          {recentContacts.length === 0 ? (
+            <p className="text-[13px] text-[var(--text-muted)]">No contacts yet.</p>
           ) : (
-            <div className="space-y-3">
-              {stageCounts.map((s) => (
-                <div key={s.stage}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[13px] text-[var(--text-tertiary)]">{s.stage}</span>
-                    <span className="text-[13px] text-[var(--text-muted)]">{s.count}</span>
+            <div className="space-y-0.5">
+              {recentContacts.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/contacts/${c.id}`}
+                  className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-md hover:bg-[var(--overlay-soft)] transition-colors"
+                >
+                  <div className="size-8 rounded-md bg-[var(--overlay-soft)] flex items-center justify-center shrink-0">
+                    <Users className="size-3.5 text-[var(--text-muted)]" />
                   </div>
-                  <div className="h-2 w-full rounded-full bg-[var(--overlay-soft)]">
-                    <div
-                      className={`h-2 rounded-full ${stageBarColor[s.stage] ?? "bg-zinc-500"}`}
-                      style={{
-                        width: `${(s.count / maxStageCount) * 100}%`,
-                      }}
-                    />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] text-[var(--text-primary)] truncate">{c.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {c.company && <span className="text-[11px] text-[var(--text-muted)]">{c.company}</span>}
+                      {c.company && <span className="text-[11px] text-[var(--text-faint)]">·</span>}
+                      <span className="text-[11px] text-[var(--text-faint)]">{c.lastTouch}</span>
+                    </div>
                   </div>
-                </div>
+                  <ChevronRight className="size-3 text-[var(--text-faint)] shrink-0" />
+                </Link>
               ))}
             </div>
           )}
@@ -405,10 +678,11 @@ export default function DashboardPage() {
                 {upcomingDeals.map((d) => (
                   <tr
                     key={d.id}
-                    className="border-b border-[var(--border)] last:border-0"
+                    className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--overlay-soft)] cursor-pointer transition-colors"
+                    onClick={() => window.location.href = `/deals/${d.id}`}
                   >
                     <td className="py-2.5 pr-4 text-[13px] text-[var(--text-primary)] font-medium">
-                      {d.name}
+                      <Link href={`/deals/${d.id}`} className="hover:underline">{d.name}</Link>
                     </td>
                     <td className="py-2.5 pr-4 text-[13px] text-[var(--text-tertiary)] hidden sm:table-cell">
                       {d.company}

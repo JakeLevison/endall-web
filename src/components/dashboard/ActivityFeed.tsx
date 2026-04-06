@@ -11,6 +11,7 @@ type FeedItem = {
   subject: string;
   contactName: string;
   contactId: string | null;
+  dealId: string | null;
   time: string;
 };
 
@@ -40,6 +41,16 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
+function entityHref(item: FeedItem): string | null {
+  // calls → contact, emails → deal or contact, others → contact
+  if (item.type === "call" && item.contactId) return `/contacts/${item.contactId}`;
+  if (item.type === "email" && item.dealId) return `/deals/${item.dealId}`;
+  if (item.type === "email" && item.contactId) return `/contacts/${item.contactId}`;
+  if (item.contactId) return `/contacts/${item.contactId}`;
+  if (item.dealId) return `/deals/${item.dealId}`;
+  return null;
+}
+
 export default function ActivityFeed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +60,7 @@ export default function ActivityFeed() {
       const supabase = createClient();
       const { data } = await supabase
         .from("activities")
-        .select("id, type, subject, contact_id, created_at, contacts(first_name, last_name)")
+        .select("id, type, subject, contact_id, deal_id, created_at, contacts(first_name, last_name)")
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -63,6 +74,7 @@ export default function ActivityFeed() {
               subject: (a.subject as string) || "",
               contactName: contact ? `${contact.first_name} ${contact.last_name}` : "",
               contactId: a.contact_id as string | null,
+              dealId: a.deal_id as string | null,
               time: (a.created_at as string) || "",
             };
           })
@@ -81,29 +93,46 @@ export default function ActivityFeed() {
         <h3 className="text-[13px] font-medium text-[var(--text-primary)]">Recent Activity</h3>
       </div>
       <div>
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--border)] last:border-0"
-          >
-            <div className={`size-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${typeColor[item.type] || typeColor.note}`}>
-              {typeIcon[item.type] || typeIcon.note}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-[var(--text-primary)] truncate">{item.subject}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {item.contactId ? (
-                  <Link href={`/contacts/${item.contactId}`} className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
-                    {item.contactName}
-                  </Link>
-                ) : (
-                  <span className="text-[11px] text-[var(--text-muted)]">{item.contactName}</span>
-                )}
-                <span className="text-[11px] text-[var(--text-faint)]">{item.time ? timeAgo(item.time) : ""}</span>
+        {items.map((item) => {
+          const href = entityHref(item);
+          const content = (
+            <>
+              <div className={`size-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${typeColor[item.type] || typeColor.note}`}>
+                {typeIcon[item.type] || typeIcon.note}
               </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] text-[var(--text-primary)] truncate">{item.subject}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {item.contactId ? (
+                    <Link href={`/contacts/${item.contactId}`} className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors" onClick={(e) => e.stopPropagation()}>
+                      {item.contactName}
+                    </Link>
+                  ) : (
+                    <span className="text-[11px] text-[var(--text-muted)]">{item.contactName}</span>
+                  )}
+                  <span className="text-[11px] text-[var(--text-faint)]">{item.time ? timeAgo(item.time) : ""}</span>
+                </div>
+              </div>
+            </>
+          );
+
+          return href ? (
+            <Link
+              key={item.id}
+              href={href}
+              className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--border)] last:border-0 hover:bg-[var(--overlay-soft)] transition-colors"
+            >
+              {content}
+            </Link>
+          ) : (
+            <div
+              key={item.id}
+              className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--border)] last:border-0"
+            >
+              {content}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

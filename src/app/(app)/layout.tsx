@@ -165,11 +165,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setChatOpen((prev) => !prev);
+        setSearchOpen((prev) => !prev);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "/") {
         e.preventDefault();
-        setSearchOpen((prev) => !prev);
+        setChatOpen((prev) => !prev);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -224,7 +224,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="sm:hidden text-[12px]">AI</span>
                 <span className="hidden sm:inline">ask endall...</span>
                 <kbd className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[11px] rounded ml-1" style={{ color: "var(--text-faint)", background: "var(--overlay-weak)", border: "1px solid var(--overlay-medium)" }}>
-                  <span className="text-xs">&#8984;</span>K
+                  <span className="text-xs">&#8984;</span>/
                 </kbd>
               </button>
             )}
