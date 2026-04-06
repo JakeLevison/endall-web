@@ -6,16 +6,16 @@ import { Phone, FileText, Zap } from "lucide-react";
 
 const POINTS = [
   {
-    icon: Phone,
-    text: "Answers every call. Books jobs. Sends alerts.",
-  },
-  {
     icon: FileText,
-    text: "Builds budgets, NPVs, estimates, proposals.",
+    text: "Budgets, NPVs, estimates, proposals — built in minutes, not days.",
   },
   {
     icon: Zap,
-    text: "No training. No FTE. Plugs in 48 hours.",
+    text: "Your whole operation, one view. No training, no long onboarding.",
+  },
+  {
+    icon: Phone,
+    text: "Every call answered, every lead qualified, every job booked.",
   },
 ];
 
