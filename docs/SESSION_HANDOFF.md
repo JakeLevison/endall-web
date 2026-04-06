@@ -1,3 +1,5 @@
+REQUIRED READING: Before starting any task, read docs/ENDALL_OPERATING_STANDARDS.md. These standards govern all design, engineering, and product decisions. If a task prompt conflicts with these standards, these standards win unless Jake explicitly overrides.
+
 # Session Handoff — 2026-04-05 (Session 2)
 
 ## Current State
