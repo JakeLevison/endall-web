@@ -59,53 +59,53 @@ export default function ComposeDialog({ open, onOpenChange, defaultTo }: Compose
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#111113] border-white/[0.06] max-w-lg">
+      <DialogContent className="bg-[var(--surface)] border-[var(--border)] max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-[15px] text-white">Compose email</DialogTitle>
+          <DialogTitle className="text-[15px] text-[var(--text-primary)]">Compose email</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           {/* Template selector */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <FileText className="size-3.5 text-zinc-600 shrink-0" />
+            <FileText className="size-3.5 text-[var(--text-muted)] shrink-0" />
             {EMAIL_TEMPLATES.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => { setSubject(t.subject); setBody(t.body); }}
-                className="text-[11px] text-zinc-500 bg-white/[0.03] border border-white/[0.06] rounded-full px-2.5 py-1 hover:bg-white/[0.06] hover:text-zinc-300 transition-colors whitespace-nowrap shrink-0"
+                className="text-[11px] text-[var(--text-muted)] bg-[var(--overlay-soft)] border border-[var(--border)] rounded-full px-2.5 py-1 hover:bg-[var(--overlay-medium)] hover:text-[var(--text-secondary)] transition-colors whitespace-nowrap shrink-0"
               >
                 {t.name}
               </button>
             ))}
           </div>
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">To</label>
+            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">To</label>
             <input
               type="email"
               value={to}
               onChange={(e) => setTo(e.target.value)}
               placeholder="recipient@company.com"
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none"
+              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
             />
           </div>
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">Subject</label>
+            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">Subject</label>
             <input
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Email subject"
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none"
+              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
             />
           </div>
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">Message</label>
+            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">Message</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write your email..."
               rows={6}
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none resize-none"
+              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none"
               style={{ fontSize: 16 }}
             />
           </div>
@@ -119,13 +119,13 @@ export default function ComposeDialog({ open, onOpenChange, defaultTo }: Compose
         <DialogFooter>
           <Button
             variant="outline"
-            className="text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+            className="text-[13px] h-8 text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
           <Button
-            className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+            className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
             onClick={handleSend}
             disabled={sending || !to || !subject || !body}
           >

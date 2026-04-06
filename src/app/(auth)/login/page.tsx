@@ -61,7 +61,7 @@ function LoginForm() {
           >
             endall
           </h1>
-          <p className="text-[13px] text-zinc-500 mt-2">Sign in to your account</p>
+          <p className="text-[13px] text-[var(--text-muted)] mt-2">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +72,7 @@ function LoginForm() {
           )}
 
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">
+            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">
               Email
             </label>
             <input
@@ -80,13 +80,13 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/[0.12]"
+              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--overlay-strong)]"
               placeholder="you@company.com"
             />
           </div>
 
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5 block">
+            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">
               Password
             </label>
             <input
@@ -94,7 +94,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/[0.12]"
+              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--overlay-strong)]"
               placeholder="Enter your password"
             />
           </div>
@@ -102,15 +102,15 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-black font-medium text-[13px] rounded-lg py-2.5 hover:bg-zinc-100 transition-colors disabled:opacity-50"
+            className="w-full bg-[var(--surface-inverse)] text-black font-medium text-[13px] rounded-lg py-2.5 hover:opacity-90 transition-colors disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="text-[13px] text-zinc-600 text-center mt-6">
+        <p className="text-[13px] text-[var(--text-muted)] text-center mt-6">
           Don't have an account?{" "}
-          <Link href="/signup" className="text-white hover:underline">
+          <Link href="/signup" className="text-[var(--text-primary)] hover:underline">
             Sign up
           </Link>
         </p>

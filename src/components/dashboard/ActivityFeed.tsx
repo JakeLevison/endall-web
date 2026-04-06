@@ -27,7 +27,7 @@ const typeColor: Record<string, string> = {
   call: "bg-amber-500/10 text-amber-400",
   meeting: "bg-purple-500/10 text-purple-400",
   note: "bg-emerald-500/10 text-emerald-400",
-  task: "bg-zinc-500/10 text-zinc-400",
+  task: "bg-zinc-500/10 text-[var(--text-tertiary)]",
 };
 
 function timeAgo(dateStr: string): string {
@@ -76,30 +76,30 @@ export default function ActivityFeed() {
   if (loading || items.length === 0) return null;
 
   return (
-    <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg overflow-hidden">
-      <div className="px-4 py-3 border-b border-white/[0.04]">
-        <h3 className="text-[13px] font-medium text-white">Recent Activity</h3>
+    <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--border)]">
+        <h3 className="text-[13px] font-medium text-[var(--text-primary)]">Recent Activity</h3>
       </div>
       <div>
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex items-start gap-3 px-4 py-2.5 border-b border-white/[0.04] last:border-0"
+            className="flex items-start gap-3 px-4 py-2.5 border-b border-[var(--border)] last:border-0"
           >
             <div className={`size-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${typeColor[item.type] || typeColor.note}`}>
               {typeIcon[item.type] || typeIcon.note}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-white truncate">{item.subject}</p>
+              <p className="text-[13px] text-[var(--text-primary)] truncate">{item.subject}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 {item.contactId ? (
-                  <Link href={`/contacts/${item.contactId}`} className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors">
+                  <Link href={`/contacts/${item.contactId}`} className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
                     {item.contactName}
                   </Link>
                 ) : (
-                  <span className="text-[11px] text-zinc-600">{item.contactName}</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">{item.contactName}</span>
                 )}
-                <span className="text-[11px] text-zinc-700">{item.time ? timeAgo(item.time) : ""}</span>
+                <span className="text-[11px] text-[var(--text-faint)]">{item.time ? timeAgo(item.time) : ""}</span>
               </div>
             </div>
           </div>

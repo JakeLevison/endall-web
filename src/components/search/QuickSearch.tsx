@@ -148,7 +148,7 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
         overflow: "hidden",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderBottom: "1px solid var(--overlay-soft)" }}>
-          <Search className="size-4 text-zinc-500 shrink-0" />
+          <Search className="size-4 text-[var(--text-muted)] shrink-0" />
           <input
             ref={inputRef}
             value={query}
@@ -161,7 +161,7 @@ export default function QuickSearch({ open, onClose }: QuickSearchProps) {
             }}
           />
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
-            <X className="size-4 text-zinc-600" />
+            <X className="size-4 text-[var(--text-muted)]" />
           </button>
         </div>
 

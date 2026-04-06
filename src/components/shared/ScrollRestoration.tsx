@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 /**
- * Forces every page load (including hard refresh) to start at the top.
+ * Forces every page load and client-side navigation to start at the top.
  *
- * The browser's default behavior is `history.scrollRestoration = "auto"`,
- * which restores the last scroll position after refresh. That's usually
- * fine - except on our landing page where a mid-scroll refresh dumps
- * prospects into the accordion or footer instead of the hero.
- *
- * We set it to `"manual"` and jump to 0,0 on first mount. Route changes
- * through Next's `<Link>` already scroll to top on their own.
+ * 1. Sets scrollRestoration to "manual" so refreshes don't restore mid-page.
+ * 2. Scrolls to top on initial mount.
+ * 3. Scrolls to top on every pathname change (covers router.push, Link, etc.).
  */
 export default function ScrollRestoration() {
+  const pathname = usePathname();
+
+  // Set manual scroll restoration once
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -21,10 +21,12 @@ export default function ScrollRestoration() {
     } catch {
       /* older browsers: ignore */
     }
-    // Use instant scroll so the user never sees the restored position
-    // flash before we jump them to the top.
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   }, []);
+
+  // Scroll to top on every route change (including initial mount)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
 
   return null;
 }

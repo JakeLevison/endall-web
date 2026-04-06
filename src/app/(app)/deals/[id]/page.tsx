@@ -63,7 +63,7 @@ const stageColor = (stage: string) => {
     case "Proposal Sent": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
     case "Meeting Scheduled":
     case "Qualified": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    default: return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+    default: return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
 
@@ -81,7 +81,7 @@ const activityColor = (type: Activity["type"]) => {
     case "email": return "bg-blue-500/10 text-blue-400";
     case "call": return "bg-emerald-500/10 text-emerald-400";
     case "meeting": return "bg-purple-500/10 text-purple-400";
-    case "note": return "bg-zinc-500/10 text-zinc-400";
+    case "note": return "bg-zinc-500/10 text-[var(--text-tertiary)]";
   }
 };
 
@@ -163,7 +163,7 @@ export default function DealDetailPage({
   if (loading || !deal) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -171,28 +171,28 @@ export default function DealDetailPage({
   return (
     <div className="h-full flex flex-col">
       {/* Breadcrumb + Actions */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.04]">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-1.5 text-[13px]">
-          <Link href="/deals" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+          <Link href="/deals" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
             Deals
           </Link>
-          <ChevronRight className="size-3 text-zinc-700" />
-          <span className="text-white">{deal.name}</span>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">{deal.name}</span>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+              className="h-7 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
             >
               Actions
               <MoreHorizontal className="size-3.5 ml-1" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-[#111113] border-white/[0.06]">
-            <DropdownMenuItem className="text-[13px] text-zinc-400">Edit</DropdownMenuItem>
-            <DropdownMenuItem className="text-[13px] text-zinc-400">Change Stage</DropdownMenuItem>
+          <DropdownMenuContent className="bg-[var(--surface)] border-[var(--border)]">
+            <DropdownMenuItem className="text-[13px] text-[var(--text-tertiary)]">Edit</DropdownMenuItem>
+            <DropdownMenuItem className="text-[13px] text-[var(--text-tertiary)]">Change Stage</DropdownMenuItem>
             <DropdownMenuItem className="text-[13px] text-red-400">Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -201,42 +201,42 @@ export default function DealDetailPage({
       {/* 3-column layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left column — Deal info */}
-        <div className="w-80 shrink-0 border-r border-white/[0.04] overflow-y-auto p-5">
+        <div className="w-80 shrink-0 border-r border-[var(--border)] overflow-y-auto p-5">
           <div className="flex items-center gap-3 mb-5">
             <Avatar className="size-10">
-              <AvatarFallback className="bg-white/[0.06] text-[13px] text-zinc-400">
+              <AvatarFallback className="bg-[var(--overlay-medium)] text-[13px] text-[var(--text-tertiary)]">
                 <DollarSign className="size-4" />
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-[15px] font-medium text-white">{deal.name}</h2>
-              <p className="text-[13px] text-zinc-500">{deal.amount}</p>
+              <h2 className="text-[15px] font-medium text-[var(--text-primary)]">{deal.name}</h2>
+              <p className="text-[13px] text-[var(--text-muted)]">{deal.amount}</p>
             </div>
           </div>
 
-          <Separator className="bg-white/[0.04] mb-4" />
+          <Separator className="bg-[var(--overlay-soft)] mb-4" />
 
           <div className="space-y-3">
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Amount</p>
-              <p className="text-[13px] text-zinc-300">{deal.amount}</p>
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Amount</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{deal.amount}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Stage</p>
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Stage</p>
               <Badge variant="outline" className={`text-[11px] font-normal ${stageColor(deal.stage)}`}>
                 {deal.stage}
               </Badge>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Close Date</p>
-              <p className="text-[13px] text-zinc-300">{deal.closeDate || "---"}</p>
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Close Date</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{deal.closeDate || "---"}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Owner</p>
-              <p className="text-[13px] text-zinc-300">{deal.owner || "---"}</p>
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Owner</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{deal.owner || "---"}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-zinc-600 mb-0.5">Health</p>
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Health</p>
               <DealHealthBadge
                 dealId={id}
                 stage={deal.stage}
@@ -250,25 +250,25 @@ export default function DealDetailPage({
 
         {/* Center column — Activity timeline */}
         <div className="flex-1 overflow-y-auto p-5 min-w-0">
-          <h3 className="text-[13px] font-medium text-white mb-4">Activity</h3>
+          <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">Activity</h3>
           {activities.length === 0 ? (
-            <p className="text-[13px] text-zinc-600">No activities yet.</p>
+            <p className="text-[13px] text-[var(--text-muted)]">No activities yet.</p>
           ) : (
             <div className="space-y-3">
               {activities.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex gap-3 p-3 rounded-lg border border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                  className="flex gap-3 p-3 rounded-lg border border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors"
                 >
                   <div className={`size-7 rounded-md flex items-center justify-center shrink-0 ${activityColor(activity.type)}`}>
                     {activityIcon(activity.type)}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-[13px] text-white">{activity.title}</p>
-                      <span className="text-[11px] text-zinc-600">{activity.date}</span>
+                      <p className="text-[13px] text-[var(--text-primary)]">{activity.title}</p>
+                      <span className="text-[11px] text-[var(--text-muted)]">{activity.date}</span>
                     </div>
-                    <p className="text-[13px] text-zinc-500">{activity.description}</p>
+                    <p className="text-[13px] text-[var(--text-muted)]">{activity.description}</p>
                   </div>
                 </div>
               ))}
@@ -277,34 +277,34 @@ export default function DealDetailPage({
         </div>
 
         {/* Right column — Associated records */}
-        <div className="w-72 shrink-0 border-l border-white/[0.04] overflow-y-auto p-5 hidden lg:block">
+        <div className="w-72 shrink-0 border-l border-[var(--border)] overflow-y-auto p-5 hidden lg:block">
           <div className="mb-6">
-            <h3 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-3">Contact</h3>
+            <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-3">Contact</h3>
             {deal.contactName ? (
               <Link
                 href={`/contacts/${deal.contactId}`}
-                className="flex items-center gap-2 p-2 rounded-md hover:bg-white/[0.02] transition-colors"
+                className="flex items-center gap-2 p-2 rounded-md hover:bg-[var(--overlay-weak)] transition-colors"
               >
-                <Users className="size-4 text-zinc-500" />
-                <span className="text-[13px] text-zinc-300">{deal.contactName}</span>
+                <Users className="size-4 text-[var(--text-muted)]" />
+                <span className="text-[13px] text-[var(--text-secondary)]">{deal.contactName}</span>
               </Link>
             ) : (
-              <p className="text-[13px] text-zinc-600">No associated contact.</p>
+              <p className="text-[13px] text-[var(--text-muted)]">No associated contact.</p>
             )}
           </div>
 
           <div>
-            <h3 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-3">Company</h3>
+            <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-3">Company</h3>
             {deal.companyName ? (
               <Link
                 href={`/companies/${deal.companyId}`}
-                className="flex items-center gap-2 p-2 rounded-md hover:bg-white/[0.02] transition-colors"
+                className="flex items-center gap-2 p-2 rounded-md hover:bg-[var(--overlay-weak)] transition-colors"
               >
-                <Building2 className="size-4 text-zinc-500" />
-                <span className="text-[13px] text-zinc-300">{deal.companyName}</span>
+                <Building2 className="size-4 text-[var(--text-muted)]" />
+                <span className="text-[13px] text-[var(--text-secondary)]">{deal.companyName}</span>
               </Link>
             ) : (
-              <p className="text-[13px] text-zinc-600">No associated company.</p>
+              <p className="text-[13px] text-[var(--text-muted)]">No associated company.</p>
             )}
           </div>
         </div>

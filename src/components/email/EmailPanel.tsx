@@ -92,21 +92,21 @@ export default function EmailPanel({ contactEmail }: EmailPanelProps) {
   };
 
   return (
-    <div className="border border-white/[0.04] rounded-lg overflow-hidden">
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
-          <Mail className="size-4 text-zinc-500" />
-          <h3 className="text-[13px] font-medium text-white">Emails</h3>
+          <Mail className="size-4 text-[var(--text-muted)]" />
+          <h3 className="text-[13px] font-medium text-[var(--text-primary)]">Emails</h3>
           {emails.length > 0 && (
-            <span className="text-[11px] text-zinc-600">{emails.length}</span>
+            <span className="text-[11px] text-[var(--text-muted)]">{emails.length}</span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-[12px] text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+            className="h-7 text-[12px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
             onClick={syncEmails}
             disabled={loading}
           >
@@ -115,7 +115,7 @@ export default function EmailPanel({ contactEmail }: EmailPanelProps) {
           </Button>
           <Button
             size="sm"
-            className="h-7 text-[12px] bg-white text-black hover:bg-zinc-100"
+            className="h-7 text-[12px] bg-[var(--surface-inverse)] text-black hover:opacity-90"
             onClick={() => setComposeOpen(!composeOpen)}
           >
             <Send className="size-3 mr-1" />
@@ -126,27 +126,27 @@ export default function EmailPanel({ contactEmail }: EmailPanelProps) {
 
       {/* Compose form */}
       {composeOpen && (
-        <div className="px-4 py-3 border-b border-white/[0.04] bg-white/[0.01] space-y-2">
+        <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--overlay-weak)] space-y-2">
           <input
             type="email"
             value={sendTo}
             onChange={(e) => setSendTo(e.target.value)}
             placeholder="To"
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded px-3 py-1.5 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none"
+            className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
           />
           <input
             type="text"
             value={sendSubject}
             onChange={(e) => setSendSubject(e.target.value)}
             placeholder="Subject"
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded px-3 py-1.5 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none"
+            className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
           />
           <textarea
             value={sendBody}
             onChange={(e) => setSendBody(e.target.value)}
             placeholder="Write your email..."
             rows={4}
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded px-3 py-1.5 text-[13px] text-white placeholder:text-zinc-600 focus:outline-none resize-none"
+            className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none resize-none"
           />
           <div className="flex items-center justify-between">
             <div>
@@ -158,7 +158,7 @@ export default function EmailPanel({ contactEmail }: EmailPanelProps) {
             </div>
             <Button
               size="sm"
-              className="h-7 text-[12px] bg-white text-black hover:bg-zinc-100"
+              className="h-7 text-[12px] bg-[var(--surface-inverse)] text-black hover:opacity-90"
               onClick={handleSend}
               disabled={sending || !sendSubject || !sendBody}
             >
@@ -172,31 +172,31 @@ export default function EmailPanel({ contactEmail }: EmailPanelProps) {
       <div className="max-h-[400px] overflow-y-auto">
         {!synced ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-[12px] text-zinc-600">Click Sync to load emails for this contact</p>
+            <p className="text-[12px] text-[var(--text-muted)]">Click Sync to load emails for this contact</p>
           </div>
         ) : emails.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <p className="text-[12px] text-zinc-600">No emails found with {contactEmail}</p>
+            <p className="text-[12px] text-[var(--text-muted)]">No emails found with {contactEmail}</p>
           </div>
         ) : (
           emails.map((email) => (
             <div
               key={email.id}
-              className="px-4 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors"
+              className="px-4 py-2.5 border-b border-[var(--border)] hover:bg-[var(--overlay-weak)] cursor-pointer transition-colors"
               onClick={() => setExpandedId(expandedId === email.id ? null : email.id)}
             >
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[12px] text-zinc-400 truncate max-w-[200px]">
+                <span className="text-[12px] text-[var(--text-tertiary)] truncate max-w-[200px]">
                   {email.from?.split("<")[0]?.trim() || email.from}
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px] text-zinc-600">{email.date?.split(",")[0]}</span>
-                  {expandedId === email.id ? <ChevronUp className="size-3 text-zinc-600" /> : <ChevronDown className="size-3 text-zinc-600" />}
+                  <span className="text-[11px] text-[var(--text-muted)]">{email.date?.split(",")[0]}</span>
+                  {expandedId === email.id ? <ChevronUp className="size-3 text-[var(--text-muted)]" /> : <ChevronDown className="size-3 text-[var(--text-muted)]" />}
                 </div>
               </div>
-              <p className="text-[13px] text-white truncate">{email.subject}</p>
+              <p className="text-[13px] text-[var(--text-primary)] truncate">{email.subject}</p>
               {expandedId === email.id && (
-                <p className="text-[12px] text-zinc-500 mt-1.5 leading-relaxed">{email.snippet}</p>
+                <p className="text-[12px] text-[var(--text-muted)] mt-1.5 leading-relaxed">{email.snippet}</p>
               )}
             </div>
           ))

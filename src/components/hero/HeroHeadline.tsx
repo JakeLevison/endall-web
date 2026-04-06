@@ -202,26 +202,26 @@ export default function HeroHeadline() {
             See it in action
           </Link>
           <Link
-            href="/dashboard/ask-endall"
+            href="/dashboard"
             style={{
               display: "inline-block",
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "16px",
               fontWeight: 500,
-              color: "var(--text-primary)",
-              backgroundColor: "transparent",
+              color: "var(--text-inverse)",
+              backgroundColor: "var(--surface-inverse)",
               padding: "12px 24px",
               borderRadius: "6px",
               textDecoration: "none",
-              border: "1px solid var(--overlay-strong)",
-              transition: "border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+              border: "1px solid var(--surface-inverse)",
+              transition: "opacity 200ms cubic-bezier(0.16, 1, 0.3, 1)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--border-hover)"; e.currentTarget.style.backgroundColor = "var(--overlay-soft)"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--overlay-strong)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+            onFocus={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+            onBlur={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
-            Try Ask Endall
+            Open App
           </Link>
         </div>
       </motion.div>

@@ -43,7 +43,7 @@ export default function ExportButton({ data, columns, filename }: ExportButtonPr
     <Button
       variant="outline"
       size="sm"
-      className="h-8 text-[12px] text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+      className="h-8 text-[12px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
       onClick={handleExport}
       disabled={data.length === 0}
     >

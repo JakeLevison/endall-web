@@ -49,7 +49,7 @@ type Prospect = {
 };
 
 const statusColor: Record<string, string> = {
-  new: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+  new: "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20",
   contacted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   replied: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   meeting_scheduled: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -57,7 +57,7 @@ const statusColor: Record<string, string> = {
   proposal_sent: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
   won: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   lost: "bg-red-500/10 text-red-400 border-red-500/20",
-  deferred: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+  deferred: "bg-zinc-500/10 text-[var(--text-muted)] border-zinc-500/20",
 };
 
 const statusLabel: Record<string, string> = {
@@ -75,7 +75,7 @@ const statusLabel: Record<string, string> = {
 const priorityColor: Record<string, string> = {
   A: "bg-red-500/10 text-red-400 border-red-500/20",
   B: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  C: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+  C: "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20",
 };
 
 export default function OutreachPage() {
@@ -228,7 +228,7 @@ export default function OutreachPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -237,13 +237,13 @@ export default function OutreachPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[15px] font-medium text-white">Outreach</h1>
-          <p className="text-[11px] text-zinc-600 mt-0.5">
+          <h1 className="text-[15px] font-medium text-[var(--text-primary)]">Outreach</h1>
+          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
             {stats.total} prospects · {stats.contacted} contacted · {stats.replied} replied · {stats.won} won
           </p>
         </div>
         <Button
-          className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
+          className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
           onClick={() => setDialogOpen(true)}
         >
           <Plus className="size-4 mr-1" />
@@ -254,28 +254,28 @@ export default function OutreachPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-1.5">
-          <Filter className="size-3.5 text-zinc-600" />
+          <Filter className="size-3.5 text-[var(--text-muted)]" />
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="bg-white/[0.03] border-white/[0.06] text-[12px] text-zinc-400 h-7 w-32">
+            <SelectTrigger className="bg-[var(--overlay-soft)] border-[var(--border)] text-[12px] text-[var(--text-tertiary)] h-7 w-32">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#111113] border-white/[0.06]">
-              <SelectItem value="all" className="text-[12px] text-zinc-300">All stages</SelectItem>
+            <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
+              <SelectItem value="all" className="text-[12px] text-[var(--text-secondary)]">All stages</SelectItem>
               {Object.entries(statusLabel).map(([k, v]) => (
-                <SelectItem key={k} value={k} className="text-[12px] text-zinc-300">{v}</SelectItem>
+                <SelectItem key={k} value={k} className="text-[12px] text-[var(--text-secondary)]">{v}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="bg-white/[0.03] border-white/[0.06] text-[12px] text-zinc-400 h-7 w-28">
+          <SelectTrigger className="bg-[var(--overlay-soft)] border-[var(--border)] text-[12px] text-[var(--text-tertiary)] h-7 w-28">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#111113] border-white/[0.06]">
-            <SelectItem value="all" className="text-[12px] text-zinc-300">All priority</SelectItem>
-            <SelectItem value="A" className="text-[12px] text-zinc-300">A — High</SelectItem>
-            <SelectItem value="B" className="text-[12px] text-zinc-300">B — Medium</SelectItem>
-            <SelectItem value="C" className="text-[12px] text-zinc-300">C — Low</SelectItem>
+          <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
+            <SelectItem value="all" className="text-[12px] text-[var(--text-secondary)]">All priority</SelectItem>
+            <SelectItem value="A" className="text-[12px] text-[var(--text-secondary)]">A — High</SelectItem>
+            <SelectItem value="B" className="text-[12px] text-[var(--text-secondary)]">B — Medium</SelectItem>
+            <SelectItem value="C" className="text-[12px] text-[var(--text-secondary)]">C — Low</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -283,36 +283,36 @@ export default function OutreachPage() {
       {/* Table */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <Send className="size-8 text-zinc-700 mb-3" />
-          <p className="text-[13px] text-zinc-500 mb-1">No prospects yet</p>
-          <p className="text-[11px] text-zinc-600">Add companies to start your outreach campaign.</p>
+          <Send className="size-8 text-[var(--text-faint)] mb-3" />
+          <p className="text-[13px] text-[var(--text-muted)] mb-1">No prospects yet</p>
+          <p className="text-[11px] text-[var(--text-muted)]">Add companies to start your outreach campaign.</p>
         </div>
       ) : (
-        <div className="border border-white/[0.04] rounded-lg overflow-hidden overflow-x-auto">
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/[0.04] hover:bg-transparent">
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Company</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Contact</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden md:table-cell">Location</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Priority</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Status</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden lg:table-cell">Signal</TableHead>
+              <TableRow className="border-[var(--border)] hover:bg-transparent">
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Company</TableHead>
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Contact</TableHead>
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden md:table-cell">Location</TableHead>
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Priority</TableHead>
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Status</TableHead>
+                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden lg:table-cell">Signal</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((p) => (
-                <TableRow key={p.id} className="border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                <TableRow key={p.id} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors">
                   <TableCell className="py-2.5">
-                    <p className="text-[13px] text-white font-medium">{p.company_name}</p>
-                    {p.employee_count && <p className="text-[11px] text-zinc-600">{p.employee_count} employees</p>}
+                    <p className="text-[13px] text-[var(--text-primary)] font-medium">{p.company_name}</p>
+                    {p.employee_count && <p className="text-[11px] text-[var(--text-muted)]">{p.employee_count} employees</p>}
                   </TableCell>
                   <TableCell className="py-2.5">
-                    <p className="text-[13px] text-zinc-300">{p.contact_name || "—"}</p>
-                    {p.email && <p className="text-[11px] text-zinc-600">{p.email}</p>}
+                    <p className="text-[13px] text-[var(--text-secondary)]">{p.contact_name || "—"}</p>
+                    {p.email && <p className="text-[11px] text-[var(--text-muted)]">{p.email}</p>}
                   </TableCell>
                   <TableCell className="py-2.5 hidden md:table-cell">
-                    <p className="text-[13px] text-zinc-400">{p.city && p.state ? `${p.city}, ${p.state}` : "—"}</p>
+                    <p className="text-[13px] text-[var(--text-tertiary)]">{p.city && p.state ? `${p.city}, ${p.state}` : "—"}</p>
                   </TableCell>
                   <TableCell className="py-2.5">
                     <Badge variant="outline" className={`text-[11px] font-medium ${priorityColor[p.priority]}`}>
@@ -324,15 +324,15 @@ export default function OutreachPage() {
                       <SelectTrigger className={`h-6 w-28 text-[11px] border ${statusColor[p.status] || statusColor.new} bg-transparent`}>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#111113] border-white/[0.06]">
+                      <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                         {Object.entries(statusLabel).map(([k, v]) => (
-                          <SelectItem key={k} value={k} className="text-[12px] text-zinc-300">{v}</SelectItem>
+                          <SelectItem key={k} value={k} className="text-[12px] text-[var(--text-secondary)]">{v}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </TableCell>
                   <TableCell className="py-2.5 hidden lg:table-cell">
-                    <p className="text-[11px] text-zinc-500 max-w-[200px] truncate">{p.qualifying_signal || "—"}</p>
+                    <p className="text-[11px] text-[var(--text-muted)] max-w-[200px] truncate">{p.qualifying_signal || "—"}</p>
                   </TableCell>
                 </TableRow>
               ))}
@@ -343,66 +343,66 @@ export default function OutreachPage() {
 
       {/* Add prospect dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#111113] border-white/[0.06] max-w-lg">
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)] max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-[15px] text-white">Add prospect</DialogTitle>
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">Add prospect</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Company name</Label>
-              <Input value={newCompany} onChange={(e) => setNewCompany(e.target.value)} placeholder="Greenleaf Mechanical" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Company name</Label>
+              <Input value={newCompany} onChange={(e) => setNewCompany(e.target.value)} placeholder="Greenleaf Mechanical" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Contact name</Label>
-              <Input value={newContact} onChange={(e) => setNewContact(e.target.value)} placeholder="John Smith" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Contact name</Label>
+              <Input value={newContact} onChange={(e) => setNewContact(e.target.value)} placeholder="John Smith" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Title</Label>
-              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Owner / GM" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Title</Label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Owner / GM" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Email</Label>
-              <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="john@company.com" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Email</Label>
+              <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="john@company.com" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Phone</Label>
-              <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="555-555-5555" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Phone</Label>
+              <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="555-555-5555" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">City</Label>
-              <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Austin" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">City</Label>
+              <Input value={newCity} onChange={(e) => setNewCity(e.target.value)} placeholder="Austin" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">State</Label>
-              <Input value={newState} onChange={(e) => setNewState(e.target.value)} placeholder="TX" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">State</Label>
+              <Input value={newState} onChange={(e) => setNewState(e.target.value)} placeholder="TX" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Employees</Label>
-              <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="50-100" className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Employees</Label>
+              <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="50-100" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Priority</Label>
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Priority</Label>
               <Select value={newPriority} onValueChange={(v) => setNewPriority(v as "A" | "B" | "C")}>
-                <SelectTrigger className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8">
+                <SelectTrigger className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111113] border-white/[0.06]">
-                  <SelectItem value="A" className="text-[12px] text-zinc-300">A — High</SelectItem>
-                  <SelectItem value="B" className="text-[12px] text-zinc-300">B — Medium</SelectItem>
-                  <SelectItem value="C" className="text-[12px] text-zinc-300">C — Low</SelectItem>
+                <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
+                  <SelectItem value="A" className="text-[12px] text-[var(--text-secondary)]">A — High</SelectItem>
+                  <SelectItem value="B" className="text-[12px] text-[var(--text-secondary)]">B — Medium</SelectItem>
+                  <SelectItem value="C" className="text-[12px] text-[var(--text-secondary)]">C — Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="col-span-2">
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Qualifying signal</Label>
-              <Input value={newSignal} onChange={(e) => setNewSignal(e.target.value)} placeholder="Expanding to commercial, recently hired..." className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8" />
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Qualifying signal</Label>
+              <Input value={newSignal} onChange={(e) => setNewSignal(e.target.value)} placeholder="Expanding to commercial, recently hired..." className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" className="text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]" onClick={() => setDialogOpen(false)}>
+            <Button variant="outline" className="text-[13px] h-8 text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8" onClick={handleCreate} disabled={!newCompany.trim()}>
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8" onClick={handleCreate} disabled={!newCompany.trim()}>
               Add
             </Button>
           </DialogFooter>

@@ -124,24 +124,24 @@ export default function TodaysPriorities() {
   if (priorities.length === 0) return null;
 
   return (
-    <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg overflow-hidden">
-      <div className="px-4 py-3 border-b border-white/[0.04]">
-        <h3 className="text-[13px] font-medium text-white">Today's Priorities</h3>
-        <p className="text-[11px] text-zinc-600 mt-0.5">{priorities.length} items need your attention</p>
+    <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--border)]">
+        <h3 className="text-[13px] font-medium text-[var(--text-primary)]">Today's Priorities</h3>
+        <p className="text-[11px] text-[var(--text-muted)] mt-0.5">{priorities.length} items need your attention</p>
       </div>
       <div>
         {priorities.map((p) => (
           <Link
             key={p.id}
             href={p.href}
-            className={`flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] border-l-2 hover:bg-white/[0.02] transition-colors ${urgencyColor[p.urgency]}`}
+            className={`flex items-center gap-3 px-4 py-3 border-b border-[var(--border)] border-l-2 hover:bg-[var(--overlay-weak)] transition-colors ${urgencyColor[p.urgency]}`}
           >
             <div className={`size-2 rounded-full shrink-0 ${urgencyDot[p.urgency]}`} />
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-white truncate">{p.title}</p>
-              <p className="text-[11px] text-zinc-500">{p.subtitle}</p>
+              <p className="text-[13px] text-[var(--text-primary)] truncate">{p.title}</p>
+              <p className="text-[11px] text-[var(--text-muted)]">{p.subtitle}</p>
             </div>
-            <ArrowRight className="size-3.5 text-zinc-600 shrink-0" />
+            <ArrowRight className="size-3.5 text-[var(--text-muted)] shrink-0" />
           </Link>
         ))}
       </div>

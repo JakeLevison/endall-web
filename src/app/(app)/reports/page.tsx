@@ -73,7 +73,7 @@ const stageBadgeColor = (stage: string) => {
     case "Negotiation": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "Proposal Sent": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
     case "Meeting Scheduled": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    default: return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+    default: return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
 
@@ -237,7 +237,7 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -248,26 +248,26 @@ export default function ReportsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[15px] font-medium text-white">Reports</h1>
+        <h1 className="text-[15px] font-medium text-[var(--text-primary)]">Reports</h1>
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="bg-white/[0.03] border border-white/[0.04] h-8 mb-6">
+        <TabsList className="bg-[var(--overlay-soft)] border border-[var(--border)] h-8 mb-6">
           <TabsTrigger
             value="overview"
-            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+            className="text-[13px] text-[var(--text-muted)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:bg-[var(--overlay-medium)] h-6 px-3"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="pipeline"
-            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+            className="text-[13px] text-[var(--text-muted)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:bg-[var(--overlay-medium)] h-6 px-3"
           >
             Pipeline
           </TabsTrigger>
           <TabsTrigger
             value="activity"
-            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+            className="text-[13px] text-[var(--text-muted)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:bg-[var(--overlay-medium)] h-6 px-3"
           >
             Activity
           </TabsTrigger>
@@ -303,64 +303,64 @@ export default function ReportsPage() {
           </div>
 
           {/* Pipeline by Stage — horizontal bar chart */}
-          <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-            <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Pipeline by Stage</h2>
+          <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+            <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-4">Pipeline by Stage</h2>
             <div className="space-y-3">
               {stageCounts.map((s) => {
                 const pct = Math.max((s.count / maxStageCount) * 100, 4);
                 return (
                   <div key={s.stage} className="flex items-center gap-3">
-                    <span className="text-[12px] text-zinc-400 w-[140px] shrink-0 truncate">
+                    <span className="text-[12px] text-[var(--text-tertiary)] w-[140px] shrink-0 truncate">
                       {s.stage}
                     </span>
-                    <div className="flex-1 h-6 bg-white/[0.02] rounded overflow-hidden">
+                    <div className="flex-1 h-6 bg-[var(--overlay-weak)] rounded overflow-hidden">
                       <div
                         className={`h-full rounded ${stageBarColor[s.stage] || "bg-zinc-500"} transition-all`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-[12px] text-zinc-500 w-[100px] text-right shrink-0">
+                    <span className="text-[12px] text-[var(--text-muted)] w-[100px] text-right shrink-0">
                       {s.count} &middot; {formatAmount(s.value)}
                     </span>
                   </div>
                 );
               })}
               {stageCounts.length === 0 && (
-                <p className="text-[13px] text-zinc-600 text-center py-4">No deal data</p>
+                <p className="text-[13px] text-[var(--text-muted)] text-center py-4">No deal data</p>
               )}
             </div>
           </div>
 
           {/* Recent Deals Closed */}
-          <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/[0.04]">
-              <h2 className="text-[11px] uppercase tracking-wide text-zinc-600">Recent Deals Closed</h2>
+          <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-[var(--border)]">
+              <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Recent Deals Closed</h2>
             </div>
             {recentDeals.length === 0 ? (
-              <p className="text-[13px] text-zinc-600 text-center py-8">No closed deals yet</p>
+              <p className="text-[13px] text-[var(--text-muted)] text-center py-8">No closed deals yet</p>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/[0.04] hover:bg-transparent">
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Deal</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden sm:table-cell">Company</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Amount</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Stage</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden md:table-cell">Close Date</TableHead>
+                  <TableRow className="border-[var(--border)] hover:bg-transparent">
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Deal</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden sm:table-cell">Company</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Amount</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Stage</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden md:table-cell">Close Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recentDeals.map((deal) => (
-                    <TableRow key={deal.id} className="border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                      <TableCell className="text-[13px] text-white font-medium py-2.5">{deal.name}</TableCell>
-                      <TableCell className="text-[13px] text-zinc-400 py-2.5 hidden sm:table-cell">{deal.company}</TableCell>
-                      <TableCell className="text-[13px] text-zinc-300 py-2.5">{formatAmount(deal.amount)}</TableCell>
+                    <TableRow key={deal.id} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors">
+                      <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">{deal.name}</TableCell>
+                      <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden sm:table-cell">{deal.company}</TableCell>
+                      <TableCell className="text-[13px] text-[var(--text-secondary)] py-2.5">{formatAmount(deal.amount)}</TableCell>
                       <TableCell className="py-2.5">
                         <Badge variant="outline" className={`text-[11px] font-normal ${stageBadgeColor(deal.stage)}`}>
                           {deal.stage}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden md:table-cell">{deal.closeDate}</TableCell>
+                      <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{deal.closeDate}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -399,49 +399,49 @@ export default function ReportsPage() {
           </div>
 
           {/* Full bar chart */}
-          <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-            <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Deals by Stage</h2>
+          <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+            <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-4">Deals by Stage</h2>
             <div className="space-y-3">
               {stageCounts.map((s) => {
                 const pct = Math.max((s.count / maxStageCount) * 100, 4);
                 return (
                   <div key={s.stage} className="flex items-center gap-3">
-                    <span className="text-[12px] text-zinc-400 w-[140px] shrink-0 truncate">
+                    <span className="text-[12px] text-[var(--text-tertiary)] w-[140px] shrink-0 truncate">
                       {s.stage}
                     </span>
-                    <div className="flex-1 h-7 bg-white/[0.02] rounded overflow-hidden">
+                    <div className="flex-1 h-7 bg-[var(--overlay-weak)] rounded overflow-hidden">
                       <div
                         className={`h-full rounded ${stageBarColor[s.stage] || "bg-zinc-500"} transition-all flex items-center pl-2`}
                         style={{ width: `${pct}%` }}
                       >
                         {pct > 15 && (
-                          <span className="text-[11px] text-white/80 font-medium">{s.count}</span>
+                          <span className="text-[11px] text-[var(--text-primary)]/80 font-medium">{s.count}</span>
                         )}
                       </div>
                     </div>
-                    <span className="text-[12px] text-zinc-500 w-[100px] text-right shrink-0">
+                    <span className="text-[12px] text-[var(--text-muted)] w-[100px] text-right shrink-0">
                       {formatAmount(s.value)}
                     </span>
                   </div>
                 );
               })}
               {stageCounts.length === 0 && (
-                <p className="text-[13px] text-zinc-600 text-center py-4">No deal data</p>
+                <p className="text-[13px] text-[var(--text-muted)] text-center py-4">No deal data</p>
               )}
             </div>
           </div>
 
           {/* Pipeline Value Over Time */}
           {dealTimeline.length > 1 && (
-            <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-              <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Pipeline Value Over Time</h2>
+            <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+              <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-4">Pipeline Value Over Time</h2>
               <TimeSeriesChart data={dealTimeline} color="#3b82f6" valuePrefix="$" height={220} />
             </div>
           )}
 
           {/* Contact Lifecycle Funnel */}
-          <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-            <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Contact Lifecycle Funnel</h2>
+          <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+            <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-4">Contact Lifecycle Funnel</h2>
             <div className="space-y-2">
               {lifecycleCounts.map((lc, i) => {
                 // Funnel: widths shrink from 100% down, proportional to count
@@ -450,7 +450,7 @@ export default function ReportsPage() {
                   : 6;
                 return (
                   <div key={lc.stage} className="flex items-center gap-3">
-                    <span className="text-[12px] text-zinc-400 w-[100px] shrink-0 truncate">
+                    <span className="text-[12px] text-[var(--text-tertiary)] w-[100px] shrink-0 truncate">
                       {funnelLabels[lc.stage] || lc.stage}
                     </span>
                     <div className="flex-1 flex justify-center">
@@ -458,7 +458,7 @@ export default function ReportsPage() {
                         className={`h-8 rounded ${funnelColors[lc.stage] || "bg-zinc-500"} flex items-center justify-center transition-all`}
                         style={{ width: `${pct}%` }}
                       >
-                        <span className="text-[11px] text-white font-medium">{lc.count}</span>
+                        <span className="text-[11px] text-[var(--text-primary)] font-medium">{lc.count}</span>
                       </div>
                     </div>
                   </div>
@@ -479,11 +479,11 @@ export default function ReportsPage() {
           </div>
 
           {/* Activity breakdown bar */}
-          <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-            <h2 className="text-[11px] uppercase tracking-wide text-zinc-600 mb-4">Activity Breakdown</h2>
+          <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+            <h2 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-4">Activity Breakdown</h2>
             {(() => {
               const total = activityCounts.email + activityCounts.call + activityCounts.meeting + activityCounts.note;
-              if (total === 0) return <p className="text-[13px] text-zinc-600 text-center py-4">No activity data</p>;
+              if (total === 0) return <p className="text-[13px] text-[var(--text-muted)] text-center py-4">No activity data</p>;
               const items = [
                 { label: "Emails", count: activityCounts.email, color: "bg-blue-500" },
                 { label: "Calls", count: activityCounts.call, color: "bg-amber-500" },
@@ -501,7 +501,7 @@ export default function ReportsPage() {
                         style={{ width: `${(item.count / total) * 100}%` }}
                       >
                         {(item.count / total) > 0.1 && (
-                          <span className="text-[11px] text-white font-medium">{item.count}</span>
+                          <span className="text-[11px] text-[var(--text-primary)] font-medium">{item.count}</span>
                         )}
                       </div>
                     ))}
@@ -511,7 +511,7 @@ export default function ReportsPage() {
                     {items.map((item) => (
                       <div key={item.label} className="flex items-center gap-1.5">
                         <div className={`size-2 rounded-full ${item.color}`} />
-                        <span className="text-[11px] text-zinc-500">{item.label}: {item.count}</span>
+                        <span className="text-[11px] text-[var(--text-muted)]">{item.label}: {item.count}</span>
                       </div>
                     ))}
                   </div>
@@ -539,10 +539,10 @@ function MetricCard({
   accent?: string;
 }) {
   return (
-    <div className="border border-white/[0.04] bg-white/[0.01] rounded-lg p-4">
-      <p className="text-[11px] text-zinc-600 mb-1">{label}</p>
-      <p className={`text-[24px] font-medium leading-tight ${accent || "text-white"}`}>{value}</p>
-      <p className="text-[11px] text-zinc-600 mt-1">{sub}</p>
+    <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-4">
+      <p className="text-[11px] text-[var(--text-muted)] mb-1">{label}</p>
+      <p className={`text-[24px] font-medium leading-tight ${accent || "text-[var(--text-primary)]"}`}>{value}</p>
+      <p className="text-[11px] text-[var(--text-muted)] mt-1">{sub}</p>
     </div>
   );
 }

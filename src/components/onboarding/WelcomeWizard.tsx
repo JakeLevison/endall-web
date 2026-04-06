@@ -62,18 +62,18 @@ export default function WelcomeWizard({ completedSteps = [], onDismiss }: Welcom
   const progress = completed.size / STEPS.length;
 
   return (
-    <div className="border border-white/[0.06] bg-white/[0.01] rounded-lg p-5 mb-6">
+    <div className="border border-[var(--border)] bg-[var(--overlay-weak)] rounded-lg p-5 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-[15px] font-semibold text-white">Welcome to endall</h2>
-          <p className="text-[13px] text-zinc-500 mt-0.5">
+          <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Welcome to endall</h2>
+          <p className="text-[13px] text-[var(--text-muted)] mt-0.5">
             Complete these steps to get started
           </p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="text-[12px] h-7 text-zinc-500 border-white/[0.06] bg-white/[0.02]"
+          className="text-[12px] h-7 text-[var(--text-muted)] border-[var(--border)] bg-[var(--overlay-weak)]"
           onClick={() => { setDismissed(true); onDismiss(); }}
         >
           Dismiss
@@ -81,7 +81,7 @@ export default function WelcomeWizard({ completedSteps = [], onDismiss }: Welcom
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-white/[0.04] rounded-full mb-5 overflow-hidden">
+      <div className="h-1 bg-[var(--overlay-soft)] rounded-full mb-5 overflow-hidden">
         <div
           className="h-full bg-emerald-500 rounded-full transition-all duration-500"
           style={{ width: `${progress * 100}%` }}
@@ -99,23 +99,23 @@ export default function WelcomeWizard({ completedSteps = [], onDismiss }: Welcom
               className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                 done
                   ? "border-emerald-500/20 bg-emerald-500/5"
-                  : "border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03]"
+                  : "border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
               }`}
             >
               <div
                 className={`size-9 rounded-lg flex items-center justify-center shrink-0 ${
-                  done ? "bg-emerald-500/10 text-emerald-400" : "bg-white/[0.04] text-zinc-400"
+                  done ? "bg-emerald-500/10 text-emerald-400" : "bg-[var(--overlay-soft)] text-[var(--text-tertiary)]"
                 }`}
               >
                 {done ? <Check className="size-5" /> : step.icon}
               </div>
               <div className="min-w-0">
-                <p className={`text-[13px] font-medium ${done ? "text-emerald-400" : "text-white"}`}>
+                <p className={`text-[13px] font-medium ${done ? "text-emerald-400" : "text-[var(--text-primary)]"}`}>
                   {step.title}
                 </p>
-                <p className="text-[12px] text-zinc-500 mt-0.5">{step.description}</p>
+                <p className="text-[12px] text-[var(--text-muted)] mt-0.5">{step.description}</p>
                 {!done && (
-                  <span className="inline-flex items-center gap-1 text-[12px] text-zinc-400 mt-1.5">
+                  <span className="inline-flex items-center gap-1 text-[12px] text-[var(--text-tertiary)] mt-1.5">
                     {step.action}
                     <ArrowRight className="size-3" />
                   </span>

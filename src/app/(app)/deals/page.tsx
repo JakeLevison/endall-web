@@ -61,7 +61,7 @@ const stageColor = (stage: string) => {
     case "Negotiation": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "Proposal Sent": return "bg-purple-500/10 text-purple-400 border-purple-500/20";
     case "Meeting Scheduled": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    default: return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+    default: return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
 
@@ -142,15 +142,15 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
             key={stage}
             data-stage={stage}
             className={`min-w-[220px] w-[220px] shrink-0 rounded-lg transition-colors ${
-              isOver ? "bg-white/[0.03]" : ""
+              isOver ? "bg-[var(--overlay-soft)]" : ""
             }`}
             onDragOver={(e) => handleDragOver(e, stage)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, stage)}
           >
             <div className="flex items-center justify-between mb-2 px-1">
-              <h3 className="text-[11px] uppercase tracking-wide text-zinc-600">{stage}</h3>
-              <span className="text-[11px] text-zinc-700">{stageDeals.length}</span>
+              <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{stage}</h3>
+              <span className="text-[11px] text-[var(--text-faint)]">{stageDeals.length}</span>
             </div>
             <div className="space-y-2 min-h-[80px]">
               {stageDeals.map((deal) => (
@@ -163,22 +163,22 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
                   onClick={() => { if (!draggedId) router.push(`/deals/${deal.id}`); }}
-                  className={`p-3 rounded-lg border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-grab active:cursor-grabbing select-none ${
+                  className={`p-3 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)] transition-all cursor-grab active:cursor-grabbing select-none ${
                     draggedId === deal.id ? "opacity-40 scale-95" : ""
                   }`}
                 >
-                  <p className="text-[13px] text-white mb-1">{deal.name}</p>
-                  <p className="text-[11px] text-zinc-500 mb-2">{deal.company}</p>
+                  <p className="text-[13px] text-[var(--text-primary)] mb-1">{deal.name}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] mb-2">{deal.company}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-zinc-300">{deal.amount}</span>
+                    <span className="text-[13px] font-medium text-[var(--text-secondary)]">{deal.amount}</span>
                     <Avatar className="size-5">
-                      <AvatarFallback className="bg-white/[0.06] text-[9px] text-zinc-500">
+                      <AvatarFallback className="bg-[var(--overlay-medium)] text-[9px] text-[var(--text-muted)]">
                         {deal.owner.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="flex items-center justify-between mt-1.5">
-                    <p className="text-[11px] text-zinc-600">Close: {deal.closeDate}</p>
+                    <p className="text-[11px] text-[var(--text-muted)]">Close: {deal.closeDate}</p>
                     <DealHealthBadge
                       dealId={deal.id}
                       stage={deal.stage}
@@ -191,9 +191,9 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
               ))}
               {stageDeals.length === 0 && (
                 <div className={`p-3 rounded-lg border border-dashed text-center transition-colors ${
-                  isOver ? "border-white/[0.12] bg-white/[0.02]" : "border-white/[0.04]"
+                  isOver ? "border-[var(--overlay-strong)] bg-[var(--overlay-weak)]" : "border-[var(--border)]"
                 }`}>
-                  <p className="text-[11px] text-zinc-700">
+                  <p className="text-[11px] text-[var(--text-faint)]">
                     {isOver ? "Drop here" : "No deals"}
                   </p>
                 </div>
@@ -209,31 +209,31 @@ function KanbanBoard({ deals, onMove }: { deals: Deal[]; onMove: (dealId: string
 function TableView({ deals }: { deals: Deal[] }) {
   const router = useRouter();
   return (
-    <div className="border border-white/[0.04] rounded-lg overflow-hidden">
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="border-white/[0.04] hover:bg-transparent">
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Name</TableHead>
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Company</TableHead>
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Amount</TableHead>
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600">Stage</TableHead>
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden md:table-cell">Close Date</TableHead>
-            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-zinc-600 hidden md:table-cell">Owner</TableHead>
+          <TableRow className="border-[var(--border)] hover:bg-transparent">
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Name</TableHead>
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Company</TableHead>
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Amount</TableHead>
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Stage</TableHead>
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden md:table-cell">Close Date</TableHead>
+            <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden md:table-cell">Owner</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {deals.map((deal) => (
-            <TableRow key={deal.id} onClick={() => router.push(`/deals/${deal.id}`)} className="border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors">
-              <TableCell className="text-[13px] text-white font-medium py-2.5">{deal.name}</TableCell>
-              <TableCell className="text-[13px] text-zinc-400 py-2.5">{deal.company}</TableCell>
-              <TableCell className="text-[13px] text-zinc-300 py-2.5">{deal.amount}</TableCell>
+            <TableRow key={deal.id} onClick={() => router.push(`/deals/${deal.id}`)} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] cursor-pointer transition-colors">
+              <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">{deal.name}</TableCell>
+              <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{deal.company}</TableCell>
+              <TableCell className="text-[13px] text-[var(--text-secondary)] py-2.5">{deal.amount}</TableCell>
               <TableCell className="py-2.5">
                 <Badge variant="outline" className={`text-[11px] font-normal ${stageColor(deal.stage)}`}>
                   {deal.stage}
                 </Badge>
               </TableCell>
-              <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden md:table-cell">{deal.closeDate}</TableCell>
-              <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden md:table-cell">{deal.owner}</TableCell>
+              <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{deal.closeDate}</TableCell>
+              <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{deal.owner}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -355,7 +355,7 @@ export default function DealsPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -363,24 +363,24 @@ export default function DealsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[15px] font-medium text-white">Deals</h1>
-        <Button onClick={() => setCreateOpen(true)} className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3">
+        <h1 className="text-[15px] font-medium text-[var(--text-primary)]">Deals</h1>
+        <Button onClick={() => setCreateOpen(true)} className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
           <Plus className="size-4 mr-1" />
           Add deal
         </Button>
       </div>
 
       <Tabs value={view} onValueChange={setView} className="mb-4">
-        <TabsList className="bg-white/[0.03] border border-white/[0.04] h-8">
+        <TabsList className="bg-[var(--overlay-soft)] border border-[var(--border)] h-8">
           <TabsTrigger
             value="board"
-            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+            className="text-[13px] text-[var(--text-muted)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:bg-[var(--overlay-medium)] h-6 px-3"
           >
             Board
           </TabsTrigger>
           <TabsTrigger
             value="table"
-            className="text-[13px] text-zinc-500 data-[state=active]:text-white data-[state=active]:bg-white/[0.06] h-6 px-3"
+            className="text-[13px] text-[var(--text-muted)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:bg-[var(--overlay-medium)] h-6 px-3"
           >
             Table
           </TabsTrigger>
@@ -388,7 +388,7 @@ export default function DealsPage() {
         <TabsContent value="board" className="mt-4">
           {deals.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-[13px] text-zinc-600">No deals yet. Create your first deal.</p>
+              <p className="text-[13px] text-[var(--text-muted)]">No deals yet. Create your first deal.</p>
             </div>
           ) : (
             <KanbanBoard deals={deals} onMove={handleMoveDeal} />
@@ -397,7 +397,7 @@ export default function DealsPage() {
         <TabsContent value="table" className="mt-4">
           {deals.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-[13px] text-zinc-600">No deals yet. Create your first deal.</p>
+              <p className="text-[13px] text-[var(--text-muted)]">No deals yet. Create your first deal.</p>
             </div>
           ) : (
             <TableView deals={deals} />
@@ -407,43 +407,43 @@ export default function DealsPage() {
 
       {/* Create Deal Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-[#111113] border-white/[0.06] sm:max-w-md">
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[15px] text-white">Add deal</DialogTitle>
-            <DialogDescription className="text-[13px] text-zinc-500">
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">Add deal</DialogTitle>
+            <DialogDescription className="text-[13px] text-[var(--text-muted)]">
               Create a new deal record.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Name</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Name</Label>
               <Input
                 value={newDealName}
                 onChange={(e) => setNewDealName(e.target.value)}
                 placeholder="Deal name"
-                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Amount</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Amount</Label>
                 <Input
                   type="number"
                   value={newAmount}
                   onChange={(e) => setNewAmount(e.target.value)}
                   placeholder="0"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Stage</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Stage</Label>
                 <Select value={newStage} onValueChange={setNewStage}>
-                  <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                     <SelectValue placeholder="Select stage" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                     {stages.map((s) => (
-                      <SelectItem key={s} value={s} className="text-[13px] text-zinc-300">
+                      <SelectItem key={s} value={s} className="text-[13px] text-[var(--text-secondary)]">
                         {s}
                       </SelectItem>
                     ))}
@@ -452,24 +452,24 @@ export default function DealsPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Close date</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Close date</Label>
               <Input
                 type="date"
                 value={newCloseDate}
                 onChange={(e) => setNewCloseDate(e.target.value)}
-                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Company</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Company</Label>
                 <Select value={newCompanyId} onValueChange={setNewCompanyId}>
-                  <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                     {companiesList.map((c) => (
-                      <SelectItem key={c.id} value={c.id} className="text-[13px] text-zinc-300">
+                      <SelectItem key={c.id} value={c.id} className="text-[13px] text-[var(--text-secondary)]">
                         {c.name}
                       </SelectItem>
                     ))}
@@ -477,14 +477,14 @@ export default function DealsPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Contact</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Contact</Label>
                 <Select value={newContactId} onValueChange={setNewContactId}>
-                  <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                     <SelectValue placeholder="Select contact" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                     {contactsList.map((c) => (
-                      <SelectItem key={c.id} value={c.id} className="text-[13px] text-zinc-300">
+                      <SelectItem key={c.id} value={c.id} className="text-[13px] text-[var(--text-secondary)]">
                         {c.first_name} {c.last_name}
                       </SelectItem>
                     ))}
@@ -497,14 +497,14 @@ export default function DealsPage() {
             <Button
               variant="outline"
               onClick={() => setCreateOpen(false)}
-              className="h-8 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateDeal}
               disabled={creating || !newDealName.trim()}
-              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
             >
               {creating ? "Creating..." : "Create deal"}
             </Button>

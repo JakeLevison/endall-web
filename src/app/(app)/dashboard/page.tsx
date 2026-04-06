@@ -54,7 +54,7 @@ const stageBadgeColor = (stage: string) => {
     case "Meeting Scheduled":
       return "bg-blue-500/10 text-blue-400 border-blue-500/20";
     default:
-      return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+      return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
 
@@ -236,7 +236,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -289,15 +289,15 @@ export default function DashboardPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-white/[0.04] bg-white/[0.01] p-4"
+            className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4"
           >
             <div className="flex items-center gap-2 mb-3">
-              <stat.icon className="size-3.5 text-zinc-600" />
-              <span className="text-[11px] text-zinc-600 uppercase tracking-wide">
+              <stat.icon className="size-3.5 text-[var(--text-muted)]" />
+              <span className="text-[11px] text-[var(--text-muted)] uppercase tracking-wide">
                 {stat.label}
               </span>
             </div>
-            <p className="text-[24px] font-medium text-white leading-none">
+            <p className="text-[24px] font-medium text-[var(--text-primary)] leading-none">
               {stat.value}
             </p>
           </div>
@@ -307,31 +307,31 @@ export default function DashboardPage() {
       {/* ── Two-column body ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Recent Activity */}
-        <div className="rounded-lg border border-white/[0.04] bg-white/[0.01] p-4">
-          <h2 className="text-[13px] font-medium text-white mb-4">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
+          <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
             Recent Activity
           </h2>
           {activities.length === 0 ? (
-            <p className="text-[13px] text-zinc-600">No recent activity.</p>
+            <p className="text-[13px] text-[var(--text-muted)]">No recent activity.</p>
           ) : (
             <div className="space-y-1">
               {activities.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-start gap-3 py-2 border-b border-white/[0.04] last:border-0"
+                  className="flex items-start gap-3 py-2 border-b border-[var(--border)] last:border-0"
                 >
-                  <div className="mt-0.5 shrink-0 size-6 rounded-md bg-white/[0.04] flex items-center justify-center text-zinc-500">
+                  <div className="mt-0.5 shrink-0 size-6 rounded-md bg-[var(--overlay-soft)] flex items-center justify-center text-[var(--text-muted)]">
                     {activityIcon(a.type)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] text-zinc-300 truncate">
+                    <p className="text-[13px] text-[var(--text-secondary)] truncate">
                       {a.subject}
                     </p>
                     {a.contactName && (
-                      <p className="text-[11px] text-zinc-600">{a.contactName}</p>
+                      <p className="text-[11px] text-[var(--text-muted)]">{a.contactName}</p>
                     )}
                   </div>
-                  <span className="text-[11px] text-zinc-700 shrink-0 mt-0.5">
+                  <span className="text-[11px] text-[var(--text-faint)] shrink-0 mt-0.5">
                     {relativeTime(a.createdAt)}
                   </span>
                 </div>
@@ -341,21 +341,21 @@ export default function DashboardPage() {
         </div>
 
         {/* Deals by Stage */}
-        <div className="rounded-lg border border-white/[0.04] bg-white/[0.01] p-4">
-          <h2 className="text-[13px] font-medium text-white mb-4">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
+          <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
             Deals by Stage
           </h2>
           {stageCounts.length === 0 ? (
-            <p className="text-[13px] text-zinc-600">No deals yet.</p>
+            <p className="text-[13px] text-[var(--text-muted)]">No deals yet.</p>
           ) : (
             <div className="space-y-3">
               {stageCounts.map((s) => (
                 <div key={s.stage}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[13px] text-zinc-400">{s.stage}</span>
-                    <span className="text-[13px] text-zinc-500">{s.count}</span>
+                    <span className="text-[13px] text-[var(--text-tertiary)]">{s.stage}</span>
+                    <span className="text-[13px] text-[var(--text-muted)]">{s.count}</span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-white/[0.04]">
+                  <div className="h-2 w-full rounded-full bg-[var(--overlay-soft)]">
                     <div
                       className={`h-2 rounded-full ${stageBarColor[s.stage] ?? "bg-zinc-500"}`}
                       style={{
@@ -371,32 +371,32 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Upcoming Close Dates ──────────────────────────────────── */}
-      <div className="rounded-lg border border-white/[0.04] bg-white/[0.01] p-4">
-        <h2 className="text-[13px] font-medium text-white mb-4">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] p-4">
+        <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">
           Upcoming Close Dates
         </h2>
         {upcomingDeals.length === 0 ? (
-          <p className="text-[13px] text-zinc-600">
+          <p className="text-[13px] text-[var(--text-muted)]">
             No deals closing in the next 30 days.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.04]">
-                  <th className="text-left text-[11px] uppercase tracking-wide text-zinc-600 pb-2 pr-4">
+                <tr className="border-b border-[var(--border)]">
+                  <th className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] pb-2 pr-4">
                     Deal
                   </th>
-                  <th className="text-left text-[11px] uppercase tracking-wide text-zinc-600 pb-2 pr-4 hidden sm:table-cell">
+                  <th className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] pb-2 pr-4 hidden sm:table-cell">
                     Company
                   </th>
-                  <th className="text-left text-[11px] uppercase tracking-wide text-zinc-600 pb-2 pr-4">
+                  <th className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] pb-2 pr-4">
                     Amount
                   </th>
-                  <th className="text-left text-[11px] uppercase tracking-wide text-zinc-600 pb-2 pr-4 hidden md:table-cell">
+                  <th className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] pb-2 pr-4 hidden md:table-cell">
                     Close Date
                   </th>
-                  <th className="text-left text-[11px] uppercase tracking-wide text-zinc-600 pb-2">
+                  <th className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] pb-2">
                     Stage
                   </th>
                 </tr>
@@ -405,18 +405,18 @@ export default function DashboardPage() {
                 {upcomingDeals.map((d) => (
                   <tr
                     key={d.id}
-                    className="border-b border-white/[0.04] last:border-0"
+                    className="border-b border-[var(--border)] last:border-0"
                   >
-                    <td className="py-2.5 pr-4 text-[13px] text-white font-medium">
+                    <td className="py-2.5 pr-4 text-[13px] text-[var(--text-primary)] font-medium">
                       {d.name}
                     </td>
-                    <td className="py-2.5 pr-4 text-[13px] text-zinc-400 hidden sm:table-cell">
+                    <td className="py-2.5 pr-4 text-[13px] text-[var(--text-tertiary)] hidden sm:table-cell">
                       {d.company}
                     </td>
-                    <td className="py-2.5 pr-4 text-[13px] text-zinc-300">
+                    <td className="py-2.5 pr-4 text-[13px] text-[var(--text-secondary)]">
                       {formatAmount(d.amount)}
                     </td>
-                    <td className="py-2.5 pr-4 text-[13px] text-zinc-500 hidden md:table-cell">
+                    <td className="py-2.5 pr-4 text-[13px] text-[var(--text-muted)] hidden md:table-cell">
                       {d.closeDate}
                     </td>
                     <td className="py-2.5">

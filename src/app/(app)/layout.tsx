@@ -182,7 +182,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <div className="flex h-screen text-zinc-300 dark:text-zinc-300" style={{ background: "var(--bg)", color: "var(--text-secondary)" }}>
+    <div className="flex h-screen" style={{ background: "var(--bg)", color: "var(--text-secondary)" }}>
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 shrink-0 flex-col" style={{ borderRight: "1px solid var(--border)" }}>
         <SidebarContent pathname={pathname} onOpenChat={openChat} />
@@ -273,7 +273,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Content */}
         <main className="flex-1 overflow-auto">
-          <React.Suspense fallback={<div className="p-6"><p className="text-[13px] text-zinc-500">Loading...</p></div>}>
+          <React.Suspense fallback={<div className="p-6"><p className="text-[13px] text-[var(--text-muted)]">Loading...</p></div>}>
             {children}
           </React.Suspense>
         </main>

@@ -42,9 +42,9 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
   if (!editor) return null;
 
   return (
-    <div className="border border-white/[0.06] rounded-lg overflow-hidden bg-white/[0.02]">
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden bg-[var(--overlay-weak)]">
       {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-white/[0.06] bg-white/[0.01]">
+      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-[var(--border)] bg-[var(--overlay-weak)]">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
@@ -57,7 +57,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         >
           <Italic className="size-3.5" />
         </ToolbarButton>
-        <div className="w-px h-4 bg-white/[0.06] mx-1" />
+        <div className="w-px h-4 bg-[var(--overlay-medium)] mx-1" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           active={editor.isActive("bulletList")}
@@ -70,7 +70,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         >
           <ListOrdered className="size-3.5" />
         </ToolbarButton>
-        <div className="w-px h-4 bg-white/[0.06] mx-1" />
+        <div className="w-px h-4 bg-[var(--overlay-medium)] mx-1" />
         <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
           <Undo className="size-3.5" />
         </ToolbarButton>
@@ -83,14 +83,14 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       <EditorContent editor={editor} />
 
       {/* Merge tags */}
-      <div className="flex flex-wrap gap-1 px-3 py-2 border-t border-white/[0.06]">
-        <span className="text-[10px] text-zinc-600 self-center mr-1">Insert:</span>
+      <div className="flex flex-wrap gap-1 px-3 py-2 border-t border-[var(--border)]">
+        <span className="text-[10px] text-[var(--text-muted)] self-center mr-1">Insert:</span>
         {MERGE_TAGS.map((tag) => (
           <button
             key={tag.token}
             type="button"
             onClick={() => editor.chain().focus().insertContent(tag.token).run()}
-            className="text-[10px] text-zinc-500 bg-white/[0.03] border border-white/[0.06] rounded px-1.5 py-0.5 hover:bg-white/[0.06] hover:text-zinc-300 transition-colors"
+            className="text-[10px] text-[var(--text-muted)] bg-[var(--overlay-soft)] border border-[var(--border)] rounded px-1.5 py-0.5 hover:bg-[var(--overlay-medium)] hover:text-[var(--text-secondary)] transition-colors"
           >
             {tag.label}
           </button>
@@ -115,8 +115,8 @@ function ToolbarButton({
       onClick={onClick}
       className={`p-1.5 rounded transition-colors ${
         active
-          ? "bg-white/[0.08] text-white"
-          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]"
+          ? "bg-[var(--surface-inverse)]/[0.08] text-[var(--text-primary)]"
+          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--overlay-soft)]"
       }`}
     >
       {children}

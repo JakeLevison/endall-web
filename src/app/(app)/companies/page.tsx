@@ -169,7 +169,7 @@ export default function CompaniesPage() {
   const SortHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
     <button
       onClick={() => toggleSort(sortKeyName)}
-      className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-zinc-600 hover:text-zinc-400 transition-colors"
+      className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hover:text-[var(--text-tertiary)] transition-colors"
     >
       {label}
       <ArrowUpDown className="size-3" />
@@ -179,7 +179,7 @@ export default function CompaniesPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -187,14 +187,14 @@ export default function CompaniesPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[15px] font-medium text-white">Companies</h1>
+        <h1 className="text-[15px] font-medium text-[var(--text-primary)]">Companies</h1>
         <div className="flex items-center gap-2">
           <ExportButton
             data={companies as unknown as Record<string, unknown>[]}
             columns={["name", "domain", "industry", "size", "city", "state"]}
             filename="companies"
           />
-          <Button onClick={() => setCreateOpen(true)} className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3">
+          <Button onClick={() => setCreateOpen(true)} className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
             <Plus className="size-4 mr-1" />
             Add company
           </Button>
@@ -202,24 +202,24 @@ export default function CompaniesPage() {
       </div>
 
       <div className="relative max-w-xs mb-4">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-zinc-600" />
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--text-muted)]" />
         <Input
           placeholder="Search companies..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-8 h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+          className="pl-8 h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
         />
       </div>
 
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-[13px] text-zinc-600">No companies yet. Add your first company.</p>
+          <p className="text-[13px] text-[var(--text-muted)]">No companies yet. Add your first company.</p>
         </div>
       ) : (
-        <div className="border border-white/[0.04] rounded-lg overflow-hidden">
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/[0.04] hover:bg-transparent">
+              <TableRow className="border-[var(--border)] hover:bg-transparent">
                 <TableHead className="h-9"><SortHeader label="Name" sortKeyName="name" /></TableHead>
                 <TableHead className="h-9"><SortHeader label="Domain" sortKeyName="domain" /></TableHead>
                 <TableHead className="h-9 hidden md:table-cell"><SortHeader label="Industry" sortKeyName="industry" /></TableHead>
@@ -230,13 +230,13 @@ export default function CompaniesPage() {
             </TableHeader>
             <TableBody>
               {filtered.map((company) => (
-                <TableRow key={company.id} onClick={() => router.push(`/companies/${company.id}`)} className="border-white/[0.04] hover:bg-white/[0.02] cursor-pointer transition-colors">
-                  <TableCell className="text-[13px] text-white font-medium py-2.5">{company.name}</TableCell>
-                  <TableCell className="text-[13px] text-zinc-400 py-2.5">{company.domain}</TableCell>
-                  <TableCell className="text-[13px] text-zinc-400 py-2.5 hidden md:table-cell">{company.industry}</TableCell>
-                  <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden lg:table-cell">{company.contacts}</TableCell>
-                  <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden lg:table-cell">{company.deals}</TableCell>
-                  <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden lg:table-cell">{company.owner}</TableCell>
+                <TableRow key={company.id} onClick={() => router.push(`/companies/${company.id}`)} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] cursor-pointer transition-colors">
+                  <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">{company.name}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{company.domain}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">{company.industry}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.contacts}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.deals}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.owner}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -245,62 +245,62 @@ export default function CompaniesPage() {
       )}
 
       <div className="flex items-center justify-between mt-4">
-        <p className="text-[11px] text-zinc-600">{filtered.length} of {totalCount} companies</p>
+        <p className="text-[11px] text-[var(--text-muted)]">{filtered.length} of {totalCount} companies</p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled className="text-[11px] text-zinc-600 border-white/[0.06] bg-transparent">Previous</Button>
-          <Button variant="outline" size="sm" disabled className="text-[11px] text-zinc-600 border-white/[0.06] bg-transparent">Next</Button>
+          <Button variant="outline" size="sm" disabled className="text-[11px] text-[var(--text-muted)] border-[var(--border)] bg-transparent">Previous</Button>
+          <Button variant="outline" size="sm" disabled className="text-[11px] text-[var(--text-muted)] border-[var(--border)] bg-transparent">Next</Button>
         </div>
       </div>
 
       {/* Create Company Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-[#111113] border-white/[0.06] sm:max-w-md">
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[15px] text-white">Add company</DialogTitle>
-            <DialogDescription className="text-[13px] text-zinc-500">
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">Add company</DialogTitle>
+            <DialogDescription className="text-[13px] text-[var(--text-muted)]">
               Create a new company record.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Name</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Name</Label>
                 <Input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Company name"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Domain</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Domain</Label>
                 <Input
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
                   placeholder="example.com"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Industry</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Industry</Label>
                 <Input
                   value={newIndustry}
                   onChange={(e) => setNewIndustry(e.target.value)}
                   placeholder="e.g. Technology"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Size</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Size</Label>
                 <Select value={newSize} onValueChange={setNewSize}>
-                  <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                  <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                     <SelectValue placeholder="Select size" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#111113] border-white/[0.06]">
+                  <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                     {companySizes.map((s) => (
-                      <SelectItem key={s} value={s} className="text-[13px] text-zinc-300">
+                      <SelectItem key={s} value={s} className="text-[13px] text-[var(--text-secondary)]">
                         {s}
                       </SelectItem>
                     ))}
@@ -310,30 +310,30 @@ export default function CompaniesPage() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">City</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">City</Label>
                 <Input
                   value={newCity}
                   onChange={(e) => setNewCity(e.target.value)}
                   placeholder="City"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">State</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">State</Label>
                 <Input
                   value={newState}
                   onChange={(e) => setNewState(e.target.value)}
                   placeholder="State"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Country</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Country</Label>
                 <Input
                   value={newCountry}
                   onChange={(e) => setNewCountry(e.target.value)}
                   placeholder="Country"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
             </div>
@@ -342,14 +342,14 @@ export default function CompaniesPage() {
             <Button
               variant="outline"
               onClick={() => setCreateOpen(false)}
-              className="h-8 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateCompany}
               disabled={creating || !newName.trim()}
-              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
             >
               {creating ? "Creating..." : "Create company"}
             </Button>

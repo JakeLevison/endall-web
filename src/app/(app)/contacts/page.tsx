@@ -196,14 +196,14 @@ export default function ContactsPage() {
       case "Lead":
         return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       default:
-        return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+        return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
     }
   };
 
   const SortHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
     <button
       onClick={() => toggleSort(sortKeyName)}
-      className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-zinc-600 hover:text-zinc-400 transition-colors"
+      className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hover:text-[var(--text-tertiary)] transition-colors"
     >
       {label}
       <ArrowUpDown className="size-3" />
@@ -213,7 +213,7 @@ export default function ContactsPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -222,7 +222,7 @@ export default function ContactsPage() {
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-[15px] font-medium text-white">Contacts</h1>
+        <h1 className="text-[15px] font-medium text-[var(--text-primary)]">Contacts</h1>
         <div className="flex items-center gap-2">
           <ExportButton
             data={contacts as unknown as Record<string, unknown>[]}
@@ -231,7 +231,7 @@ export default function ContactsPage() {
           />
           <Button
             onClick={() => setCreateOpen(true)}
-            className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
+            className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
           >
             <Plus className="size-4 mr-1" />
             Add contact
@@ -242,29 +242,29 @@ export default function ContactsPage() {
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-zinc-600" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-[var(--text-muted)]" />
           <Input
             placeholder="Search contacts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+            className="pl-8 h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="h-8 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
             >
               Stage: {stageFilter}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-[#111113] border-white/[0.06]">
+          <DropdownMenuContent className="bg-[var(--surface)] border-[var(--border)]">
             {stages.map((s) => (
               <DropdownMenuItem
                 key={s}
                 onClick={() => setStageFilter(s)}
-                className="text-[13px] text-zinc-400"
+                className="text-[13px] text-[var(--text-tertiary)]"
               >
                 {s}
               </DropdownMenuItem>
@@ -276,15 +276,15 @@ export default function ContactsPage() {
       {/* Table */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-[13px] text-zinc-600">
+          <p className="text-[13px] text-[var(--text-muted)]">
             No contacts yet. Import or add your first contact.
           </p>
         </div>
       ) : (
-        <div className="border border-white/[0.04] rounded-lg overflow-hidden">
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/[0.04] hover:bg-transparent">
+              <TableRow className="border-[var(--border)] hover:bg-transparent">
                 <TableHead className="h-9">
                   <SortHeader label="Name" sortKeyName="name" />
                 </TableHead>
@@ -310,15 +310,15 @@ export default function ContactsPage() {
                 <TableRow
                   key={contact.id}
                   onClick={() => router.push(`/contacts/${contact.id}`)}
-                  className="cursor-pointer border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+                  className="cursor-pointer border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors"
                 >
-                  <TableCell className="text-[13px] text-white font-medium py-2.5">
+                  <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">
                     {contact.name}
                   </TableCell>
-                  <TableCell className="text-[13px] text-zinc-400 py-2.5">
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">
                     {contact.email}
                   </TableCell>
-                  <TableCell className="text-[13px] text-zinc-400 py-2.5 hidden md:table-cell">
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">
                     {contact.company}
                   </TableCell>
                   <TableCell className="py-2.5">
@@ -329,10 +329,10 @@ export default function ContactsPage() {
                       {contact.stage}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden lg:table-cell">
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
                     {contact.lastActivity}
                   </TableCell>
-                  <TableCell className="text-[13px] text-zinc-500 py-2.5 hidden lg:table-cell">
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
                     {contact.owner}
                   </TableCell>
                 </TableRow>
@@ -344,7 +344,7 @@ export default function ContactsPage() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4">
-        <p className="text-[11px] text-zinc-600">
+        <p className="text-[11px] text-[var(--text-muted)]">
           {filtered.length} of {totalCount} contacts
         </p>
         <div className="flex gap-2">
@@ -352,7 +352,7 @@ export default function ContactsPage() {
             variant="outline"
             size="sm"
             disabled
-            className="text-[11px] text-zinc-600 border-white/[0.06] bg-transparent"
+            className="text-[11px] text-[var(--text-muted)] border-[var(--border)] bg-transparent"
           >
             Previous
           </Button>
@@ -360,7 +360,7 @@ export default function ContactsPage() {
             variant="outline"
             size="sm"
             disabled
-            className="text-[11px] text-zinc-600 border-white/[0.06] bg-transparent"
+            className="text-[11px] text-[var(--text-muted)] border-[var(--border)] bg-transparent"
           >
             Next
           </Button>
@@ -369,36 +369,36 @@ export default function ContactsPage() {
 
       {/* Create Contact Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-[#111113] border-white/[0.06] sm:max-w-md">
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[15px] text-white">Add contact</DialogTitle>
-            <DialogDescription className="text-[13px] text-zinc-500">
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">Add contact</DialogTitle>
+            <DialogDescription className="text-[13px] text-[var(--text-muted)]">
               Create a new contact record.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">First name</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">First name</Label>
                 <Input
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="First name"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-600">Last name</Label>
+                <Label className="text-[11px] text-[var(--text-muted)]">Last name</Label>
                 <Input
                   value={newLastName}
                   onChange={(e) => setNewLastName(e.target.value)}
                   placeholder="Last name"
-                  className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                  className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Email</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Email</Label>
               <Input
                 type="email"
                 value={newEmail}
@@ -416,31 +416,31 @@ export default function ContactsPage() {
                   }
                 }}
                 placeholder="email@example.com"
-                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
               />
               {enrichHint && (
                 <p className="text-[11px] text-emerald-400">{enrichHint}</p>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Phone</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Phone</Label>
               <Input
                 type="tel"
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
                 placeholder="+1 (555) 000-0000"
-                className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300 placeholder:text-zinc-600"
+                className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)] placeholder:text-[var(--text-muted)]"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Company</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Company</Label>
               <Select value={newCompanyId} onValueChange={setNewCompanyId}>
-                <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                   <SelectValue placeholder="Select company" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111113] border-white/[0.06]">
+                <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                   {companiesList.map((c) => (
-                    <SelectItem key={c.id} value={c.id} className="text-[13px] text-zinc-300">
+                    <SelectItem key={c.id} value={c.id} className="text-[13px] text-[var(--text-secondary)]">
                       {c.name}
                     </SelectItem>
                   ))}
@@ -448,14 +448,14 @@ export default function ContactsPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-600">Lifecycle stage</Label>
+              <Label className="text-[11px] text-[var(--text-muted)]">Lifecycle stage</Label>
               <Select value={newLifecycleStage} onValueChange={setNewLifecycleStage}>
-                <SelectTrigger className="h-8 bg-white/[0.02] border-white/[0.06] text-[13px] text-zinc-300">
+                <SelectTrigger className="h-8 bg-[var(--overlay-weak)] border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111113] border-white/[0.06]">
+                <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
                   {lifecycleStages.map((s) => (
-                    <SelectItem key={s} value={s} className="text-[13px] text-zinc-300 capitalize">
+                    <SelectItem key={s} value={s} className="text-[13px] text-[var(--text-secondary)] capitalize">
                       {s.toUpperCase()}
                     </SelectItem>
                   ))}
@@ -467,14 +467,14 @@ export default function ContactsPage() {
             <Button
               variant="outline"
               onClick={() => setCreateOpen(false)}
-              className="h-8 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateContact}
               disabled={creating || !newFirstName.trim()}
-              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
             >
               {creating ? "Creating..." : "Create contact"}
             </Button>

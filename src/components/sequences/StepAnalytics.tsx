@@ -86,8 +86,8 @@ export default function StepAnalytics({ sequenceId, stepId, stepType }: StepAnal
 function Stat({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div className="flex items-center gap-1">
-      <span className="text-[10px] text-zinc-600">{label}:</span>
-      <span className={`text-[11px] font-medium ${accent || "text-zinc-400"}`}>{value}</span>
+      <span className="text-[10px] text-[var(--text-muted)]">{label}:</span>
+      <span className={`text-[11px] font-medium ${accent || "text-[var(--text-tertiary)]"}`}>{value}</span>
     </div>
   );
 }

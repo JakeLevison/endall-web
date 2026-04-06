@@ -26,95 +26,63 @@ export default function ValuePropSection() {
             What Endall replaces
           </p>
 
-          {/* Role replacement — two-column on desktop, stacked on mobile */}
+          {/* Role replacement — 3-column on desktop, stacked on mobile */}
           <div
+            className="role-cards-grid"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "32px",
+              gap: "20px",
               marginBottom: "48px",
             }}
           >
-            <div>
-              <h3
+            {[
+              {
+                title: "Your office manager",
+                desc: "Endall answers every call, qualifies every lead, and books jobs to your calendar. Nothing falls through.",
+              },
+              {
+                title: "Your bookkeeper",
+                desc: "Track revenue, job costs, and crew utilization from a single dashboard. Morning briefings land before your first coffee.",
+              },
+              {
+                title: "Your sales coordinator",
+                desc: "Endall prospects for you \u2013 finds opportunities, sends proposals, follows up automatically. You close. It does the rest.",
+              },
+            ].map((card) => (
+              <div
+                key={card.title}
                 style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(18px, 2.5vw, 22px)",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "10px",
-                  letterSpacing: "-0.01em",
+                  border: "1px solid var(--overlay-medium)",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  background: "var(--overlay-weak)",
                 }}
               >
-                Your office manager
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(15px, 2vw, 17px)",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.65,
-                  margin: 0,
-                }}
-              >
-                Endall answers every call, qualifies every lead, and books jobs
-                to your calendar. Nothing falls through.
-              </p>
-            </div>
-
-            <div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(18px, 2.5vw, 22px)",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "10px",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Your bookkeeper
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(15px, 2vw, 17px)",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.65,
-                  margin: 0,
-                }}
-              >
-                Track revenue, job costs, and crew utilization from a single
-                dashboard. Morning briefings land before your first coffee.
-              </p>
-            </div>
-
-            <div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(18px, 2.5vw, 22px)",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "10px",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Your sales coordinator
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans), sans-serif",
-                  fontSize: "clamp(15px, 2vw, 17px)",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.65,
-                  margin: 0,
-                }}
-              >
-                Endall prospects for you — finds opportunities, sends proposals,
-                follows up automatically. You close. It does the rest.
-              </p>
-            </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-sans), sans-serif",
+                    fontSize: "clamp(18px, 2.5vw, 22px)",
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    marginBottom: "10px",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {card.title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans), sans-serif",
+                    fontSize: "clamp(15px, 2vw, 17px)",
+                    color: "var(--text-secondary)",
+                    lineHeight: 1.65,
+                    margin: 0,
+                  }}
+                >
+                  {card.desc}
+                </p>
+              </div>
+            ))}
           </div>
 
           <p

@@ -68,10 +68,10 @@ const fallbackNodes: WorkflowNode[] = [
 const statusColor = (status: string) => {
   switch (status) {
     case "active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-    case "draft": return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+    case "draft": return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
     case "paused": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     case "archived": return "bg-red-500/10 text-red-400 border-red-500/20";
-    default: return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+    default: return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
 
@@ -100,7 +100,7 @@ const nodeIconBg = (type: WorkflowNode["node_type"]) => {
     case "trigger": return "bg-blue-500/10 text-blue-400";
     case "condition": return "bg-amber-500/10 text-amber-400";
     case "action": return "bg-emerald-500/10 text-emerald-400";
-    case "delay": return "bg-zinc-500/10 text-zinc-400";
+    case "delay": return "bg-zinc-500/10 text-[var(--text-tertiary)]";
     case "ai_action": return "bg-purple-500/10 text-purple-400";
   }
 };
@@ -268,7 +268,7 @@ export default function WorkflowDetailPage({
   if (loading || !workflow) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-zinc-500">Loading...</p>
+        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
       </div>
     );
   }
@@ -276,13 +276,13 @@ export default function WorkflowDetailPage({
   return (
     <div className="h-full flex flex-col">
       {/* Breadcrumb */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.04]">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-1.5 text-[13px]">
-          <Link href="/workflows" className="text-zinc-500 hover:text-zinc-300 transition-colors">
+          <Link href="/workflows" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
             Workflows
           </Link>
-          <ChevronRight className="size-3 text-zinc-700" />
-          <span className="text-white">{workflow.name}</span>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">{workflow.name}</span>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={`text-[11px] font-normal capitalize ${statusColor(workflow.status)}`}>
@@ -291,7 +291,7 @@ export default function WorkflowDetailPage({
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-[13px] text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+            className="h-7 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
             onClick={handleToggleStatus}
           >
             {workflow.status === "active" ? "Pause" : "Activate"}
@@ -305,14 +305,14 @@ export default function WorkflowDetailPage({
           {/* Node flow */}
           {nodes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-[13px] text-zinc-600">No nodes yet. Add a trigger to start building this workflow.</p>
+              <p className="text-[13px] text-[var(--text-muted)]">No nodes yet. Add a trigger to start building this workflow.</p>
             </div>
           ) : (
             <div className="relative">
               {nodes.map((node, idx) => (
                 <div key={node.id}>
                   {/* Node card */}
-                  <div className={`p-4 rounded-lg border border-white/[0.04] bg-white/[0.01] border-l-2 ${nodeBorderColor(node.node_type)} hover:bg-white/[0.02] transition-colors`}>
+                  <div className={`p-4 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] border-l-2 ${nodeBorderColor(node.node_type)} hover:bg-[var(--overlay-weak)] transition-colors`}>
                     <div className="flex items-start gap-3">
                       <div className={`size-8 rounded-lg flex items-center justify-center shrink-0 ${nodeIconBg(node.node_type)}`}>
                         {nodeIcon(node.node_type)}
@@ -320,7 +320,7 @@ export default function WorkflowDetailPage({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
-                          <span className="text-[11px] uppercase tracking-wide text-zinc-600">{nodeTypeLabel(node.node_type)}</span>
+                          <span className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{nodeTypeLabel(node.node_type)}</span>
                           {node.node_type === "trigger" && (
                             <Badge variant="outline" className="text-[11px] font-normal bg-blue-500/10 text-blue-400 border-blue-500/20">
                               {triggerLabels[node.config.trigger_type || workflow.trigger_type] || node.config.trigger_type || workflow.trigger_type}
@@ -329,14 +329,14 @@ export default function WorkflowDetailPage({
                           </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDeleteNode(node.id); }}
-                            className="text-zinc-700 hover:text-red-400 transition-colors p-1"
+                            className="text-[var(--text-faint)] hover:text-red-400 transition-colors p-1"
                           >
                             <Trash2 className="size-3.5" />
                           </button>
                         </div>
-                        <p className="text-[13px] text-white">{node.config.description || "No description"}</p>
+                        <p className="text-[13px] text-[var(--text-primary)]">{node.config.description || "No description"}</p>
                         {node.config.value && node.node_type !== "delay" && (
-                          <p className="text-[13px] text-zinc-500 mt-0.5">{node.config.value}</p>
+                          <p className="text-[13px] text-[var(--text-muted)] mt-0.5">{node.config.value}</p>
                         )}
                       </div>
                     </div>
@@ -345,7 +345,7 @@ export default function WorkflowDetailPage({
                   {/* Connector line */}
                   {idx < nodes.length - 1 && (
                     <div className="flex justify-center py-1">
-                      <div className="w-px h-6 bg-white/[0.06]" />
+                      <div className="w-px h-6 bg-[var(--overlay-medium)]" />
                     </div>
                   )}
                 </div>
@@ -353,15 +353,15 @@ export default function WorkflowDetailPage({
 
               {/* Add node at bottom */}
               <div className="flex justify-center py-1">
-                <div className="w-px h-6 bg-white/[0.06]" />
+                <div className="w-px h-6 bg-[var(--overlay-medium)]" />
               </div>
               <div className="flex justify-center">
                 <button
                   onClick={() => setDialogOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02] transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-[var(--border)] hover:border-[var(--overlay-strong)] hover:bg-[var(--overlay-weak)] transition-colors"
                 >
-                  <Plus className="size-4 text-zinc-600" />
-                  <span className="text-[13px] text-zinc-600">Add node</span>
+                  <Plus className="size-4 text-[var(--text-muted)]" />
+                  <span className="text-[13px] text-[var(--text-muted)]">Add node</span>
                 </button>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function WorkflowDetailPage({
           {nodes.length === 0 && (
             <div className="flex justify-center mt-4">
               <Button
-                className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8 px-3"
+                className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
                 onClick={() => setDialogOpen(true)}
               >
                 <Plus className="size-4 mr-1" />
@@ -383,59 +383,59 @@ export default function WorkflowDetailPage({
 
       {/* Add node dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#111113] border-white/[0.06]">
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)]">
           <DialogHeader>
-            <DialogTitle className="text-[15px] text-white">Add node</DialogTitle>
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">Add node</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Node type</Label>
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5">Node type</Label>
               <Select value={newNodeType} onValueChange={(v) => setNewNodeType(v as WorkflowNode["node_type"])}>
-                <SelectTrigger className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8 w-full">
+                <SelectTrigger className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8 w-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#111113] border-white/[0.06]">
-                  <SelectItem value="trigger" className="text-[13px] text-zinc-300">Trigger</SelectItem>
-                  <SelectItem value="condition" className="text-[13px] text-zinc-300">Condition</SelectItem>
-                  <SelectItem value="action" className="text-[13px] text-zinc-300">Action</SelectItem>
-                  <SelectItem value="ai_action" className="text-[13px] text-zinc-300">AI Action</SelectItem>
-                  <SelectItem value="delay" className="text-[13px] text-zinc-300">Delay</SelectItem>
+                <SelectContent className="bg-[var(--surface)] border-[var(--border)]">
+                  <SelectItem value="trigger" className="text-[13px] text-[var(--text-secondary)]">Trigger</SelectItem>
+                  <SelectItem value="condition" className="text-[13px] text-[var(--text-secondary)]">Condition</SelectItem>
+                  <SelectItem value="action" className="text-[13px] text-[var(--text-secondary)]">Action</SelectItem>
+                  <SelectItem value="ai_action" className="text-[13px] text-[var(--text-secondary)]">AI Action</SelectItem>
+                  <SelectItem value="delay" className="text-[13px] text-[var(--text-secondary)]">Delay</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Description</Label>
+              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5">Description</Label>
               <Textarea
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 placeholder="What does this node do?"
-                className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 min-h-[60px]"
+                className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] min-h-[60px]"
               />
             </div>
 
             {newNodeType === "delay" && (
               <div>
-                <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Delay (days)</Label>
+                <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5">Delay (days)</Label>
                 <Input
                   type="number"
                   min="1"
                   value={newConfig}
                   onChange={(e) => setNewConfig(e.target.value)}
                   placeholder="1"
-                  className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white h-8 w-24"
+                  className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8 w-24"
                 />
               </div>
             )}
 
             {(newNodeType === "condition" || newNodeType === "action" || newNodeType === "ai_action") && (
               <div>
-                <Label className="text-[11px] uppercase tracking-wide text-zinc-600 mb-1.5">Configuration</Label>
+                <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5">Configuration</Label>
                 <Input
                   value={newConfig}
                   onChange={(e) => setNewConfig(e.target.value)}
                   placeholder={newNodeType === "condition" ? "e.g. lifecycle_stage equals Lead" : newNodeType === "ai_action" ? "e.g. Classify lead, Draft follow-up email" : "e.g. Send Slack notification"}
-                  className="bg-white/[0.03] border-white/[0.06] text-[13px] text-white placeholder:text-zinc-600 h-8"
+                  className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] h-8"
                 />
               </div>
             )}
@@ -443,13 +443,13 @@ export default function WorkflowDetailPage({
           <DialogFooter>
             <Button
               variant="outline"
-              className="text-[13px] h-8 text-zinc-400 border-white/[0.06] bg-white/[0.02]"
+              className="text-[13px] h-8 text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
               onClick={() => setDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button
-              className="bg-white text-zinc-900 hover:bg-zinc-100 text-[13px] h-8"
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
               onClick={handleAddNode}
               disabled={creating || !newDescription.trim()}
             >

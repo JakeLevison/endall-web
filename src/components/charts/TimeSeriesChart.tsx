@@ -34,7 +34,7 @@ export default function TimeSeriesChart({
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center" style={{ height }}>
-        <p className="text-[13px] text-zinc-600">No data for this period</p>
+        <p className="text-[13px] text-[var(--text-muted)]">No data for this period</p>
       </div>
     );
   }
