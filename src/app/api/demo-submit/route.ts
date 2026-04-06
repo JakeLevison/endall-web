@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createHmac } from "crypto";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -96,6 +97,22 @@ export async function POST(request: NextRequest) {
       });
     } catch (emailErr) {
       console.error("Resend email error (demo-submit):", emailErr);
+    }
+
+    // Notify chief-of-staff bridge
+    try {
+      const bridgeUrl = process.env.COS_API_URL || "http://localhost:8100";
+      const rawBody = JSON.stringify({ name, work_email, company, trade, team_size, notes: notes || null });
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const secret = process.env.INTERNAL_WEBHOOK_SECRET;
+      if (secret) {
+        headers["X-Webhook-Signature"] = createHmac("sha256", secret).update(rawBody).digest("hex");
+      } else {
+        console.warn("INTERNAL_WEBHOOK_SECRET not set — bridge request will be unsigned");
+      }
+      await fetch(`${bridgeUrl}/triggers/demo-signup`, { method: "POST", headers, body: rawBody });
+    } catch (bridgeErr) {
+      console.error("Bridge notify error (demo-signup):", bridgeErr);
     }
 
     return NextResponse.json({ success: true });
