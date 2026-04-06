@@ -16,7 +16,7 @@ export default function InlineCTA({
     <div
       style={{
         textAlign: "center",
-        padding: "24px 16px 56px",
+        padding: "16px 16px 40px",
         maxWidth: 720,
         margin: "0 auto",
       }}

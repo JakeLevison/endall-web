@@ -61,23 +61,56 @@ const TASKS = [
 type Tab = "Pipeline" | "Sequences" | "Workflows" | "Tasks";
 
 /* ─── Pipeline Tab ────────────────────────────────────────────────────── */
-function PipelineView() {
+function PipelineView({ onTabChange }: { onTabChange: (tab: Tab) => void }) {
   const [selected, setSelected] = useState<number | null>(null);
+  const [revenueExpanded, setRevenueExpanded] = useState(false);
+  const [dealsExpanded, setDealsExpanded] = useState(false);
   const deal = selected !== null ? DEALS[selected] : null;
 
   return (
     <>
-      {/* Stat cards */}
+      {/* Stat cards — all clickable */}
       <div
         className="grid grid-cols-2 md:grid-cols-3"
         style={{ padding: "16px 20px", gap: "12px" }}
       >
-        <StatCard label="Revenue" value={<>$<CountUp target={284} suffix="k" delay={200} /></>} trend="+23%" />
-        <StatCard label="Active Deals" value={<CountUp target={47} delay={200} />} />
+        <StatCard label="Revenue" value={<>$<CountUp target={284} suffix="k" delay={200} /></>} trend="+23%" onClick={() => setRevenueExpanded(!revenueExpanded)} active={revenueExpanded} />
+        <StatCard label="Active Deals" value={<CountUp target={47} delay={200} />} onClick={() => setDealsExpanded(!dealsExpanded)} active={dealsExpanded} />
         <div className="hidden md:block">
-          <StatCard label="Emails Sent" value={<CountUp target={3812} delay={200} />} />
+          <StatCard label="Emails Sent" value={<CountUp target={3812} delay={200} />} onClick={() => onTabChange("Sequences")} />
         </div>
       </div>
+
+      {/* Revenue breakdown mini-chart */}
+      {revenueExpanded && (
+        <div style={{ margin: "0 20px 12px", padding: "12px 14px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg)", animation: "panel-slide 250ms ease-out" }}>
+          <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px" }}>Revenue by Quarter</div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: "48px" }}>
+            {[{ q: "Q1", h: 45, v: "$62k" }, { q: "Q2", h: 65, v: "$89k" }, { q: "Q3", h: 55, v: "$74k" }, { q: "Q4", h: 85, v: "$59k" }].map((bar) => (
+              <div key={bar.q} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                <div style={{ width: "100%", height: `${bar.h}%`, background: "var(--brand-accent-light)", borderRadius: "3px", minHeight: "8px", transition: "height 500ms ease" }} />
+                <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>{bar.q}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active deals breakdown */}
+      {dealsExpanded && (
+        <div style={{ margin: "0 20px 12px", padding: "12px 14px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg)", animation: "panel-slide 250ms ease-out" }}>
+          <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px" }}>Pipeline by Stage</div>
+          {[{ stage: "Discovery", count: 12, color: "#60a5fa" }, { stage: "Proposal", count: 18, color: "#a78bfa" }, { stage: "Negotiation", count: 11, color: "#f59e0b" }, { stage: "Closed Won", count: 6, color: "#22c55e" }].map((s) => (
+            <div key={s.stage} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-secondary)", width: "80px" }}>{s.stage}</span>
+              <div style={{ flex: 1, height: "6px", background: "var(--overlay-medium)", borderRadius: "3px", overflow: "hidden" }}>
+                <div style={{ width: `${(s.count / 18) * 100}%`, height: "100%", background: s.color, borderRadius: "3px" }} />
+              </div>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", width: "20px", textAlign: "right" }}>{s.count}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Deals table */}
       <div style={{ padding: "0 20px 16px" }}>
@@ -314,9 +347,19 @@ function TasksView() {
 }
 
 /* ─── Shared UI ───────────────────────────────────────────────────────── */
-function StatCard({ label, value, trend }: { label: string; value: React.ReactNode; trend?: string }) {
+function StatCard({ label, value, trend, onClick, active }: { label: string; value: React.ReactNode; trend?: string; onClick?: () => void; active?: boolean }) {
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "8px", padding: "14px" }}>
+    <div
+      onClick={onClick}
+      style={{
+        background: active ? "var(--overlay-soft)" : "var(--bg)",
+        border: `1px solid ${active ? "var(--brand-accent-light)" : "var(--border)"}`,
+        borderRadius: "8px",
+        padding: "14px",
+        cursor: onClick ? "pointer" : "default",
+        transition: "border-color 200ms ease, background 200ms ease",
+      }}
+    >
       <div style={{ fontFamily: "var(--font-sans), sans-serif", fontSize: "10px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{label}</div>
       <div style={{ fontFamily: "var(--font-sans), sans-serif", fontSize: "22px", fontWeight: 500, color: "var(--text-primary)" }}>{value}</div>
       {trend && <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "10px", color: "var(--brand-accent-light)", marginTop: "4px" }}>{trend}</div>}
@@ -394,7 +437,7 @@ export default function DashboardMock() {
 
         {/* Tab content with fade transition */}
         <div key={activeTab} style={{ animation: "tab-fade 250ms ease-out" }}>
-          {activeTab === "Pipeline" && <PipelineView />}
+          {activeTab === "Pipeline" && <PipelineView onTabChange={setActiveTab} />}
           {activeTab === "Sequences" && <SequencesView />}
           {activeTab === "Workflows" && <WorkflowsView />}
           {activeTab === "Tasks" && <TasksView />}

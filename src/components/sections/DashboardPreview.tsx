@@ -6,7 +6,7 @@ import ScrollReveal from "@/components/shared/ScrollReveal";
 export default function DashboardPreview() {
   return (
     <ScrollReveal>
-      <section style={{ padding: "80px 16px 40px" }}>
+      <section style={{ padding: "60px 16px 40px" }}>
         <div
           style={{
             maxWidth: "1100px",

@@ -71,7 +71,7 @@ export default function CapabilityAccordion() {
       {/* Anchor aliases - both nav links land here */}
       <div id="features" style={{ scrollMarginTop: "100px" }} />
       <div id="how-it-works" style={{ scrollMarginTop: "100px" }} />
-      <section style={{ padding: "80px 16px" }}>
+      <section style={{ padding: "80px 16px 40px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
           <p
             style={{
@@ -211,7 +211,7 @@ export default function CapabilityAccordion() {
               fontSize: "clamp(15px, 2.2vw, 17px)",
               color: "var(--text-tertiary)",
               textAlign: "center",
-              marginTop: "48px",
+              marginTop: "32px",
               fontStyle: "italic",
             }}
           >

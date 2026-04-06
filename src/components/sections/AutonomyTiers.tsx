@@ -68,7 +68,7 @@ export default function AutonomyTiers() {
 
   return (
     <ScrollReveal>
-      <section style={{ padding: "80px 16px" }}>
+      <section style={{ padding: "60px 16px 40px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
           <p
             style={{

@@ -45,7 +45,7 @@ export default function AboutPage() {
           </h1>
 
           {/* Mission */}
-          <section style={{ marginBottom: 56 }}>
+          <section style={{ marginBottom: 48 }}>
             <h2
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
@@ -66,8 +66,10 @@ export default function AboutPage() {
             </p>
           </section>
 
+          <div style={{ borderTop: "1px solid var(--border)", marginBottom: 48 }} />
+
           {/* Problem */}
-          <section style={{ marginBottom: 56 }}>
+          <section style={{ marginBottom: 48 }}>
             <h2
               style={{
                 fontFamily: "var(--font-sans), sans-serif",
@@ -88,6 +90,8 @@ export default function AboutPage() {
               weeks.
             </p>
           </section>
+
+          <div style={{ borderTop: "1px solid var(--border)", marginBottom: 48 }} />
 
           {/* Why MEP */}
           <section style={{ marginBottom: 48 }}>
