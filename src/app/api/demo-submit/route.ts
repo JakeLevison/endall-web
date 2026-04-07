@@ -10,6 +10,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, work_email, company, trade, team_size, notes, turnstile_token } = body;
 
+    const tenant_id = process.env.TENANT_ID || null;
+    if (!tenant_id) console.warn("TENANT_ID not set — bridge call will be skipped");
+
     if (!name || !work_email || !company || !trade || !team_size) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -51,12 +54,13 @@ export async function POST(request: NextRequest) {
     }
 
     // DB insert — best effort (table may not exist yet)
+    let insertedRow: { id: string } | null = null;
     try {
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       );
-      const { error } = await supabase.from("demo_requests").insert({
+      const { data, error } = await supabase.from("demo_requests").insert({
         name,
         work_email,
         company,
@@ -65,9 +69,12 @@ export async function POST(request: NextRequest) {
         notes: notes || null,
         lead_quality,
         turnstile_score,
-      });
+        ...(tenant_id ? { tenant_id } : {}),
+      }).select("id").single();
       if (error) {
         console.error("demo_requests insert error:", error);
+      } else {
+        insertedRow = data;
       }
     } catch (dbErr) {
       console.error("demo_requests DB error:", dbErr);
@@ -100,19 +107,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Notify chief-of-staff bridge
-    try {
-      const bridgeUrl = process.env.COS_API_URL || "http://localhost:8100";
-      const rawBody = JSON.stringify({ name, work_email, company, trade, team_size, notes: notes || null });
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const secret = process.env.INTERNAL_WEBHOOK_SECRET;
-      if (secret) {
-        headers["X-Webhook-Signature"] = createHmac("sha256", secret).update(rawBody).digest("hex");
-      } else {
-        console.warn("INTERNAL_WEBHOOK_SECRET not set — bridge request will be unsigned");
+    if (!insertedRow) {
+      console.warn("Skipping bridge call — no inserted row returned from Supabase");
+    } else if (!tenant_id) {
+      console.warn("Skipping bridge call — TENANT_ID not set");
+    } else {
+      try {
+        const bridgeUrl = process.env.COS_API_URL || "http://localhost:8100";
+        const rawBody = JSON.stringify({ demo_request_id: insertedRow.id, tenant_id });
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        const secret = process.env.INTERNAL_WEBHOOK_SECRET;
+        if (secret) {
+          headers["X-Webhook-Signature"] = createHmac("sha256", secret).update(rawBody).digest("hex");
+        } else {
+          console.warn("INTERNAL_WEBHOOK_SECRET not set — bridge request will be unsigned");
+        }
+        await fetch(`${bridgeUrl}/triggers/demo-signup`, { method: "POST", headers, body: rawBody });
+      } catch (bridgeErr) {
+        console.error("Bridge notify error (demo-signup):", bridgeErr);
       }
-      await fetch(`${bridgeUrl}/triggers/demo-signup`, { method: "POST", headers, body: rawBody });
-    } catch (bridgeErr) {
-      console.error("Bridge notify error (demo-signup):", bridgeErr);
     }
 
     return NextResponse.json({ success: true });
