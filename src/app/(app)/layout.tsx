@@ -24,6 +24,7 @@ import {
   Sparkles,
   Send,
   ChevronDown,
+  Calendar,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -38,6 +39,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/dispatch", label: "Dispatch", icon: Calendar },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
