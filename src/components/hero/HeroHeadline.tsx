@@ -1,20 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
-// Rotating words picked for emotional resonance with contractors - these
-// are the pain points they feel every day, not abstract operational functions.
-// Ordered so the most universally painful / least self-selecting words lead.
-// "Calls" used to be first, but a contractor who answers their own phone will
-// self-select out before the second rotation. By the time Calls appears (5th),
-// they've already bought the premise.
-const words = ["Back Office", "Operations", "Paperwork", "Pipeline", "Outreach", "Calls"];
-
 export default function HeroHeadline() {
-  const measureRef = useRef<HTMLSpanElement>(null);
-  const [stepPx, setStepPx] = useState(0);
   const prefersReducedMotion = useReducedMotion();
 
   const fadeUp = (delay: number) => ({
@@ -23,40 +12,11 @@ export default function HeroHeadline() {
     transition: { duration: 0.4, ease: "easeOut" as const, delay },
   });
 
-  // Measure the actual rendered pixel height of a word so the container
-  // and animation step are EXACTLY right — no em guessing, no font-metric
-  // assumptions. Re-measure on resize since font-size is responsive.
-  useEffect(() => {
-    function measure() {
-      if (measureRef.current) {
-        setStepPx(measureRef.current.offsetHeight);
-      }
-    }
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  // Build pixel-accurate keyframes from the measured step height. We show
-  // N words + 1 duplicate of the first word for a seamless wraparound. Each
-  // word holds for ~75% of its slot then slides for the remaining ~25%.
-  const slots = words.length + 1; // +1 for the wraparound dup
-  const slotPct = 100 / slots;
-  const holdPct = slotPct * 0.75;
-  const keyframes =
-    stepPx > 0
-      ? `@keyframes cycle-words-px {\n` +
-        Array.from({ length: slots }, (_, i) => {
-          const startPct = (i * slotPct).toFixed(2);
-          const holdEndPct = (i * slotPct + holdPct).toFixed(2);
-          const y = -stepPx * i;
-          return `  ${startPct}%, ${holdEndPct}% { transform: translateY(${y}px); }`;
-        }).join("\n") +
-        `\n}`
-      : "";
-
-  // Slightly longer total duration so each visceral word reads clearly.
-  const cycleSeconds = (slots * 1.6).toFixed(2);
+  // Hero headline candidates (Jake to pick). Sentence case, no em dashes,
+  // savings-first, "ops" framing, no "replace/cut staff" vibes.
+  // Alt A: "Cut your back-office cost by 90% and go back on the tools."
+  // Alt B: "An ops layer that saves you 30 hours a week (and about 170 grand a year)."
+  // Chosen: savings-first, plain-spoken, no AI-flavor.
 
   return (
     <section
@@ -82,30 +42,8 @@ export default function HeroHeadline() {
           marginBottom: "20px",
         }}
       >
-        Your AI ops team
+        An ops layer that compounds
       </motion.p>
-
-      {/* Hidden measurement element — same font/size as headline, measures "Sequences" (has descender) */}
-      <span
-        ref={measureRef}
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          visibility: "hidden",
-          pointerEvents: "none",
-          fontFamily: "var(--font-sans), sans-serif",
-          fontWeight: 600,
-          lineHeight: 1.1,
-          letterSpacing: "-0.03em",
-          display: "block",
-          whiteSpace: "nowrap",
-        }}
-        className="text-[36px] sm:text-[56px] lg:text-[72px]"
-      >
-        Sequences
-      </span>
 
       <motion.h1
         {...fadeUp(0.15)}
@@ -120,46 +58,7 @@ export default function HeroHeadline() {
         }}
         className="text-[36px] sm:text-[56px] lg:text-[72px]"
       >
-        <span>We run your</span>
-        <br className="sm:hidden" />
-        {" "}
-        {stepPx > 0 && (
-          <span
-            style={{
-              display: "inline-block",
-              height: stepPx - 1,
-              overflow: "hidden",
-              verticalAlign: "bottom",
-              position: "relative",
-            }}
-          >
-            <span
-              style={{
-                display: "block",
-                animation: `cycle-words-px ${cycleSeconds}s cubic-bezier(0.16, 1, 0.3, 1) infinite`,
-                willChange: "transform",
-              }}
-            >
-              {[...words, words[0]].map((word, i) => (
-                <span
-                  key={`${word}-${i}`}
-                  style={{
-                    display: "block",
-                    height: stepPx,
-                    lineHeight: `${stepPx}px`,
-                    overflow: "hidden",
-                    clipPath: "inset(0)",
-                    padding: 0,
-                    margin: 0,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  {word}
-                </span>
-              ))}
-            </span>
-          </span>
-        )}
+        Save 90% on your back office so you can win on the field.
       </motion.h1>
 
       <motion.p
@@ -173,9 +72,9 @@ export default function HeroHeadline() {
           lineHeight: 1.6,
         }}
       >
-        Endall is an AI operations team for MEP contractors. It covers your
-        office manager, bookkeeper, and sales coordinator roles — so you can
-        focus on the work, not the office.
+        Endall is an ops layer for MEP and specialty contractors. It scales your
+        team across the bookkeeper, office manager, and sales coordinator seats
+        for a fraction of what a full back office costs.
       </motion.p>
 
       <motion.div {...fadeUp(0.45)} style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
@@ -225,8 +124,6 @@ export default function HeroHeadline() {
           </Link>
         </div>
       </motion.div>
-
-      {keyframes && <style dangerouslySetInnerHTML={{ __html: keyframes }} />}
     </section>
   );
 }

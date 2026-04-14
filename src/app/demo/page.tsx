@@ -26,6 +26,17 @@ const TOTAL_WALKTHROUGH_STEPS = 4; // steps 1-4 count for progress dots
 export default function DemoPage() {
   const [step, setStep] = useState(0);
 
+  // ?start=voice deep-links straight into the Front Desk voice agent (step 3)
+  // from the landing page "Try the voice agent" CTAs.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("start") === "voice") {
+      trackDemoEvent("demo_started", { source: "voice_cta" });
+      setStep(3);
+    }
+  }, []);
+
   useEffect(() => {
     trackDemoEvent("step_viewed", { step });
   }, [step]);

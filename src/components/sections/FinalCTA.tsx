@@ -25,7 +25,7 @@ export default function FinalCTA() {
   return (
     <section id="final-cta" ref={sectionRef} style={{ padding: "120px 16px", background: "radial-gradient(ellipse 600px 300px at 50% 50%, var(--overlay-weak), transparent)" }}>
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
-        {/* Main line — staggered clip reveal per line */}
+        {/* Main line: staggered clip reveal per line */}
         <h2
           style={{
             fontFamily: "var(--font-sans), sans-serif",
@@ -114,6 +114,37 @@ export default function FinalCTA() {
             }}
           >
             Try the interactive demo
+          </a>
+          <a
+            href="/demo?start=voice"
+            onClick={() =>
+              posthog.capture("voice_agent_cta_clicked", {
+                source: "final_cta",
+              })
+            }
+            style={{
+              display: "inline-block",
+              background: "transparent",
+              color: "var(--text-primary)",
+              padding: "12px 28px",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              textDecoration: "none",
+              fontFamily: "var(--font-sans), sans-serif",
+              border: "1px solid var(--text-primary)",
+              transition: "background-color 0.2s ease, color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--text-primary)";
+              e.currentTarget.style.color = "var(--bg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "var(--text-primary)";
+            }}
+          >
+            Try the voice agent
           </a>
           <a
             href="/contact"

@@ -66,6 +66,7 @@ export default function Home() {
             lead="Want to see this in action?"
             cta="Book a demo"
             href="/contact?intent=book_demo"
+            showVoiceCta
           />
 
           {/* 3b. Autonomy tiers — "You decide how much Endall takes off your plate" */}

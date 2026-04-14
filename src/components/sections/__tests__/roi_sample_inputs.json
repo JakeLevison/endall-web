@@ -1,0 +1,31 @@
+{
+  "company_name": "Mercer Electric",
+  "inputs": {
+    "staff": 2,
+    "monthly_cost": 8000,
+    "missed_calls_per_week": 5
+  },
+  "expected": {
+    "rows": [
+      {
+        "label": "Current admin cost",
+        "monthly": 8000,
+        "annual": 96000
+      },
+      {
+        "label": "Lost revenue from missed calls",
+        "monthly": 8062.5,
+        "annual": 96750
+      }
+    ],
+    "totals": {
+      "monthly": 16062.5,
+      "annual": 192750
+    }
+  },
+  "constants": {
+    "AVG_JOB_VALUE": 2500,
+    "CLOSE_RATE": 0.15,
+    "WEEKS_PER_MONTH": 4.3
+  }
+}

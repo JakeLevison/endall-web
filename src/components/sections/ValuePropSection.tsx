@@ -1,6 +1,6 @@
 import ScrollReveal from "@/components/shared/ScrollReveal";
 
-// "What Endall covers" — concrete capacity multiplication, then $170K stat.
+// "What Endall covers" section: capacity framing plus the $170K stat.
 export default function ValuePropSection() {
   return (
     <ScrollReveal>
@@ -26,7 +26,7 @@ export default function ValuePropSection() {
             What Endall covers
           </p>
 
-          {/* Role replacement — 3-column on desktop, stacked on mobile */}
+          {/* Role cards: 3-column on desktop, stacked on mobile */}
           <div
             className="role-cards-grid"
             style={{
@@ -37,16 +37,16 @@ export default function ValuePropSection() {
           >
             {[
               {
-                title: "Your office manager",
-                desc: "Endall answers every call, qualifies every lead, and books jobs to your calendar. Nothing falls through.",
-              },
-              {
                 title: "Your bookkeeper",
                 desc: "Track revenue, job costs, and crew utilization from a single dashboard. Morning briefings land before your first coffee.",
               },
               {
+                title: "Your office manager",
+                desc: "Endall answers every call, qualifies every lead, and books jobs to your calendar. Nothing falls through.",
+              },
+              {
                 title: "Your sales coordinator",
-                desc: "Endall prospects for you \u2013 finds opportunities, sends proposals, follows up automatically. You close. It does the rest.",
+                desc: "Endall prospects for you, sends proposals, and follows up automatically. You close. The ops layer does the rest.",
               },
             ].map((card) => (
               <div
@@ -96,7 +96,7 @@ export default function ValuePropSection() {
               letterSpacing: "-0.01em",
             }}
           >
-            One AI ops team. A fraction of the cost. Up and running fast.
+            Save roughly $170K a year on back-office spend. Get 30+ hours a week back on the tools.
           </p>
 
           {/* $170K stat - hero of this section */}

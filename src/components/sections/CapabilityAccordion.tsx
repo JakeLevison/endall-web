@@ -16,23 +16,31 @@ const CARDS: Card[] = [
   {
     id: "sales-outreach",
     icon: <Send size={18} />,
-    title: "Lead Qualification & Outreach",
-    collapsed: "Prospecting, follow-ups, and pipeline — on autopilot.",
+    title: "Lead qualification & outreach",
+    collapsed: "Prospecting, follow-ups, and pipeline, on autopilot.",
     expanded:
       "Endall finds prospects in your corridor, writes personalized emails in your voice, follows up on a cadence, and alerts you when someone's interested. You don't touch it until there's a meeting to take.",
   },
   {
+    id: "competitive-intel",
+    icon: <Search size={18} />,
+    title: "Competitive intel",
+    collapsed: "Active market research. On your behalf. Continuously.",
+    expanded:
+      "Endall researches your market without being asked. It tracks who's bidding on data center work in your corridor, watches competitor pricing patterns in public records, and surfaces gaps where you have an edge. Ask 'who are the other electrical bidders on Loudoun DC-14?' and you get a real answer, not a Google search summary.",
+  },
+  {
     id: "estimating",
     icon: <FileEdit size={18} />,
-    title: "Estimating & Proposals",
+    title: "Estimating & proposals",
     collapsed: "Bid faster. Win more. Guess less.",
     expanded:
-      "You just won a data center subcontract. Tell Endall the scope — 200-amp panel upgrade, 4,000 sq ft commercial rough-in — and it generates a detailed estimate in under a minute. Material costs, labor hours, margin targets, branded proposal ready to send. Under 5 minutes from scope to proposal.",
+      "You just won a data center subcontract. Tell Endall the scope (200-amp panel upgrade, 4,000 sq ft commercial rough-in) and it generates a detailed estimate in under a minute. Material costs, labor hours, margin targets, branded proposal ready to send. Under 5 minutes from scope to proposal.",
   },
   {
     id: "morning-briefing",
     icon: <Sunrise size={18} />,
-    title: "Morning Briefing",
+    title: "Morning briefing",
     collapsed: "Your daily ops report. No meetings required.",
     expanded:
       "It's Monday morning. Before your first coffee, Endall sends you a one-page briefing. Three new leads, two overdue invoices, one job hitting margin targets, one that isn't. What needs your attention today. No meetings. No catch-up calls. Just clarity.",
@@ -40,26 +48,18 @@ const CARDS: Card[] = [
   {
     id: "financial-ops",
     icon: <LineChart size={18} />,
-    title: "Financial Ops",
-    collapsed: "Your back-office finance team. Margins, invoices, cash flow — always visible.",
+    title: "Financial ops",
+    collapsed: "Your back-office finance team. Margins, invoices, cash flow, always visible.",
     expanded:
-      "Endall connects to QuickBooks and becomes your back-office finance team. It tracks margin on every job — estimated vs. actual — and flags jobs bleeding money before they finish. It shows you who's paid, who's overdue, and how much is outstanding. It forecasts cash flow weekly. Ask Endall: 'Am I profitable this month?' 'Which jobs are losing money?' 'Who hasn't paid me?' — you get the real answer, from real data.",
-  },
-  {
-    id: "competitive-intel",
-    icon: <Search size={18} />,
-    title: "Competitive Intel",
-    collapsed: "Active market research. On your behalf. Continuously.",
-    expanded:
-      "Endall researches your market without being asked. It tracks who's bidding on data center work in your corridor, watches competitor pricing patterns in public records, and surfaces gaps where you have an edge. Ask 'who are the other electrical bidders on Loudoun DC-14?' and you get a real answer — not a Google search summary.",
+      "Endall connects to QuickBooks and becomes your back-office finance team. It tracks margin on every job (estimated vs. actual) and flags jobs bleeding money before they finish. It shows you who's paid, who's overdue, and how much is outstanding. It forecasts cash flow weekly. Ask Endall: 'Am I profitable this month?' 'Which jobs are losing money?' 'Who hasn't paid me?' You get the real answer, from real data.",
   },
   {
     id: "front-desk",
     icon: <Phone size={18} />,
-    title: "Front Desk",
-    collapsed: "Every call answered. Every lead qualified. 24/7.",
+    title: "Front desk",
+    collapsed: "24/7, whatever comes up. Every call answered, every lead qualified.",
     expanded:
-      "A GC calls at 7 PM. Endall picks up. It sounds like a real person — friendly, professional, natural. It asks the right questions, figures out what the caller needs, and books the site visit on your calendar. If it's urgent, you get a text immediately. If it's a tire-kicker, Endall takes care of it so you don't have to.",
+      "24/7, whatever comes up. A GC calls at 7 PM and Endall picks up. It sounds like a real person (friendly, professional, natural), asks the right questions, figures out what the caller needs, and books the site visit on your calendar. If it's urgent, you get a text right away. If it's a tire-kicker, the ops layer takes care of it so you don't have to.",
   },
 ];
 

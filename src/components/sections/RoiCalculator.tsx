@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import { computeRoiRows } from "@/lib/roi-tldr";
+import { posthog } from "@/lib/posthog";
 
-const AVG_JOB_VALUE = 2500;
-const CLOSE_RATE = 0.15;
-const WEEKS_PER_MONTH = 4.3;
 const PAY_PER_STAFF = 4000; // default monthly admin pay per head
 const PAY_STEP = 500;
 const PAY_MAX = 25000;
@@ -32,7 +31,7 @@ export default function RoiCalculator() {
   const userTouchedPay = useRef(false);
 
   // Update pay slider alongside staff changes. While the user hasn't touched
-  // pay, it tracks N × $4,000. Once they drag it, we leave it alone — except
+  // pay, it tracks N × $4,000. Once they drag it, we leave it alone, except
   // moving back to 0 staff forces pay to $0 and re-arms auto-tracking.
   const handleStaffChange = (n: number) => {
     setStaff(n);
@@ -51,11 +50,62 @@ export default function RoiCalculator() {
     setMonthlyCost(v);
   };
 
-  // Admin cost === whatever the pay slider shows (it already represents total
-  // admin spend across all staff). Zero when no staff.
-  const adminCost = staff > 0 ? monthlyCost : 0;
-  const lostRevenue = missedCalls * WEEKS_PER_MONTH * AVG_JOB_VALUE * CLOSE_RATE;
-  const total = adminCost + lostRevenue;
+  // Single source of truth lives in @/lib/roi-tldr (mirrors the backend
+  // compute_rows in chief-of-staff templates/roi_tldr.py). The TLDR table
+  // below and the downloaded XLSX both consume this so numbers match.
+  const { rows: tldrRows, totals: tldrTotals } = computeRoiRows({
+    staff,
+    monthly_cost: monthlyCost,
+    missed_calls_per_week: missedCalls,
+  });
+  const adminCost = tldrRows[0].monthly;
+  const lostRevenue = tldrRows[1].monthly;
+  const total = tldrTotals.monthly;
+
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "error">("idle");
+
+  const handleDownload = async () => {
+    if (downloadState === "loading") return;
+    setDownloadState("loading");
+    const inputs = {
+      staff,
+      monthly_cost: monthlyCost,
+      missed_calls_per_week: missedCalls,
+    };
+    posthog.capture("roi_tldr_downloaded", {
+      ...inputs,
+      totals_monthly: tldrTotals.monthly,
+      totals_annual: tldrTotals.annual,
+    });
+    try {
+      const resp = await fetch("/api/roi/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_name: null, inputs }),
+      });
+      if (!resp.ok) throw new Error(`bridge status ${resp.status}`);
+      const data = (await resp.json()) as { download_url: string; filename: string };
+      const downloadResp = await fetch(
+        `/api/chat/download?file_id=${encodeURIComponent(
+          data.download_url.replace(/^\/download\//, "")
+        )}&filename=${encodeURIComponent(data.filename)}`
+      );
+      if (!downloadResp.ok) throw new Error(`file status ${downloadResp.status}`);
+      const blob = await downloadResp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = data.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setDownloadState("idle");
+    } catch (err) {
+      console.error("roi download failed:", err);
+      setDownloadState("error");
+    }
+  };
 
   return (
     <ScrollReveal>
@@ -215,6 +265,194 @@ export default function RoiCalculator() {
             Missed-call revenue based on $2,500 average job value and 15% close
             rate. Your results may vary.
           </p>
+
+          {/* Money TLDR: live-updating summary, sits below inputs, feeds the XLSX download. */}
+          <div
+            data-testid="roi-tldr-table"
+            style={{
+              marginTop: "40px",
+              background: "var(--overlay-weak)",
+              border: "1px solid var(--overlay-medium)",
+              borderRadius: "16px",
+              padding: "24px",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: "clamp(18px, 2.4vw, 22px)",
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                margin: "0 0 16px",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Money TLDR
+            </h3>
+
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontFamily: "var(--font-sans), sans-serif",
+                fontSize: "clamp(13px, 1.8vw, 15px)",
+              }}
+            >
+              <thead>
+                <tr>
+                  <th
+                    style={{
+                      textAlign: "left",
+                      padding: "8px 8px",
+                      borderBottom: "1px solid var(--overlay-medium)",
+                      color: "var(--text-tertiary)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Line item
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "right",
+                      padding: "8px 8px",
+                      borderBottom: "1px solid var(--overlay-medium)",
+                      color: "var(--text-tertiary)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Monthly savings
+                  </th>
+                  <th
+                    style={{
+                      textAlign: "right",
+                      padding: "8px 8px",
+                      borderBottom: "1px solid var(--overlay-medium)",
+                      color: "var(--text-tertiary)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Annual savings
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tldrRows.map((row) => (
+                  <tr key={row.label} data-testid="roi-tldr-row">
+                    <td
+                      style={{
+                        padding: "10px 8px",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {row.label}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px 8px",
+                        textAlign: "right",
+                        color: "var(--text-secondary)",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      ${fmt(row.monthly)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px 8px",
+                        textAlign: "right",
+                        color: "var(--text-secondary)",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      ${fmt(row.annual)}
+                    </td>
+                  </tr>
+                ))}
+                <tr data-testid="roi-tldr-total">
+                  <td
+                    style={{
+                      padding: "12px 8px",
+                      borderTop: "1px solid var(--overlay-medium)",
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                    }}
+                  >
+                    Total
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px 8px",
+                      borderTop: "1px solid var(--overlay-medium)",
+                      textAlign: "right",
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    ${fmt(tldrTotals.monthly)}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px 8px",
+                      borderTop: "1px solid var(--overlay-medium)",
+                      textAlign: "right",
+                      fontWeight: 600,
+                      color: "var(--brand-accent-light)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    ${fmt(tldrTotals.annual)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "8px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleDownload}
+                disabled={downloadState === "loading"}
+                style={{
+                  fontFamily: "var(--font-sans), sans-serif",
+                  fontSize: "15px",
+                  fontWeight: 500,
+                  color: "var(--text-inverse)",
+                  backgroundColor: "var(--surface-inverse)",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: downloadState === "loading" ? "wait" : "pointer",
+                  opacity: downloadState === "loading" ? 0.7 : 1,
+                }}
+              >
+                {downloadState === "loading"
+                  ? "Generating..."
+                  : "Download the numbers"}
+              </button>
+              {downloadState === "error" && (
+                <p
+                  role="alert"
+                  style={{
+                    fontFamily: "var(--font-sans), sans-serif",
+                    fontSize: "13px",
+                    color: "var(--brand-accent-light)",
+                    margin: 0,
+                  }}
+                >
+                  Download failed. Try again or email jake@endall.ai.
+                </p>
+              )}
+            </div>
+          </div>
 
           <div
             style={{
