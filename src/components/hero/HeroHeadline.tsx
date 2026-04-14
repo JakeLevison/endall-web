@@ -1,23 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+
+const words = ["CRM", "Sequences", "Workflows", "Tasks", "Reports"];
 
 export default function HeroHeadline() {
-  const prefersReducedMotion = useReducedMotion();
-
-  const fadeUp = (delay: number) => ({
-    initial: prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.4, ease: "easeOut" as const, delay },
-  });
-
-  // Hero headline candidates (Jake to pick). Sentence case, no em dashes,
-  // savings-first, "ops" framing, no "replace/cut staff" vibes.
-  // Alt A: "Cut your back-office cost by 90% and go back on the tools."
-  // Alt B: "An ops layer that saves you 30 hours a week (and about 170 grand a year)."
-  // Chosen: savings-first, plain-spoken, no AI-flavor.
-
   return (
     <section
       style={{
@@ -26,104 +13,86 @@ export default function HeroHeadline() {
         textAlign: "center",
         paddingLeft: "16px",
         paddingRight: "16px",
-        position: "relative",
-        overflow: "hidden",
       }}
     >
-      {/* Tagline */}
-      <motion.p
-        {...fadeUp(0)}
+      <h1
         style={{
-          fontFamily: "var(--font-mono), monospace",
-          fontSize: "11px",
-          textTransform: "uppercase",
-          letterSpacing: "3px",
+          fontFamily: "var(--font-serif), serif",
+          fontWeight: 400,
           color: "var(--text-muted)",
-          marginBottom: "20px",
-        }}
-      >
-        An ops layer that compounds
-      </motion.p>
-
-      <motion.h1
-        {...fadeUp(0.15)}
-        style={{
-          fontFamily: "var(--font-sans), sans-serif",
-          fontWeight: 600,
-          color: "var(--text-secondary)",
-          lineHeight: 1.1,
-          letterSpacing: "-0.03em",
+          lineHeight: 1.15,
           margin: "0 auto",
           maxWidth: "900px",
         }}
-        className="text-[36px] sm:text-[56px] lg:text-[72px]"
+        className="text-[40px] sm:text-[56px] lg:text-[72px]"
       >
-        Save 90% on your back office so you can win on the field.
-      </motion.h1>
+        One platform for{" "}
+        <span
+          style={{
+            display: "inline-block",
+            height: "1.15em",
+            overflow: "hidden",
+            verticalAlign: "bottom",
+            position: "relative",
+          }}
+        >
+          <span
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              animation: "cycle-words 12.5s cubic-bezier(0.16, 1, 0.3, 1) infinite",
+            }}
+          >
+            {words.map((word) => (
+              <span
+                key={word}
+                style={{
+                  display: "block",
+                  height: "1.15em",
+                  color: "#ffffff",
+                }}
+              >
+                {word}
+              </span>
+            ))}
+          </span>
+        </span>
+      </h1>
 
-      <motion.p
-        {...fadeUp(0.3)}
+      <p
         style={{
           fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "clamp(16px, 2.5vw, 20px)",
+          fontSize: "18px",
           color: "var(--text-tertiary)",
-          maxWidth: "680px",
+          maxWidth: "560px",
           margin: "24px auto 0",
           lineHeight: 1.6,
         }}
       >
-        Endall is an ops layer for MEP and specialty contractors. It scales your
-        team across the bookkeeper, office manager, and sales coordinator seats
-        for a fraction of what a full back office costs.
-      </motion.p>
+        CRM, email sequences, workflow automation, task management, and AI agents.
+      </p>
 
-      <motion.div {...fadeUp(0.45)} style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>
-          <Link
-            href="/demo"
-            style={{
-              display: "inline-block",
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "16px",
-              fontWeight: 500,
-              color: "var(--text-inverse)",
-              backgroundColor: "var(--surface-inverse)",
-              padding: "12px 24px",
-              borderRadius: "6px",
-              textDecoration: "none",
-              transition: "background-color 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
-            onFocus={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-            onBlur={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-inverse)")}
-          >
-            See it in action
-          </Link>
-          <Link
-            href="/dashboard"
-            style={{
-              display: "inline-block",
-              fontFamily: "var(--font-sans), sans-serif",
-              fontSize: "16px",
-              fontWeight: 500,
-              color: "var(--text-inverse)",
-              backgroundColor: "var(--surface-inverse)",
-              padding: "12px 24px",
-              borderRadius: "6px",
-              textDecoration: "none",
-              border: "1px solid var(--surface-inverse)",
-              transition: "opacity 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-            onFocus={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-            onBlur={(e) => { e.currentTarget.style.opacity = "1"; }}
-          >
-            Open App
-          </Link>
-        </div>
-      </motion.div>
+      <div style={{ marginTop: "40px" }}>
+        <Link
+          href="/dashboard"
+          style={{
+            display: "inline-block",
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: "14px",
+            fontWeight: 500,
+            color: "#000000",
+            backgroundColor: "#ffffff",
+            padding: "12px 24px",
+            borderRadius: "6px",
+            textDecoration: "none",
+            transition: "background-color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e5e5e5")}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+        >
+          Open App
+        </Link>
+      </div>
     </section>
   );
 }
