@@ -429,7 +429,13 @@ export default function AskEndallPage() {
                   {QUICK_ACTIONS.map((action) => (
                     <button
                       key={action.id}
-                      onClick={() => sendMessage("", action.id)}
+                      onClick={() => {
+                        posthog.capture("workflow_button_clicked", {
+                          action_id: action.id,
+                          label: action.label,
+                        });
+                        sendMessage("", action.id);
+                      }}
                       disabled={loading}
                       style={{
                         display: "flex",

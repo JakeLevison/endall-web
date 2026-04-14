@@ -87,7 +87,7 @@ function AgentCard({ name, color, perf, status, logs }: AgentCardProps) {
   const Icon = ICON_MAP[logs[0]?.agent_id ?? ""] ?? Phone;
   const derived = deriveStatus(status, logs);
 
-  const leads = perf?.qualified_count ?? 0 + (perf?.warm_count ?? 0);
+  const leads = (perf?.qualified_count ?? 0) + (perf?.warm_count ?? 0);
   const pipeline = perf?.closed_count ?? 0;
   const actions = perf?.total_actions ?? 0;
 

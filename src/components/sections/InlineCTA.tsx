@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+
+import { posthog } from "@/lib/posthog";
 
 // Lightweight centered text CTA — used between marketing sections to give
 // readers a natural off-ramp without a full banner. Amber accent only on
@@ -33,6 +37,13 @@ export default function InlineCTA({
         {lead}{" "}
         <Link
           href={href}
+          onClick={() =>
+            posthog.capture("cta_clicked", {
+              source: "inline_cta",
+              cta,
+              href,
+            })
+          }
           style={{
             color: "var(--brand-accent-light)",
             textDecoration: "none",

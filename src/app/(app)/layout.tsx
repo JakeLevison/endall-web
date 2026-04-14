@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
 import ComposeDialog from "@/components/email/ComposeDialog";
 import QuickSearch from "@/components/search/QuickSearch";
+import { posthog } from "@/lib/posthog";
 import {
   Home,
   Users,
@@ -58,6 +59,12 @@ function NavLink({ item, pathname }: { item: { href: string; label: string; icon
   return (
     <Link
       href={item.href}
+      onClick={() =>
+        posthog.capture("nav_clicked", {
+          href: item.href,
+          label: item.label,
+        })
+      }
       className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] transition-colors"
       style={{
         background: isActive ? "var(--overlay-soft)" : "transparent",

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { posthog } from "@/lib/posthog";
+
 export default function FinalCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
@@ -85,6 +87,13 @@ export default function FinalCTA() {
         >
           <a
             href="/demo"
+            onClick={() =>
+              posthog.capture("cta_clicked", {
+                source: "final_cta",
+                cta: "Try the interactive demo",
+                href: "/demo",
+              })
+            }
             style={{
               display: "inline-block",
               background: "var(--brand-accent-light)",
@@ -108,6 +117,13 @@ export default function FinalCTA() {
           </a>
           <a
             href="/contact"
+            onClick={() =>
+              posthog.capture("cta_clicked", {
+                source: "final_cta",
+                cta: "Talk to us",
+                href: "/contact",
+              })
+            }
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: 14,
