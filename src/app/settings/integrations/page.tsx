@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type QbStatus =
   | { connected: false }
@@ -9,6 +10,7 @@ type QbStatus =
       company_name: string;
       environment: string;
       connected_at: string;
+      auto_push_enabled: boolean;
     };
 
 const BRIDGE_URL =
@@ -32,6 +34,7 @@ function useQueryParams(): Record<string, string> | null {
 }
 
 export default function IntegrationsPage() {
+  const router = useRouter();
   const params = useQueryParams();
   const adminKey = params?.admin_key || "";
   const tenantIdFromUrl = params?.tenant_id || "";
@@ -41,8 +44,24 @@ export default function IntegrationsPage() {
   const [status, setStatus] = useState<QbStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [autoPushBusy, setAutoPushBusy] = useState(false);
+  const [showConnectedBanner, setShowConnectedBanner] = useState(false);
 
   const tenantId = tenantIdFromUrl || FALLBACK_TENANT_ID;
+
+  // Banner persistence fix: read ?connected=1 once into local state so the
+  // banner renders for this session, then strip the query string so a
+  // reload doesn't show it forever.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (params === null) return;
+    if (!connectedFlag) return;
+    setShowConnectedBanner(true);
+    const clean = new URL(window.location.href);
+    clean.searchParams.delete("connected");
+    const qs = clean.searchParams.toString();
+    router.replace(qs ? `/settings/integrations?${qs}` : "/settings/integrations");
+  }, [params, connectedFlag, router]);
 
   const fetchStatus = useCallback(async () => {
     if (!adminKey || !tenantId) {
@@ -84,6 +103,35 @@ export default function IntegrationsPage() {
     window.location.href = url;
   };
 
+  const handleToggleAutoPush = async () => {
+    if (!status || !status.connected) return;
+    if (!adminKey || !tenantId) return;
+    const next = !status.auto_push_enabled;
+    setAutoPushBusy(true);
+    try {
+      const url = `${BRIDGE_URL}/integrations/quickbooks/auto-push?admin_key=${encodeURIComponent(
+        adminKey,
+      )}`;
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Tenant-Id": tenantId,
+        },
+        body: JSON.stringify({ enabled: next }),
+      });
+      if (!res.ok) {
+        setLoadError(`auto-push update failed (${res.status})`);
+      } else {
+        setStatus({ ...status, auto_push_enabled: next });
+      }
+    } catch (err) {
+      setLoadError((err as Error).message || "auto-push update failed");
+    } finally {
+      setAutoPushBusy(false);
+    }
+  };
+
   const handleDisconnect = async () => {
     if (!adminKey || !tenantId) return;
     const url = `${BRIDGE_URL}/integrations/quickbooks/disconnect?tenant_id=${encodeURIComponent(
@@ -116,7 +164,7 @@ export default function IntegrationsPage() {
       <div className="w-full max-w-xl flex flex-col gap-4">
         <h1 className="text-xl font-medium text-white">Integrations</h1>
 
-        {connectedFlag === "1" && (
+        {showConnectedBanner && (
           <div
             role="status"
             data-testid="success-banner"
@@ -183,6 +231,45 @@ export default function IntegrationsPage() {
               </button>
             )}
           </div>
+
+          {!loading && status && status.connected && (
+            <div
+              data-testid="auto-push-row"
+              className="mt-4 flex items-center justify-between border-t border-white/10 pt-4"
+            >
+              <div>
+                <div className="text-sm text-white">Auto-push invoices</div>
+                <div className="text-xs text-white/50 mt-0.5">
+                  Send new invoices to QuickBooks automatically.
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                data-testid="auto-push-toggle"
+                aria-checked={status.auto_push_enabled}
+                aria-label="Toggle auto-push"
+                onClick={handleToggleAutoPush}
+                disabled={autoPushBusy}
+                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                style={{
+                  background: status.auto_push_enabled
+                    ? "#10b981"
+                    : "rgba(255,255,255,0.2)",
+                  opacity: autoPushBusy ? 0.6 : 1,
+                }}
+              >
+                <span
+                  className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  style={{
+                    transform: status.auto_push_enabled
+                      ? "translateX(22px)"
+                      : "translateX(4px)",
+                  }}
+                />
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </main>

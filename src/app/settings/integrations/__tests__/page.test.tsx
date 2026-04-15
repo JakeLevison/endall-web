@@ -1,6 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 
+const routerReplaceMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    replace: routerReplaceMock,
+    push: vi.fn(),
+    back: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+    forward: vi.fn(),
+  }),
+}));
+
 import IntegrationsPage from "../page";
 
 const BRIDGE_URL = "https://ask-endall-bridge-production.up.railway.app";
@@ -50,7 +62,7 @@ function mockFetchStatus(body: unknown, ok = true) {
 
 describe("IntegrationsPage", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    routerReplaceMock.mockClear();
   });
 
   afterEach(() => {
@@ -87,6 +99,7 @@ describe("IntegrationsPage", () => {
       company_name: "Sandbox Company US 1096",
       environment: "sandbox",
       connected_at: "2026-04-14T12:00:00+00:00",
+      auto_push_enabled: true,
     });
     render(<IntegrationsPage />);
 
@@ -120,10 +133,84 @@ describe("IntegrationsPage", () => {
       company_name: "Sandbox Company US 1096",
       environment: "sandbox",
       connected_at: "2026-04-14T12:00:00+00:00",
+      auto_push_enabled: true,
     });
     render(<IntegrationsPage />);
     await waitFor(() => {
       expect(screen.getByTestId("success-banner")).toBeInTheDocument();
+    });
+  });
+
+  it("auto-push toggle reflects server state and strips ?connected=1 from URL", async () => {
+    setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}&connected=1`);
+    mockFetchStatus({
+      connected: true,
+      company_name: "Sandbox Company US 1096",
+      environment: "sandbox",
+      connected_at: "2026-04-14T12:00:00+00:00",
+      auto_push_enabled: true,
+    });
+    render(<IntegrationsPage />);
+
+    const toggle = await screen.findByTestId("auto-push-toggle");
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+
+    // Banner persistence fix: router.replace called with query string stripped.
+    await waitFor(() => {
+      expect(routerReplaceMock).toHaveBeenCalled();
+    });
+    const replaceArgs = routerReplaceMock.mock.calls.map((c) => String(c[0]));
+    expect(replaceArgs.some((u) => !u.includes("connected=1"))).toBe(true);
+  });
+
+  it("auto-push toggle PATCHes /integrations/quickbooks/auto-push on click", async () => {
+    setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}`);
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).includes("/status")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            connected: true,
+            company_name: "Sandbox Company US 1096",
+            environment: "sandbox",
+            connected_at: "2026-04-14T12:00:00+00:00",
+            auto_push_enabled: true,
+          }),
+        } as unknown as Response;
+      }
+      if (String(url).includes("/auto-push")) {
+        const body = JSON.parse(String(init?.body ?? "{}"));
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ auto_push_enabled: body.enabled }),
+        } as unknown as Response;
+      }
+      return { ok: false, status: 404, json: async () => ({}) } as unknown as Response;
+    });
+    (globalThis.fetch as unknown) = fetchMock;
+
+    render(<IntegrationsPage />);
+
+    const toggle = await screen.findByTestId("auto-push-toggle");
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      const patchCall = fetchMock.mock.calls.find(
+        (c) =>
+          String(c[0]).includes("/integrations/quickbooks/auto-push") &&
+          ((c[1] as RequestInit | undefined)?.method === "PATCH"),
+      );
+      expect(patchCall).toBeTruthy();
+      const body = JSON.parse(String((patchCall?.[1] as RequestInit | undefined)?.body));
+      expect(body).toEqual({ enabled: false });
+    });
+
+    await waitFor(() => {
+      expect(toggle.getAttribute("aria-checked")).toBe("false");
     });
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { posthog } from "@/lib/posthog";
 
 export type InvoiceJobSummary = {
@@ -8,6 +8,20 @@ export type InvoiceJobSummary = {
   caller_name: string | null;
   job_type: string | null;
   preferred_date: string | null;
+};
+
+type QbConnState =
+  | { connected: false }
+  | { connected: true; auto_push_enabled: boolean };
+
+type QbInvoiceState = {
+  qb_invoice_id: string | null;
+  qb_push_error: string | null;
+};
+
+type Generated = {
+  invoice_id: string;
+  invoice_number: string;
 };
 
 export function InvoiceModal({
@@ -26,6 +40,90 @@ export function InvoiceModal({
   const [dueDays, setDueDays] = useState(30);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [generated, setGenerated] = useState<Generated | null>(null);
+  const [qbConn, setQbConn] = useState<QbConnState | null>(null);
+  const [qbState, setQbState] = useState<QbInvoiceState>({
+    qb_invoice_id: null,
+    qb_push_error: null,
+  });
+  const [pushing, setPushing] = useState(false);
+
+  const reset = useCallback(() => {
+    setAmount("");
+    setMemo("");
+    setDueDays(30);
+    setSubmitting(false);
+    setError(null);
+    setGenerated(null);
+    setQbConn(null);
+    setQbState({ qb_invoice_id: null, qb_push_error: null });
+    setPushing(false);
+  }, []);
+
+  useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
+
+  // After generation, fetch QB connection status then poll the invoice qb
+  // fields up to 5 times (1s interval) to catch the background auto-push.
+  useEffect(() => {
+    if (!generated) return;
+    let cancelled = false;
+
+    async function loadStatus() {
+      try {
+        const res = await fetch("/api/quickbooks/status", { cache: "no-store" });
+        if (!res.ok) {
+          if (!cancelled) setQbConn({ connected: false });
+          return;
+        }
+        const body = await res.json();
+        if (cancelled) return;
+        if (body.connected) {
+          setQbConn({
+            connected: true,
+            auto_push_enabled: body.auto_push_enabled !== false,
+          });
+        } else {
+          setQbConn({ connected: false });
+        }
+      } catch {
+        if (!cancelled) setQbConn({ connected: false });
+      }
+    }
+
+    async function pollInvoice() {
+      if (!generated) return;
+      for (let i = 0; i < 5; i += 1) {
+        if (cancelled) return;
+        try {
+          const res = await fetch(
+            `/api/quickbooks/invoices/${encodeURIComponent(generated.invoice_id)}/status`,
+            { cache: "no-store" },
+          );
+          if (res.ok) {
+            const body = await res.json();
+            if (cancelled) return;
+            setQbState({
+              qb_invoice_id: body.qb_invoice_id || null,
+              qb_push_error: body.qb_push_error || null,
+            });
+            if (body.qb_invoice_id || body.qb_push_error) return;
+          }
+        } catch {
+          // swallow; next iteration retries
+        }
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+
+    loadStatus();
+    pollInvoice();
+    return () => {
+      cancelled = true;
+    };
+  }, [generated]);
 
   if (!open) return null;
 
@@ -75,12 +173,49 @@ export function InvoiceModal({
         document.body.removeChild(a);
       }
       onGenerated?.(filename, downloadUrl);
-      onClose();
+      if (body.invoice_id) {
+        setGenerated({
+          invoice_id: body.invoice_id,
+          invoice_number: body.invoice_number,
+        });
+      } else {
+        onClose();
+      }
     } catch (err) {
       console.error("invoice generate failed:", err);
       setError("Could not generate invoice. Try again or email jake@endall.ai");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handlePush() {
+    if (!generated) return;
+    setPushing(true);
+    try {
+      const resp = await fetch(
+        `/api/quickbooks/invoices/${encodeURIComponent(generated.invoice_id)}/push`,
+        { method: "POST" },
+      );
+      const body = await resp.json().catch(() => ({}));
+      if (resp.ok && body.status === "pushed") {
+        setQbState({
+          qb_invoice_id: body.qb_invoice_id || null,
+          qb_push_error: null,
+        });
+      } else {
+        setQbState({
+          qb_invoice_id: null,
+          qb_push_error: body?.detail || `push failed (${resp.status})`,
+        });
+      }
+    } catch (err) {
+      setQbState({
+        qb_invoice_id: null,
+        qb_push_error: (err as Error).message || "push failed",
+      });
+    } finally {
+      setPushing(false);
     }
   }
 
@@ -109,7 +244,9 @@ export function InvoiceModal({
           color: "var(--text-primary)",
         }}
       >
-        <h2 className="text-[14px] font-medium">Generate invoice</h2>
+        <h2 className="text-[14px] font-medium">
+          {generated ? "Invoice generated" : "Generate invoice"}
+        </h2>
         <div
           className="rounded-md border p-3 text-[12px] space-y-0.5"
           style={{
@@ -132,58 +269,159 @@ export function InvoiceModal({
           </div>
         </div>
 
-        <label className="block text-[12px] space-y-1">
-          <span className="text-[var(--text-tertiary)]">Amount ($)</span>
-          <input
-            type="number"
-            step="0.01"
-            min="0.01"
-            required
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-md border px-2 py-1.5 text-[13px]"
-            style={{
-              background: "var(--overlay-soft)",
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-          />
-        </label>
+        {!generated && (
+          <>
+            <label className="block text-[12px] space-y-1">
+              <span className="text-[var(--text-tertiary)]">Amount ($)</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full rounded-md border px-2 py-1.5 text-[13px]"
+                style={{
+                  background: "var(--overlay-soft)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+            </label>
 
-        <label className="block text-[12px] space-y-1">
-          <span className="text-[var(--text-tertiary)]">Memo (optional)</span>
-          <input
-            type="text"
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            placeholder="What was the work? Leave blank to use job type."
-            className="w-full rounded-md border px-2 py-1.5 text-[13px]"
-            style={{
-              background: "var(--overlay-soft)",
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-          />
-        </label>
+            <label className="block text-[12px] space-y-1">
+              <span className="text-[var(--text-tertiary)]">Memo (optional)</span>
+              <input
+                type="text"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="What was the work? Leave blank to use job type."
+                className="w-full rounded-md border px-2 py-1.5 text-[13px]"
+                style={{
+                  background: "var(--overlay-soft)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+            </label>
 
-        <label className="block text-[12px] space-y-1">
-          <span className="text-[var(--text-tertiary)]">Due in</span>
-          <select
-            value={dueDays}
-            onChange={(e) => setDueDays(parseInt(e.target.value, 10))}
-            className="w-full rounded-md border px-2 py-1.5 text-[13px]"
+            <label className="block text-[12px] space-y-1">
+              <span className="text-[var(--text-tertiary)]">Due in</span>
+              <select
+                value={dueDays}
+                onChange={(e) => setDueDays(parseInt(e.target.value, 10))}
+                className="w-full rounded-md border px-2 py-1.5 text-[13px]"
+                style={{
+                  background: "var(--overlay-soft)",
+                  borderColor: "var(--border)",
+                  color: "var(--text-primary)",
+                }}
+              >
+                <option value={15}>15 days</option>
+                <option value={30}>30 days</option>
+                <option value={45}>45 days</option>
+                <option value={60}>60 days</option>
+              </select>
+            </label>
+          </>
+        )}
+
+        {generated && (
+          <div
+            data-testid="qb-push-area"
+            className="rounded-md border p-3 text-[12px] space-y-2"
             style={{
               background: "var(--overlay-soft)",
               borderColor: "var(--border)",
-              color: "var(--text-primary)",
             }}
           >
-            <option value={15}>15 days</option>
-            <option value={30}>30 days</option>
-            <option value={45}>45 days</option>
-            <option value={60}>60 days</option>
-          </select>
-        </label>
+            <div className="text-[var(--text-tertiary)]">
+              Invoice <strong>{generated.invoice_number}</strong> created.
+            </div>
+            {qbState.qb_invoice_id && (
+              <div
+                data-testid="qb-badge-pushed"
+                className="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium"
+                style={{
+                  background: "rgba(16, 185, 129, 0.15)",
+                  color: "#10b981",
+                  border: "1px solid rgba(16, 185, 129, 0.4)",
+                }}
+              >
+                Pushed to QuickBooks · {qbState.qb_invoice_id}
+              </div>
+            )}
+            {!qbState.qb_invoice_id && qbState.qb_push_error && (
+              <div className="space-y-1">
+                <div
+                  data-testid="qb-badge-failed"
+                  className="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium"
+                  style={{
+                    background: "rgba(245, 158, 11, 0.15)",
+                    color: "#f59e0b",
+                    border: "1px solid rgba(245, 158, 11, 0.4)",
+                  }}
+                >
+                  Push failed
+                </div>
+                <div className="text-[11px] text-[var(--text-muted)]">
+                  {qbState.qb_push_error}
+                </div>
+                <button
+                  type="button"
+                  data-testid="qb-retry-button"
+                  onClick={handlePush}
+                  disabled={pushing}
+                  className="rounded-md px-2 py-1 text-[11px] font-medium border"
+                  style={{
+                    borderColor: "var(--border)",
+                    color: "var(--text-primary)",
+                    background: "transparent",
+                    opacity: pushing ? 0.6 : 1,
+                  }}
+                >
+                  {pushing ? "Retrying..." : "Retry push"}
+                </button>
+              </div>
+            )}
+            {!qbState.qb_invoice_id &&
+              !qbState.qb_push_error &&
+              qbConn?.connected && (
+                <button
+                  type="button"
+                  data-testid="qb-push-button"
+                  onClick={handlePush}
+                  disabled={pushing}
+                  className="rounded-md px-2 py-1 text-[11px] font-medium"
+                  style={{
+                    background: "#3b82f6",
+                    color: "white",
+                    opacity: pushing ? 0.6 : 1,
+                  }}
+                >
+                  {pushing ? "Pushing..." : "Push to QuickBooks"}
+                </button>
+              )}
+            {!qbState.qb_invoice_id &&
+              !qbState.qb_push_error &&
+              qbConn &&
+              !qbConn.connected && (
+                <div
+                  data-testid="qb-not-connected"
+                  className="text-[11px] text-[var(--text-muted)]"
+                >
+                  Connect QuickBooks in{" "}
+                  <a
+                    href="/settings/integrations"
+                    className="underline"
+                  >
+                    Settings
+                  </a>{" "}
+                  to enable push.
+                </div>
+              )}
+          </div>
+        )}
 
         {error ? (
           <p role="alert" className="text-[12px]" style={{ color: "#ef4444" }}>
@@ -202,20 +440,22 @@ export function InvoiceModal({
               background: "transparent",
             }}
           >
-            Cancel
+            {generated ? "Close" : "Cancel"}
           </button>
-          <button
-            type="submit"
-            disabled={submitting || !valid}
-            className="rounded-md px-3 py-1.5 text-[12px] font-medium"
-            style={{
-              background: "var(--brand-accent-light)",
-              color: "#1a1a1a",
-              opacity: submitting || !valid ? 0.6 : 1,
-            }}
-          >
-            {submitting ? "Generating..." : "Generate invoice"}
-          </button>
+          {!generated && (
+            <button
+              type="submit"
+              disabled={submitting || !valid}
+              className="rounded-md px-3 py-1.5 text-[12px] font-medium"
+              style={{
+                background: "var(--brand-accent-light)",
+                color: "#1a1a1a",
+                opacity: submitting || !valid ? 0.6 : 1,
+              }}
+            >
+              {submitting ? "Generating..." : "Generate invoice"}
+            </button>
+          )}
         </div>
       </form>
     </div>

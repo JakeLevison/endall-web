@@ -45,16 +45,23 @@ describe("InvoiceModal", () => {
     expect(submit).not.toBeDisabled();
   });
 
-  it("submits POST to /api/invoices/generate, triggers download, fires posthog, closes", async () => {
-    const fetchMock = vi.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        download_url: "/download/invoice_abc",
-        filename: "Mercer_Invoice_INV-1111-20260414-001.xlsx",
-        invoice_number: "INV-1111-20260414-001",
-        invoice_id: "inv-1",
-      }),
-    } as Response));
+  it("submits POST to /api/invoices/generate, triggers download, fires posthog, transitions to QB view", async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url === "/api/invoices/generate") {
+        return {
+          ok: true,
+          json: async () => ({
+            download_url: "/download/invoice_abc",
+            filename: "Mercer_Invoice_INV-1111-20260414-001.xlsx",
+            invoice_number: "INV-1111-20260414-001",
+            invoice_id: "inv-1",
+          }),
+        } as Response;
+      }
+      // QB status + invoice qb-status return not-connected so modal stays
+      // simple; other tests exercise the QB badge branches.
+      return { ok: true, json: async () => ({ connected: false }) } as Response;
+    });
     vi.stubGlobal("fetch", fetchMock);
     const onClose = vi.fn();
 
@@ -78,7 +85,13 @@ describe("InvoiceModal", () => {
         })
       );
     });
-    expect(onClose).toHaveBeenCalled();
+    // Modal stays open and shows the "Invoice generated" heading.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /invoice generated/i })
+      ).toBeInTheDocument();
+    });
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("shows inline error when bridge returns non-200 and no em dash", async () => {
