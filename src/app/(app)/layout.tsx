@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
 import ComposeDialog from "@/components/email/ComposeDialog";
 import QuickSearch from "@/components/search/QuickSearch";
+import { createClient } from "@/lib/supabase/client";
 import { posthog } from "@/lib/posthog";
 import {
   Home,
@@ -24,6 +25,7 @@ import {
   Sparkles,
   Send,
   ChevronDown,
+  Activity,
   Calendar,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -39,6 +41,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/command-center", label: "Command Center", icon: Activity },
   { href: "/dispatch", label: "Dispatch", icon: Calendar },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
@@ -272,7 +275,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator style={{ background: "var(--border)" }} />
-              <DropdownMenuItem className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
+              <DropdownMenuItem
+                className="text-[13px]"
+                style={{ color: "var(--text-tertiary)" }}
+                onClick={async () => {
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = "/login";
+                }}
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -14,12 +13,13 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = searchParams.get("redirect") || "/dispatch";
+  const urlError = searchParams.get("error");
+
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState(urlError || "");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,15 +29,17 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}`,
+        },
       });
 
       if (authError) {
         setError(authError.message);
       } else {
-        router.push(redirect);
+        setSent(true);
       }
     } catch {
       setError("Something went wrong. Please try again.");
@@ -64,56 +66,49 @@ function LoginForm() {
           <p className="text-[13px] text-[var(--text-muted)] mt-2">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="text-[13px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-              {error}
+        {sent ? (
+          <div className="border border-[var(--border)] rounded-lg px-4 py-4">
+            <p className="text-[13px] text-[var(--text-secondary)]">
+              Check your email for a sign-in link.
+            </p>
+            <p className="text-[13px] text-[var(--text-muted)] mt-2">
+              We sent a link to{" "}
+              <strong className="text-[var(--text-primary)]">{email}</strong>.
+              Click it to sign in.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="text-[13px] text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--overlay-strong)]"
+                placeholder="you@company.com"
+              />
             </div>
-          )}
 
-          <div>
-            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--overlay-strong)]"
-              placeholder="you@company.com"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1.5 block">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-[var(--overlay-soft)] border border-[var(--border)] rounded-lg px-3 py-2 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--overlay-strong)]"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[var(--surface-inverse)] text-black font-medium text-[13px] rounded-lg py-2.5 hover:opacity-90 transition-colors disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <p className="text-[13px] text-[var(--text-muted)] text-center mt-6">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-[var(--text-primary)] hover:underline">
-            Sign up
-          </Link>
-        </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[var(--surface-inverse)] text-black font-medium text-[13px] rounded-lg py-2.5 hover:opacity-90 transition-colors disabled:opacity-50"
+            >
+              {loading ? "Sending link..." : "Send sign-in link"}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

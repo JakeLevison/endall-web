@@ -69,8 +69,8 @@ describe("IntegrationsPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders unauthorized when admin_key missing", async () => {
-    setLocation(`?tenant_id=${TENANT_ID}`);
+  it("renders unauthorized when no tenant resolvable", async () => {
+    setLocation("");
     render(<IntegrationsPage />);
     await waitFor(() => {
       expect(

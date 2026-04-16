@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getTenantIdFromCookie } from "@/lib/tenant";
 
 type QbStatus =
   | { connected: false }
@@ -47,11 +48,9 @@ export default function IntegrationsPage() {
   const [autoPushBusy, setAutoPushBusy] = useState(false);
   const [showConnectedBanner, setShowConnectedBanner] = useState(false);
 
-  const tenantId = tenantIdFromUrl || FALLBACK_TENANT_ID;
+  const bypassMode = !!adminKey;
+  const tenantId = tenantIdFromUrl || getTenantIdFromCookie() || FALLBACK_TENANT_ID;
 
-  // Banner persistence fix: read ?connected=1 once into local state so the
-  // banner renders for this session, then strip the query string so a
-  // reload doesn't show it forever.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (params === null) return;
@@ -64,17 +63,22 @@ export default function IntegrationsPage() {
   }, [params, connectedFlag, router]);
 
   const fetchStatus = useCallback(async () => {
-    if (!adminKey || !tenantId) {
+    if (!tenantId) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setLoadError(null);
     try {
-      const url = `${BRIDGE_URL}/integrations/quickbooks/status?tenant_id=${encodeURIComponent(
-        tenantId,
-      )}&admin_key=${encodeURIComponent(adminKey)}`;
-      const res = await fetch(url, { cache: "no-store" });
+      let res: Response;
+      if (bypassMode) {
+        const url = `${BRIDGE_URL}/integrations/quickbooks/status?tenant_id=${encodeURIComponent(
+          tenantId,
+        )}&admin_key=${encodeURIComponent(adminKey)}`;
+        res = await fetch(url, { cache: "no-store" });
+      } else {
+        res = await fetch("/api/quickbooks/status", { cache: "no-store" });
+      }
       if (!res.ok) {
         setLoadError(`status request failed (${res.status})`);
         setStatus(null);
@@ -88,7 +92,7 @@ export default function IntegrationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [adminKey, tenantId]);
+  }, [bypassMode, adminKey, tenantId]);
 
   useEffect(() => {
     if (params === null) return;
@@ -96,30 +100,43 @@ export default function IntegrationsPage() {
   }, [params, fetchStatus]);
 
   const handleConnect = () => {
-    if (!adminKey || !tenantId) return;
-    const url = `${BRIDGE_URL}/integrations/quickbooks/authorize?tenant_id=${encodeURIComponent(
-      tenantId,
-    )}&admin_key=${encodeURIComponent(adminKey)}`;
-    window.location.href = url;
+    if (!tenantId) return;
+    if (bypassMode) {
+      const url = `${BRIDGE_URL}/integrations/quickbooks/authorize?tenant_id=${encodeURIComponent(
+        tenantId,
+      )}&admin_key=${encodeURIComponent(adminKey)}`;
+      window.location.href = url;
+    } else {
+      window.location.href = "/api/quickbooks/authorize";
+    }
   };
 
   const handleToggleAutoPush = async () => {
     if (!status || !status.connected) return;
-    if (!adminKey || !tenantId) return;
+    if (!tenantId) return;
     const next = !status.auto_push_enabled;
     setAutoPushBusy(true);
     try {
-      const url = `${BRIDGE_URL}/integrations/quickbooks/auto-push?admin_key=${encodeURIComponent(
-        adminKey,
-      )}`;
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Tenant-Id": tenantId,
-        },
-        body: JSON.stringify({ enabled: next }),
-      });
+      let res: Response;
+      if (bypassMode) {
+        const url = `${BRIDGE_URL}/integrations/quickbooks/auto-push?admin_key=${encodeURIComponent(
+          adminKey,
+        )}`;
+        res = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Tenant-Id": tenantId,
+          },
+          body: JSON.stringify({ enabled: next }),
+        });
+      } else {
+        res = await fetch("/api/quickbooks/auto-push", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: next }),
+        });
+      }
       if (!res.ok) {
         setLoadError(`auto-push update failed (${res.status})`);
       } else {
@@ -133,12 +150,16 @@ export default function IntegrationsPage() {
   };
 
   const handleDisconnect = async () => {
-    if (!adminKey || !tenantId) return;
-    const url = `${BRIDGE_URL}/integrations/quickbooks/disconnect?tenant_id=${encodeURIComponent(
-      tenantId,
-    )}&admin_key=${encodeURIComponent(adminKey)}`;
+    if (!tenantId) return;
     try {
-      await fetch(url, { method: "POST" });
+      if (bypassMode) {
+        const url = `${BRIDGE_URL}/integrations/quickbooks/disconnect?tenant_id=${encodeURIComponent(
+          tenantId,
+        )}&admin_key=${encodeURIComponent(adminKey)}`;
+        await fetch(url, { method: "POST" });
+      } else {
+        await fetch("/api/quickbooks/disconnect", { method: "POST" });
+      }
     } catch (err) {
       setLoadError((err as Error).message || "disconnect failed");
     }
@@ -149,7 +170,7 @@ export default function IntegrationsPage() {
     return null;
   }
 
-  if (!adminKey) {
+  if (!bypassMode && !tenantId) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-lg border border-white/10 p-6 text-sm text-white/80">
