@@ -8,13 +8,13 @@ import Navbar from "@/components/hero/Navbar";
 import Footer from "@/components/sections/Footer";
 
 const TRADE_OPTIONS = [
-  "HVAC",
-  "Plumbing",
   "Electrical",
-  "Mechanical",
   "Fire Protection",
-  "Refrigeration",
+  "HVAC",
+  "Mechanical",
   "Multi-trade",
+  "Plumbing",
+  "Refrigeration",
   "Other",
 ];
 
