@@ -6,7 +6,7 @@ Save this file to the Obsidian vault at `vault/Endall/OPERATING_STANDARDS.md` an
 
 ## Product Philosophy
 
-Every module, agent, workflow, and interface in the Endall system must meet these standards. This is not aspirational — this is the bar.
+Every module, agent, workflow, and interface in the Endall system must meet these standards. This is not aspirational. This is the bar.
 
 ### 1. Show, Don't Tell
 
@@ -23,7 +23,7 @@ Every Endall module and agent must be designed to learn, evolve, and get smarter
 - Lead scoring improves as more calls are processed
 - Outreach sequences optimize based on reply rates
 - The morning briefing gets more relevant as it learns what the contractor acts on
-- The system compounds — month 3 is meaningfully better than month 1
+- The system compounds. Month 3 is meaningfully better than month 1
 
 This is not a feature request. This is an architectural requirement. Every new module must answer: "How does this get smarter over time?" If the answer is "it doesn't," redesign it.
 
@@ -72,9 +72,13 @@ No module operates in isolation. The front desk feeds the SDR. The SDR feeds the
 - "Endall" never "Endall AI"
 - "Operations team" / "ops team" never "software"
 - Never use "handles" / "handling"
-- Voice/calls is never the lead feature — always position as one part of a larger ops replacement
+- Voice/calls is never the lead feature, always position as one part of a larger ops replacement
 - Jake's public title: "Founder" (not Co-Founder)
 - Email signature: Jake Levison / Founder, Endall / (203) 610-9399 / endall.ai
+- **No em dashes.** Use commas, parentheses, periods, or en-dashes (–) instead. Applies to all copy: website, emails, drafts, docs, SOUL files. En-dashes are permitted but use sparingly.
+- **Self-introduction:** "My name is Jake Levison" never "I'm Jake." Applies to cold outreach, voice-agent scripts, email openers, and all first-contact contexts.
+- **Job-search signatures** (job applications, recruiter replies, career-site contact forms): name + phone only. Do not include title, company, or domain. Those contexts are Jake-as-candidate, not Jake-as-founder.
+- **MEP includes electrical** (mechanical, electrical, plumbing). Never write "MEP and electrical contractors." Treat "MEP contractors" as the complete set.
 
 ---
 
@@ -82,9 +86,9 @@ No module operates in isolation. The front desk feeds the SDR. The SDR feeds the
 
 | Service | URL | Env Var |
 |---------|-----|---------|
-| **Vercel (frontend)** | `https://endall.ai` | — (production domain) |
+| **Vercel (frontend)** | `https://endall.ai` | (production domain) |
 | **Ask Endall Bridge (Railway)** | `https://ask-endall-bridge-production.up.railway.app` | `ASK_ENDALL_BRIDGE_URL`, `NEXT_PUBLIC_OPS_API_URL` |
-| **Chief-of-Staff API (Railway)** | TBD — set via env var | `COS_API_URL` |
+| **Chief-of-Staff API (Railway)** | TBD (set via env var) | `COS_API_URL` |
 | **ElevenLabs** | Via SDK (API key auth) | `ELEVENLABS_API_KEY` |
 | **Twilio** | Via SDK (account SID + auth token) | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` |
 | **Supabase** | `https://jqvtrbyzgccmedsqopyd.supabase.co` | `NEXT_PUBLIC_SUPABASE_URL` |
@@ -98,7 +102,7 @@ All backend URLs must be set via environment variables in Vercel. Localhost fall
 ## PostHog Analytics
 
 ### Project Setup
-- **Provider:** PostHog Cloud (US region — `https://us.i.posthog.com`)
+- **Provider:** PostHog Cloud (US region, `https://us.i.posthog.com`)
 - **Integration:** `posthog-js` client-side, initialized in `src/lib/posthog.ts`
 - **Provider wrapper:** `src/components/providers/PostHogProvider.tsx` (mounted in root layout)
 - **Page views:** Automatic via PostHog `capture_pageview: true`
@@ -106,11 +110,11 @@ All backend URLs must be set via environment variables in Vercel. Localhost fall
 ### Tracked Events
 | Event | Trigger | Properties |
 |-------|---------|------------|
-| `page_view` | Automatic (all pages) | — |
-| `demo_form_started` | User lands on `/demo/request` | — |
+| `page_view` | Automatic (all pages) | |
+| `demo_form_started` | User lands on `/demo/request` | |
 | `demo_form_completed` | Successful demo form submission | `trade`, `team_size` |
-| `demo_form_abandoned` | User leaves `/demo/request` without submitting | — |
-| `command_center_viewed` | Dashboard page loads | — |
+| `demo_form_abandoned` | User leaves `/demo/request` without submitting | |
+| `command_center_viewed` | Dashboard page loads | |
 | `ask_endall_query` | User submits a question in Ask Endall | `query_length` |
 
 ### Rules
