@@ -2,10 +2,22 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PUBLIC_ROUTES = ["/", "/login", "/signup", "/no-tenant"];
+const PUBLIC_PREFIXES = [
+  "/contact",
+  "/demo",
+  "/discovery",
+  "/privacy",
+  "/team",
+  "/terms",
+  "/ask",
+];
 
 function isPublicRoute(pathname: string) {
   return (
     PUBLIC_ROUTES.includes(pathname) ||
+    PUBLIC_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    ) ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/auth/")

@@ -95,4 +95,57 @@ describe("middleware", () => {
     const location = res.headers.get("location") || "";
     expect(location).toContain("/no-tenant");
   });
+
+  // Every real page under src/app that should be publicly reachable. If
+  // someone adds a marketing page and forgets the allowlist, this should
+  // be the test that fails.
+  const PUBLIC_PATHS = [
+    "/contact",
+    "/demo",
+    "/demo/request",
+    "/demo/confirmation",
+    "/demo/interactive",
+    "/discovery",
+    "/privacy",
+    "/team",
+    "/terms",
+    "/ask",
+  ];
+
+  it.each(PUBLIC_PATHS)(
+    "public marketing route %s returns 200 without session",
+    async (path) => {
+      mockUser = null;
+      mockMembership = null;
+
+      const req = makeRequest(path);
+      const res = await middleware(req);
+
+      expect(res.status).toBe(200);
+    },
+  );
+
+  it("bypass off + no session + public route does NOT redirect (the prod regression path)", async () => {
+    vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "false");
+    mockUser = null;
+    mockMembership = null;
+
+    const req = makeRequest("/contact");
+    const res = await middleware(req);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("authenticated top-level route still redirects to /login when no session (regression guard)", async () => {
+    vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "false");
+    mockUser = null;
+
+    const req = makeRequest("/settings/integrations");
+    const res = await middleware(req);
+
+    expect(res.status).toBe(307);
+    const location = res.headers.get("location") || "";
+    expect(location).toContain("/login");
+  });
 });
