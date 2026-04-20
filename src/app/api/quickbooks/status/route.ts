@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import {
+  resolveTenantFromSession,
+  tenantUnresolvedResponse,
+} from "@/lib/tenant-server";
 
 // Proxy GET /integrations/quickbooks/status. Server-side admin key, tenant
-// from header or env default. Used by the invoice modal + settings page.
-export async function GET(request: NextRequest) {
+// from authenticated session. Used by the invoice modal + settings page.
+export async function GET() {
   const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
   const adminKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
-  const tenantId =
-    request.headers.get("x-tenant-id") ||
-    process.env.NEXT_PUBLIC_TENANT_ID ||
-    "";
 
   if (!adminKey) {
     return NextResponse.json(
@@ -16,13 +16,13 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-  if (!tenantId) {
-    return NextResponse.json({ error: "tenant id missing" }, { status: 400 });
-  }
+
+  const resolved = await resolveTenantFromSession();
+  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   try {
     const url = `${bridgeUrl}/integrations/quickbooks/status?tenant_id=${encodeURIComponent(
-      tenantId,
+      resolved.tenant_id,
     )}&admin_key=${encodeURIComponent(adminKey)}`;
     const resp = await fetch(url, { cache: "no-store" });
     const text = await resp.text();

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  resolveTenantFromSession,
+  tenantUnresolvedResponse,
+} from "@/lib/tenant-server";
 
-// Proxy PATCH /integrations/quickbooks/auto-push.
 export async function PATCH(request: NextRequest) {
   const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
   const adminKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
-  const tenantId =
-    request.headers.get("x-tenant-id") ||
-    process.env.NEXT_PUBLIC_TENANT_ID ||
-    "";
 
   if (!adminKey) {
     return NextResponse.json(
@@ -15,9 +14,9 @@ export async function PATCH(request: NextRequest) {
       { status: 500 },
     );
   }
-  if (!tenantId) {
-    return NextResponse.json({ error: "tenant id missing" }, { status: 400 });
-  }
+
+  const resolved = await resolveTenantFromSession();
+  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   let body: unknown;
   try {
@@ -31,7 +30,7 @@ export async function PATCH(request: NextRequest) {
       method: "PATCH",
       headers: {
         "X-Admin-Key": adminKey,
-        "X-Tenant-Id": tenantId,
+        "X-Tenant-Id": resolved.tenant_id,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),

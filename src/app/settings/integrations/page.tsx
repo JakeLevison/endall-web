@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getTenantIdFromCookie } from "@/lib/tenant";
+import { useTenant } from "@/lib/tenant-hook";
 
 type QbStatus =
   | { connected: false }
@@ -17,8 +17,6 @@ type QbStatus =
 const BRIDGE_URL =
   process.env.NEXT_PUBLIC_BRIDGE_URL ||
   "https://ask-endall-bridge-production.up.railway.app";
-
-const FALLBACK_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "";
 
 function useQueryParams(): Record<string, string> | null {
   const [params, setParams] = useState<Record<string, string> | null>(null);
@@ -49,7 +47,8 @@ export default function IntegrationsPage() {
   const [showConnectedBanner, setShowConnectedBanner] = useState(false);
 
   const bypassMode = !!adminKey;
-  const tenantId = tenantIdFromUrl || getTenantIdFromCookie() || FALLBACK_TENANT_ID;
+  const { tenant_id: sessionTenantId } = useTenant();
+  const tenantId = tenantIdFromUrl || sessionTenantId || "";
 
   useEffect(() => {
     if (typeof window === "undefined") return;

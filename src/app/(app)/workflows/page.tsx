@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 
 type Workflow = {
   id: string;
@@ -66,6 +67,7 @@ const statusColor = (status: string) => {
 
 export default function WorkflowsPage() {
   const router = useRouter();
+  const { tenant_id: tenantId } = useTenant();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -107,7 +109,7 @@ export default function WorkflowsPage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !tenantId) return;
     setCreating(true);
 
     try {
@@ -118,7 +120,7 @@ export default function WorkflowsPage() {
           name: newName.trim(),
           status: "draft",
           trigger_type: newTrigger,
-          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+          tenant_id: tenantId,
         })
         .select()
         .single();

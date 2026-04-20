@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import StepAnalytics from "@/components/sequences/StepAnalytics";
 import dynamic from "next/dynamic";
 
@@ -114,6 +115,7 @@ export default function SequenceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { tenant_id: tenantId } = useTenant();
   const [sequence, setSequence] = useState<Sequence | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,12 +265,12 @@ export default function SequenceDetailPage({
   };
 
   const handleEnroll = async () => {
-    if (selectedContacts.size === 0) return;
+    if (selectedContacts.size === 0 || !tenantId) return;
     setEnrolling(true);
     try {
       const supabase = createClient();
       const enrollments = Array.from(selectedContacts).map((contactId) => ({
-        tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+        tenant_id: tenantId,
         sequence_id: id,
         contact_id: contactId,
         status: "active",

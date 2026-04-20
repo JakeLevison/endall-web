@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import type { Deal as DBDeal } from "@/lib/types";
 import DealHealthBadge from "@/components/deals/DealHealthBadge";
 
@@ -243,6 +244,7 @@ function TableView({ deals }: { deals: Deal[] }) {
 }
 
 export default function DealsPage() {
+  const { tenant_id: tenantId } = useTenant();
   const [view, setView] = useState("board");
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,10 +274,10 @@ export default function DealsPage() {
   }, []);
 
   async function handleCreateDeal() {
+    if (!tenantId) return;
     setCreating(true);
     try {
       const supabase = createClient();
-      const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
       const { error } = await supabase.from("deals").insert({
         name: newDealName,
         amount: newAmount ? parseFloat(newAmount) : 0,

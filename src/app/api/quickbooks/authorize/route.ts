@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import {
+  resolveTenantFromSession,
+  tenantUnresolvedResponse,
+} from "@/lib/tenant-server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const bridgeUrl =
     process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
   const adminKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
-  const tenantId =
-    request.headers.get("x-tenant-id") ||
-    process.env.NEXT_PUBLIC_TENANT_ID ||
-    "";
 
   if (!adminKey) {
     return NextResponse.json(
@@ -15,12 +15,12 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-  if (!tenantId) {
-    return NextResponse.json({ error: "tenant id missing" }, { status: 400 });
-  }
+
+  const resolved = await resolveTenantFromSession();
+  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   const url = `${bridgeUrl}/integrations/quickbooks/authorize?tenant_id=${encodeURIComponent(
-    tenantId
+    resolved.tenant_id
   )}&admin_key=${encodeURIComponent(adminKey)}`;
 
   return NextResponse.redirect(url);

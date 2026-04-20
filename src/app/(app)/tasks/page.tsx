@@ -32,6 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import type { Task as DBTask } from "@/lib/types";
 
 type Task = {
@@ -238,6 +239,7 @@ function TaskTableView({ tasks }: { tasks: Task[] }) {
 }
 
 function CreateTaskDialog({ onCreated }: { onCreated: (task: Task) => void }) {
+  const { tenant_id: tenantId } = useTenant();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
@@ -257,10 +259,8 @@ function CreateTaskDialog({ onCreated }: { onCreated: (task: Task) => void }) {
   };
 
   const handleSubmit = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || !tenantId) return;
     setSaving(true);
-
-    const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
 
     const newTask: Task = {
       id: crypto.randomUUID(),
@@ -541,6 +541,7 @@ export default function TasksPage() {
 }
 
 function ProjectsList() {
+  const { tenant_id: tenantId } = useTenant();
   const [projects, setProjects] = useState<{ id: string; name: string; description: string; status: string; color: string; taskCount: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -570,7 +571,7 @@ function ProjectsList() {
   }, []);
 
   const handleCreate = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !tenantId) return;
     try {
       const supabase = createClient();
       const { data } = await supabase
@@ -578,7 +579,7 @@ function ProjectsList() {
         .insert({
           name: newName.trim(),
           description: newDesc.trim() || null,
-          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+          tenant_id: tenantId,
         })
         .select()
         .single();

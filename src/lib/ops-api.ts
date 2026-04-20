@@ -1,14 +1,13 @@
 "use client";
 
 import useSWR from "swr";
+import { useTenant } from "@/lib/tenant-hook";
 
 // ── Config ──────────────────────────────────────────────────────────
 
 const API_BASE =
   process.env.NEXT_PUBLIC_OPS_API_URL ||
   "https://ask-endall-bridge-production.up.railway.app";
-
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "default";
 
 const REFRESH_MS = 30_000; // 30-second polling
 
@@ -65,14 +64,15 @@ async function fetchApi<T>(
   return res.json();
 }
 
-// ── API functions ───────────────────────────────────────────────────
+// ── API functions (server utilities: explicit tenant_id) ───────────
 
 export function getAgentLogs(
+  tenantId: string,
   agentId?: string,
   limit = 20,
 ): Promise<AgentLog[]> {
   const params: Record<string, string> = {
-    tenant_id: TENANT_ID,
+    tenant_id: tenantId,
     limit: String(limit),
   };
   if (agentId) params.agent_id = agentId;
@@ -80,64 +80,81 @@ export function getAgentLogs(
 }
 
 export function getAgentPerformance(
+  tenantId: string,
   agentId: string,
   period = "today",
 ): Promise<AgentPerformance> {
   return fetchApi<AgentPerformance>("/api/agent-performance", {
     agent_id: agentId,
-    tenant_id: TENANT_ID,
+    tenant_id: tenantId,
     period,
   });
 }
 
 export function getAgentStatus(
+  tenantId: string,
   agentId: string,
 ): Promise<AgentStatusResponse> {
   return fetchApi<AgentStatusResponse>("/api/agent-status", {
     agent_id: agentId,
-    tenant_id: TENANT_ID,
+    tenant_id: tenantId,
   });
 }
 
 // ── Aggregate fetchers (for SWR) ───────────────────────────────────
 
-async function fetchAllPerformance(): Promise<
-  Record<string, AgentPerformance | null>
-> {
+async function fetchAllPerformance(
+  tenantId: string,
+): Promise<Record<string, AgentPerformance | null>> {
   const results = await Promise.all(
-    AGENTS.map((a) => getAgentPerformance(a.id).catch(() => null)),
+    AGENTS.map((a) => getAgentPerformance(tenantId, a.id).catch(() => null)),
   );
   return Object.fromEntries(AGENTS.map((a, i) => [a.id, results[i]]));
 }
 
-async function fetchAllStatuses(): Promise<
-  Record<string, AgentStatusResponse | null>
-> {
+async function fetchAllStatuses(
+  tenantId: string,
+): Promise<Record<string, AgentStatusResponse | null>> {
   const results = await Promise.all(
-    AGENTS.map((a) => getAgentStatus(a.id).catch(() => null)),
+    AGENTS.map((a) => getAgentStatus(tenantId, a.id).catch(() => null)),
   );
   return Object.fromEntries(AGENTS.map((a, i) => [a.id, results[i]]));
 }
 
-// ── Hooks ───────────────────────────────────────────────────────────
+// ── Hooks (client: call useTenant internally) ──────────────────────
 
 export function useAllLogs(limit = 50) {
-  return useSWR("ops:all-logs", () => getAgentLogs(undefined, limit), {
-    refreshInterval: REFRESH_MS,
-    fallbackData: [],
-  });
+  const { tenant_id: tenantId } = useTenant();
+  return useSWR(
+    tenantId ? ["ops:all-logs", tenantId, limit] : null,
+    () => getAgentLogs(tenantId as string, undefined, limit),
+    {
+      refreshInterval: REFRESH_MS,
+      fallbackData: [],
+    },
+  );
 }
 
 export function useAllPerformance() {
-  return useSWR("ops:all-performance", fetchAllPerformance, {
-    refreshInterval: REFRESH_MS,
-    fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
-  });
+  const { tenant_id: tenantId } = useTenant();
+  return useSWR(
+    tenantId ? ["ops:all-performance", tenantId] : null,
+    () => fetchAllPerformance(tenantId as string),
+    {
+      refreshInterval: REFRESH_MS,
+      fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
+    },
+  );
 }
 
 export function useAllStatuses() {
-  return useSWR("ops:all-statuses", fetchAllStatuses, {
-    refreshInterval: REFRESH_MS,
-    fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
-  });
+  const { tenant_id: tenantId } = useTenant();
+  return useSWR(
+    tenantId ? ["ops:all-statuses", tenantId] : null,
+    () => fetchAllStatuses(tenantId as string),
+    {
+      refreshInterval: REFRESH_MS,
+      fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
+    },
+  );
 }

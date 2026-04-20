@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import ExportButton from "@/components/shared/ExportButton";
 import type { Company as DBCompany } from "@/lib/types";
 
@@ -49,6 +50,7 @@ const companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]
 
 export default function CompaniesPage() {
   const router = useRouter();
+  const { tenant_id: tenantId } = useTenant();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -69,10 +71,10 @@ export default function CompaniesPage() {
   const [newCountry, setNewCountry] = useState("");
 
   async function handleCreateCompany() {
+    if (!tenantId) return;
     setCreating(true);
     try {
       const supabase = createClient();
-      const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
       const { error } = await supabase.from("companies").insert({
         name: newName,
         domain: newDomain || null,
