@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import { SEQUENCE_TEMPLATES } from "@/lib/sequence-templates";
 
 type Sequence = {
@@ -47,6 +48,7 @@ const statusColor = (status: string) => {
 
 export default function SequencesPage() {
   const router = useRouter();
+  const { tenant_id: tenantId } = useTenant();
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -89,7 +91,7 @@ export default function SequencesPage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !tenantId) return;
     setCreating(true);
 
     try {
@@ -102,7 +104,7 @@ export default function SequencesPage() {
           name: newName.trim(),
           status: "draft",
           steps_count: template?.steps.length || 0,
-          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+          tenant_id: tenantId,
         })
         .select()
         .single();
@@ -118,7 +120,7 @@ export default function SequencesPage() {
           delay_days: s.delay_days,
           subject: s.subject || null,
           body: s.body || null,
-          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+          tenant_id: tenantId,
         }));
         await supabase.from("sequence_steps").insert(steps);
       }

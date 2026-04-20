@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 import { enrichFromEmail } from "@/lib/enrichment";
 import ExportButton from "@/components/shared/ExportButton";
 import type { Contact as DBContact } from "@/lib/types";
@@ -59,6 +60,7 @@ const lifecycleStages = ["subscriber", "lead", "mql", "sql", "opportunity", "cus
 
 export default function ContactsPage() {
   const router = useRouter();
+  const { tenant_id: tenantId } = useTenant();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -89,10 +91,10 @@ export default function ContactsPage() {
   }, []);
 
   async function handleCreateContact() {
+    if (!tenantId) return;
     setCreating(true);
     try {
       const supabase = createClient();
-      const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
       const { error } = await supabase.from("contacts").insert({
         first_name: newFirstName,
         last_name: newLastName,
@@ -404,9 +406,9 @@ export default function ContactsPage() {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 onBlur={async () => {
-                  if (newEmail && newEmail.includes("@") && !newCompanyId) {
+                  if (newEmail && newEmail.includes("@") && !newCompanyId && tenantId) {
                     const supabase = createClient();
-                    const result = await enrichFromEmail(supabase, process.env.NEXT_PUBLIC_TENANT_ID || "", newEmail);
+                    const result = await enrichFromEmail(supabase, tenantId, newEmail);
                     if (result.company_id) {
                       setNewCompanyId(result.company_id);
                       setEnrichHint(`Matched to ${result.company_name}`);

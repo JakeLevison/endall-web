@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "109d88ca-983a-4bfd-9e79-c64061fd0727";
+import {
+  resolveTenantFromSession,
+  tenantUnresolvedResponse,
+} from "@/lib/tenant-server";
 
 function getSupabase() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -22,6 +24,9 @@ function getDeviceId(req: NextRequest): string | null {
 /** List conversations for this device (newest first, limit 50). */
 export async function GET(request: NextRequest) {
   try {
+    const resolved = await resolveTenantFromSession();
+    if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
+
     const deviceId = getDeviceId(request);
     if (!deviceId) {
       // No device id = no history. Safer than leaking the shared firehose.
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from("conversations")
       .select("id, title, workflow, created_at, updated_at")
-      .eq("tenant_id", TENANT_ID)
+      .eq("tenant_id", resolved.tenant_id)
       .eq("device_id", deviceId)
       .order("updated_at", { ascending: false })
       .limit(50);
@@ -51,6 +56,9 @@ export async function GET(request: NextRequest) {
 /** Create a new conversation. Body: { id?, title?, workflow? } */
 export async function POST(request: NextRequest) {
   try {
+    const resolved = await resolveTenantFromSession();
+    if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
+
     const body = await request.json();
     const deviceId = getDeviceId(request);
     if (!deviceId) {
@@ -59,7 +67,7 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase();
 
     const row: Record<string, unknown> = {
-      tenant_id: TENANT_ID,
+      tenant_id: resolved.tenant_id,
       device_id: deviceId,
     };
     if (body.id) row.id = body.id;

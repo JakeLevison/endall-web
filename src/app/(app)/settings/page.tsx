@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 
 /* ─── Company Tab ─────────────────────────────────────────────────── */
 //
@@ -646,7 +647,7 @@ function CustomFieldsTab() {
   });
   const [saving, setSaving] = useState(false);
 
-  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
+  const { tenant_id: tenantId } = useTenant();
 
   const fetchFields = async () => {
     try {

@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
+import { useTenant } from "@/lib/tenant-hook";
 
 type Prospect = {
   id: string;
@@ -79,6 +80,7 @@ const priorityColor: Record<string, string> = {
 };
 
 export default function OutreachPage() {
+  const { tenant_id: tenantId } = useTenant();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -137,7 +139,7 @@ export default function OutreachPage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!newCompany.trim()) return;
+    if (!newCompany.trim() || !tenantId) return;
     try {
       const supabase = createClient();
       const { data } = await supabase
@@ -153,7 +155,7 @@ export default function OutreachPage() {
           employee_count: newSize.trim() || null,
           priority: newPriority,
           qualifying_signal: newSignal.trim() || null,
-          tenant_id: process.env.NEXT_PUBLIC_TENANT_ID,
+          tenant_id: tenantId,
         })
         .select()
         .single();

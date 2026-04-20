@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  resolveTenantFromSession,
+  tenantUnresolvedResponse,
+} from "@/lib/tenant-server";
 
 // Proxy GET /integrations/quickbooks/invoices/{invoice_id}/qb-status.
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ invoice_id: string }> },
 ) {
   const { invoice_id } = await params;
   const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
   const adminKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
-  const tenantId =
-    request.headers.get("x-tenant-id") ||
-    process.env.NEXT_PUBLIC_TENANT_ID ||
-    "";
 
   if (!adminKey) {
     return NextResponse.json(
@@ -19,9 +19,9 @@ export async function GET(
       { status: 500 },
     );
   }
-  if (!tenantId) {
-    return NextResponse.json({ error: "tenant id missing" }, { status: 400 });
-  }
+
+  const resolved = await resolveTenantFromSession();
+  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   try {
     const resp = await fetch(
@@ -30,7 +30,7 @@ export async function GET(
         method: "GET",
         headers: {
           "X-Admin-Key": adminKey,
-          "X-Tenant-Id": tenantId,
+          "X-Tenant-Id": resolved.tenant_id,
         },
         cache: "no-store",
       },
