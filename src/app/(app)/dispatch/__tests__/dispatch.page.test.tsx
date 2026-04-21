@@ -33,25 +33,34 @@ vi.mock("swr", () => {
   };
 });
 
+// Tuesday noon UTC. Freezing to this instant and building fixtures off of it
+// via setUTCHours/setUTCDate keeps the "Today" / "This week" bucket math
+// deterministic regardless of the runner's local timezone or wall-clock.
+const FROZEN_NOW = new Date("2026-04-21T12:00:00Z");
+
 function todayIso(hour = 10) {
-  const d = new Date();
-  d.setHours(hour, 0, 0, 0);
+  const d = new Date(FROZEN_NOW);
+  d.setUTCHours(hour, 0, 0, 0);
   return d.toISOString();
 }
 
 function daysFromTodayIso(days: number, hour = 10) {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  d.setHours(hour, 0, 0, 0);
+  const d = new Date(FROZEN_NOW);
+  d.setUTCDate(d.getUTCDate() + days);
+  d.setUTCHours(hour, 0, 0, 0);
   return d.toISOString();
 }
 
 describe("Dispatch page", () => {
   beforeEach(() => {
     captureMock.mockClear();
+    // Fake only Date so setTimeout/setInterval (used by waitFor) keep real.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(FROZEN_NOW);
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
