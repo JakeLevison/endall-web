@@ -10,7 +10,7 @@
 //     Each download POST carries it through to the bridge so the file
 //     renders with their name.
 //   - If the user landed on /demo/interactive without filling the gate, the
-//     bridge falls back to "Summit MEP Services" (neutral fictional MEP
+//     bridge falls back to "Cornerstone MEP Partners" (neutral fictional MEP
 //     contractor, no collision with any real or test tenant).
 //   - Chat text still shows "your company" in the fallback case for the
 //     preset response copy — that's a UI choice, not a data dependency.
@@ -215,7 +215,7 @@ export function getDemoPresets(): Record<string, DemoPreset> {
 }
 
 /** Return the user's saved company name, or empty string if none. The
- *  bridge falls back to "Summit MEP Services" when this is empty. */
+ *  bridge falls back to "Cornerstone MEP Partners" when this is empty. */
 export function getDemoCompanyOrEmpty(): string {
   if (typeof window === "undefined") return "";
   try {
