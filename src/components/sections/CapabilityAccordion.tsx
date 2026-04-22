@@ -68,9 +68,9 @@ export default function CapabilityAccordion() {
 
   return (
     <>
-      {/* Anchor aliases - both nav links land here */}
+      {/* Features nav anchor. The How It Works anchor lives on
+          HowItWorksLifecycle so the two nav links lead to distinct sections. */}
       <div id="features" style={{ scrollMarginTop: "100px" }} />
-      <div id="how-it-works" style={{ scrollMarginTop: "100px" }} />
       <section style={{ padding: "80px 16px 40px" }}>
         <div style={{ maxWidth: "960px", margin: "0 auto" }}>
           <p

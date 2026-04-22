@@ -57,14 +57,21 @@ export default function AboutPage() {
             >
               Our mission
             </h2>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              Most MEP contractors run sophisticated operations on unsophisticated tools.
+              The phone gets missed, the estimate goes out late, the invoice sits for a
+              week, and growth hits a ceiling that has nothing to do with the work in the
+              field.
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              Endall exists to lift that ceiling. We build AI agents that run the back
+              office end to end: answering calls, qualifying leads, drafting estimates,
+              dispatching crews, pushing invoices, closing the books. Not tools your team
+              operates. A team that operates alongside them.
+            </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              MEP contractors build the backbone of every commercial building. They run
-              technically sophisticated businesses on outdated back-office tools, and the
-              data center buildout is pushing them to scale faster than they can hire.
-              Endall is the ops team they&apos;ve never been able to build: AI agents that
-              answer the phone, prospect for new work, draft estimates, dispatch crews,
-              push invoices, and keep the books. Not software your team operates. A team
-              itself.
+              A contractor with ten people in the field should be able to run like they
+              have a hundred in the office. That&apos;s the standard we build to.
             </p>
           </section>
 
@@ -84,19 +91,20 @@ export default function AboutPage() {
               Why now
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              The tools that cover the contractor back office today were built for the
-              last decade. They assumed a large office staff operating dashboards, and
-              priced themselves accordingly. Two things changed. AI became capable enough
-              to actually do the work, not just track it. The AI data center buildout
-              opened a ten-year window for MEP contractors who can scale their operations
-              as fast as they scale their crews.
+              The back-office tools MEP contractors use today were built for a world where
+              AI could track work but not do it, and where demand grew at a normal pace.
+              Both assumptions broke in the same eighteen months.
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              AI agents can now run the workflows the old tools were designed to monitor.
+              And the AI data center buildout has opened a ten-year demand window that MEP
+              contractors cannot hire their way into fast enough. The constraint has moved
+              from tools to operations, and from crews to capacity.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              Endall is built for that window. Every function in the back office is an
-              agent, not a module. Every workflow runs end-to-end, not one form at a
-              time. A contractor with ten people in the field can run like they have a
-              hundred in the office. No implementation consultants. No training. Live in
-              48 hours.
+              Endall is built for that window. Every back-office function runs as an agent.
+              Every workflow runs end to end. No implementation consultants, no training,
+              live in 48 hours.
             </p>
           </section>
 
