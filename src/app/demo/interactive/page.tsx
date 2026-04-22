@@ -5,8 +5,42 @@ import { Sparkles, BarChart3, Wallet, FileText, TrendingUp, Wrench, FileEdit, Se
 import DemoOverlay from "@/components/demo/DemoOverlay";
 import DemoProgressBar from "@/components/demo/DemoProgressBar";
 import { askEndallDemo } from "@/components/demo/ask-endall-config";
-import { getDemoPresets, type DemoFile } from "@/data/demo-presets";
+import {
+  getDemoPresets,
+  getDemoCompanyOrEmpty,
+  type DemoFile,
+} from "@/data/demo-presets";
 import ChatMessage from "@/components/chat/ChatMessage";
+
+async function fetchPresetFile(file: DemoFile): Promise<void> {
+  const resp = await fetch(`/api/demo/${file.presetPath}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      company_name: getDemoCompanyOrEmpty(),
+      // NPV preset requires a contract_value; pick a reasonable demo default
+      // matching the chat copy ("$4.25M contract"). Other presets ignore it.
+      contract_value: file.presetPath === "npv" ? 4_250_000 : undefined,
+    }),
+  });
+  if (!resp.ok) {
+    const err = await resp.text().catch(() => "");
+    throw new Error(err || `HTTP ${resp.status}`);
+  }
+  const blob = await resp.blob();
+  const url = URL.createObjectURL(blob);
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } finally {
+    // Defer revoke so Safari has time to start the download.
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+}
 
 // Preset quick actions (mirrors real QUICK_ACTIONS). Each ID maps to a cached
 // response in DEMO_PRESETS so the demo feels instant.
@@ -28,76 +62,82 @@ type SimMessage = {
   files?: DemoFile[];
 };
 
+// Mirrors DemoProgressBar's internal 250ms fade after `done=true`. The final
+// chat bubble appends at delay + FINISH_TAIL_MS so the bar has time to show
+// "Done" before it unmounts.
+const FINISH_TAIL_MS = 250;
+
 export default function InteractiveDemoPage() {
   const [demoActive, setDemoActive] = useState(true);
   const [messages, setMessages] = useState<SimMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [progressDone, setProgressDone] = useState(false);
-  const pendingRef = useRef<SimMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Render a cached preset response. The progress bar animates in parallel
-  // and we fire `done` after the preset's renderDelayMs to let the staged
-  // bar look like real work.
-  const runPreset = useCallback((presetId: string) => {
-    const preset = getDemoPresets()[presetId];
-    if (!preset) return;
+  // Schedule the progress bar's fake work and the append of the final bubble.
+  // The final message is captured by value in this closure — no ref, no
+  // callback from DemoProgressBar — so it survives React 19 StrictMode
+  // double-invocation of the state updater.
+  const scheduleFinalMessage = useCallback(
+    (finalMsg: SimMessage, delayMs: number) => {
+      setProgressDone(false);
+      setLoading(true);
+      setTimeout(() => setProgressDone(true), delayMs);
+      setTimeout(() => {
+        setLoading(false);
+        setMessages((prev) => [...prev, finalMsg]);
+      }, delayMs + FINISH_TAIL_MS);
+    },
+    []
+  );
 
-    // 1. user bubble
-    setMessages([{ id: "u-" + presetId, role: "user", content: preset.userMessage }]);
+  const runPreset = useCallback(
+    (presetId: string) => {
+      const preset = getDemoPresets()[presetId];
+      if (!preset) return;
 
-    // 2. optional intro reply (fires quickly, no progress bar)
-    const kickoff = () => {
+      setMessages([
+        { id: "u-" + presetId, role: "user", content: preset.userMessage },
+      ]);
+
+      const finalMsg: SimMessage = {
+        id: "r-" + presetId,
+        role: "assistant",
+        content: preset.response,
+        files: preset.files,
+      };
+      const delay = preset.renderDelayMs ?? 1000;
+
       if (preset.intro) {
         setTimeout(() => {
           setMessages((prev) => [
             ...prev,
             { id: "i-" + presetId, role: "assistant", content: preset.intro! },
           ]);
-          showFinal();
+          scheduleFinalMessage(finalMsg, delay);
         }, 600);
       } else {
-        showFinal();
+        scheduleFinalMessage(finalMsg, delay);
       }
-    };
-
-    // 3. show progress bar, then deliver final response + files
-    const showFinal = () => {
-      setProgressDone(false);
-      pendingRef.current = {
-        id: "r-" + presetId,
-        role: "assistant",
-        content: preset.response,
-        files: preset.files,
-      };
-      setLoading(true);
-      const delay = preset.renderDelayMs ?? 1000;
-      setTimeout(() => setProgressDone(true), delay);
-    };
-
-    kickoff();
-  }, []);
-
-  const onProgressFinished = useCallback(() => {
-    setLoading(false);
-    if (pendingRef.current) {
-      setMessages((prev) => [...prev, pendingRef.current!]);
-      pendingRef.current = null;
-    }
-  }, []);
+    },
+    [scheduleFinalMessage]
+  );
 
   const handleSendMessage = useCallback(() => {
     if (!input.trim()) return;
-    const userMsg: SimMessage = { id: String(Date.now()), role: "user", content: input };
+    const userMsg: SimMessage = {
+      id: String(Date.now()),
+      role: "user",
+      content: input,
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
-    // Pick the closest preset by keyword; fallback to a generic response.
     const q = userMsg.content.toLowerCase();
     const keywordMatch: Array<[string, string[]]> = [
       ["npv_analysis", ["npv", "return", "irr"]],
@@ -109,12 +149,13 @@ export default function InteractiveDemoPage() {
       ["competitive_analysis", ["competitor", "market", "competitive"]],
       ["capabilities_doc", ["capabilities", "deck", "company profile"]],
     ];
-    const matched = keywordMatch.find(([, kws]) => kws.some((k) => q.includes(k)));
+    const matched = keywordMatch.find(([, kws]) =>
+      kws.some((k) => q.includes(k))
+    );
     const presets = getDemoPresets();
     const preset = matched ? presets[matched[0]] : null;
 
-    setProgressDone(false);
-    pendingRef.current = preset
+    const finalMsg: SimMessage = preset
       ? {
           id: "r-" + Date.now(),
           role: "assistant",
@@ -127,9 +168,8 @@ export default function InteractiveDemoPage() {
           content:
             "That's a great question. In the full product, Endall would pull your actual pipeline, crew data, and financials to answer this. Try one of the preset actions to see a complete example.",
         };
-    setLoading(true);
-    setTimeout(() => setProgressDone(true), preset?.renderDelayMs ?? 1600);
-  }, [input]);
+    scheduleFinalMessage(finalMsg, preset?.renderDelayMs ?? 1600);
+  }, [input, scheduleFinalMessage]);
 
   const handleActionClick = useCallback(
     (actionId: string) => {
@@ -243,10 +283,16 @@ export default function InteractiveDemoPage() {
               {msg.files && msg.files.length > 0 && (
                 <div data-demo="file-download" style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                   {msg.files.map((f) => (
-                    <a
+                    <button
                       key={f.filename}
-                      href={f.url}
-                      download={f.filename}
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await fetchPresetFile(f);
+                        } catch (err) {
+                          console.error("demo preset download failed:", err);
+                        }
+                      }}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -259,7 +305,8 @@ export default function InteractiveDemoPage() {
                         fontSize: 13,
                         fontWeight: 500,
                         cursor: "pointer",
-                        textDecoration: "none",
+                        fontFamily: "inherit",
+                        textAlign: "left",
                         transition: "background 0.15s",
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(59,130,246,0.2)")}
@@ -267,7 +314,7 @@ export default function InteractiveDemoPage() {
                     >
                       <Download size={14} />
                       <span>{f.filename}</span>
-                    </a>
+                    </button>
                   ))}
                 </div>
               )}
@@ -277,7 +324,7 @@ export default function InteractiveDemoPage() {
 
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 12 }}>
-            <DemoProgressBar done={progressDone} onFinished={onProgressFinished} />
+            <DemoProgressBar done={progressDone} />
           </div>
         )}
 

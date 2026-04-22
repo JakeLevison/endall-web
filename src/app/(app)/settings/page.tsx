@@ -53,9 +53,8 @@ import { useTenant } from "@/lib/tenant-hook";
 /* ─── Company Tab ─────────────────────────────────────────────────── */
 //
 // Demo-time company switcher. Reads + writes to the bridge's
-// /settings/company endpoint (company_settings table). When Jake changes
-// "Patriot Electric" to "Mercer Mechanical" here, the next voice call uses
-// that name without a Railway redeploy.
+// /settings/company endpoint (company_settings table). Changing the value
+// here takes effect on the next voice call without a Railway redeploy.
 
 type CompanySettings = {
   company_id: string;
@@ -199,7 +198,7 @@ function CompanyTab() {
 
       <div className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {field("company_name", "Company name", "Patriot Electric")}
+          {field("company_name", "Company name", "Your company name")}
           {field("company_id", "Company ID", "default", true)}
           {field("industry", "Industry", "electrical")}
           {field("timezone", "Timezone", "America/New_York")}

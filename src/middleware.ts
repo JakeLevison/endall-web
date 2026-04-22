@@ -5,7 +5,6 @@ const PUBLIC_ROUTES = ["/", "/login", "/signup", "/no-tenant"];
 const PUBLIC_PREFIXES = [
   "/contact",
   "/demo",
-  "/demo-files",
   "/discovery",
   "/privacy",
   "/team",
