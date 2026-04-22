@@ -105,6 +105,8 @@ describe("middleware", () => {
     "/demo/request",
     "/demo/confirmation",
     "/demo/interactive",
+    "/demo-files/Patriot_Electric_NPV.xlsx",
+    "/demo-files/Patriot_Electric_Proposal.docx",
     "/discovery",
     "/privacy",
     "/team",
