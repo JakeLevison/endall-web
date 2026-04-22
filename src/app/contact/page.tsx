@@ -137,7 +137,7 @@ function ContactPageInner() {
                   marginBottom: 12,
                 }}
               >
-                Thanks — we&rsquo;ll reach out within 24 hours.
+                Thanks. We&rsquo;ll reach out within 24 hours.
               </p>
               <p
                 style={{
