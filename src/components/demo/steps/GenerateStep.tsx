@@ -33,7 +33,10 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
     try { return localStorage.getItem("endall_demo_company") || ""; }
     catch { return ""; }
   });
-  const [contractValue, setContractValue] = useState(350000);
+  // Store raw digits as a string so the field can be truly empty (placeholder
+  // "0" shows) and comma formatting stays purely presentational. type="number"
+  // previously coerced empty input to 0 and pinned an un-deletable leading 0.
+  const [contractValue, setContractValue] = useState("");
   const [loadingMsg, setLoadingMsg] = useState(LOADING_MESSAGES[0]);
   const [error] = useState("");
   const [file, setFile] = useState<{ filename: string; download_url: string } | null>(null);
@@ -183,11 +186,12 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
                   $
                 </span>
                 <input
-                  type="number"
-                  value={contractValue}
-                  onChange={(e) => setContractValue(Number(e.target.value) || 0)}
-                  min={10000}
-                  step={10000}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={contractValue ? Number(contractValue).toLocaleString("en-US") : ""}
+                  onChange={(e) => setContractValue(e.target.value.replace(/\D/g, ""))}
+                  placeholder="0"
                   style={{
                     width: "100%",
                     fontFamily: "var(--font-sans), sans-serif",
