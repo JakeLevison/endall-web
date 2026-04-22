@@ -106,6 +106,7 @@ describe("middleware", () => {
     "/demo/confirmation",
     "/demo/interactive",
     "/discovery",
+    "/features",
     "/privacy",
     "/team",
     "/terms",
