@@ -8,14 +8,14 @@ import PostHogProvider from "@/components/providers/PostHogProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Endall — AI Ops Team for MEP Contractors",
+  title: "Endall: AI Ops Team for MEP Contractors",
   description:
     "Financial models, proposals, project estimates, competitive analysis, call answering, and morning briefings. One AI ops team for MEP contractors.",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "Endall — AI Ops Team for MEP Contractors",
+    title: "Endall: AI Ops Team for MEP Contractors",
     description:
       "Financial models, proposals, project estimates, and competitive analysis. One AI ops team for MEP contractors.",
     url: "https://endall.ai",
