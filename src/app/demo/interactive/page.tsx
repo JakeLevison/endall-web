@@ -12,6 +12,17 @@ import {
 } from "@/data/demo-presets";
 import ChatMessage from "@/components/chat/ChatMessage";
 
+// Extract a filename from a Content-Disposition header, or null if absent /
+// malformed. The bridge is the source of truth for the filename — it knows
+// the fallback company name used inside the workbook, which may differ from
+// anything the client could compute (localStorage might be empty, in which
+// case the bridge substitutes its own neutral name).
+function filenameFromContentDisposition(cd: string | null): string | null {
+  if (!cd) return null;
+  const m = /filename="?([^";]+)"?/i.exec(cd);
+  return m ? m[1] : null;
+}
+
 async function fetchPresetFile(file: DemoFile): Promise<void> {
   const resp = await fetch(`/api/demo/${file.presetPath}`, {
     method: "POST",
@@ -27,12 +38,18 @@ async function fetchPresetFile(file: DemoFile): Promise<void> {
     const err = await resp.text().catch(() => "");
     throw new Error(err || `HTTP ${resp.status}`);
   }
+  // Prefer the bridge's Content-Disposition filename so the filename matches
+  // the company name actually used inside the file. Fall back to the
+  // client-computed filename if the header is missing.
+  const downloadName =
+    filenameFromContentDisposition(resp.headers.get("Content-Disposition")) ||
+    file.filename;
   const blob = await resp.blob();
   const url = URL.createObjectURL(blob);
   try {
     const a = document.createElement("a");
     a.href = url;
-    a.download = file.filename;
+    a.download = downloadName;
     document.body.appendChild(a);
     a.click();
     a.remove();
