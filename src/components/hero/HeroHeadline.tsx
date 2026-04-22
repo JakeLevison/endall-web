@@ -6,11 +6,10 @@ import { motion, useReducedMotion } from "framer-motion";
 
 // Rotating words picked for emotional resonance with contractors - these
 // are the pain points they feel every day, not abstract operational functions.
-// Ordered so the most universally painful / least self-selecting words lead.
-// "Calls" used to be first, but a contractor who answers their own phone will
-// self-select out before the second rotation. By the time Calls appears (5th),
-// they've already bought the premise.
-const words = ["Back Office", "Operations", "Paperwork", "Pipeline", "Outreach", "Calls"];
+// The animation plays once and stops permanently on "Operations" (the umbrella
+// term). Words are ordered specific-to-general so the progression builds from
+// concrete daily tasks to the full category Endall replaces.
+const words = ["Calls", "Outreach", "Paperwork", "Pipeline", "Back Office", "Operations"];
 
 export default function HeroHeadline() {
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -37,12 +36,14 @@ export default function HeroHeadline() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // Build pixel-accurate keyframes from the measured step height. We show
-  // N words + 1 duplicate of the first word for a seamless wraparound. Each
-  // word holds for ~75% of its slot then slides for the remaining ~25%.
-  const slots = words.length + 1; // +1 for the wraparound dup
+  // Build pixel-accurate keyframes from the measured step height. Each word
+  // holds for ~75% of its slot then slides for the remaining ~25%. The final
+  // keyframe pins the end position so fill-mode: forwards can hold "Operations"
+  // permanently after the single play-through completes.
+  const slots = words.length;
   const slotPct = 100 / slots;
   const holdPct = slotPct * 0.75;
+  const finalY = -stepPx * (slots - 1);
   const keyframes =
     stepPx > 0
       ? `@keyframes cycle-words-px {\n` +
@@ -52,6 +53,7 @@ export default function HeroHeadline() {
           const y = -stepPx * i;
           return `  ${startPct}%, ${holdEndPct}% { transform: translateY(${y}px); }`;
         }).join("\n") +
+        `\n  100% { transform: translateY(${finalY}px); }` +
         `\n}`
       : "";
 
@@ -136,11 +138,11 @@ export default function HeroHeadline() {
             <span
               style={{
                 display: "block",
-                animation: `cycle-words-px ${cycleSeconds}s cubic-bezier(0.16, 1, 0.3, 1) infinite`,
+                animation: `cycle-words-px ${cycleSeconds}s cubic-bezier(0.16, 1, 0.3, 1) 1 forwards`,
                 willChange: "transform",
               }}
             >
-              {[...words, words[0]].map((word, i) => (
+              {words.map((word, i) => (
                 <span
                   key={`${word}-${i}`}
                   style={{

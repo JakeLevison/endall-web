@@ -5,6 +5,7 @@ const PUBLIC_ROUTES = ["/", "/login", "/signup", "/no-tenant"];
 const PUBLIC_PREFIXES = [
   "/contact",
   "/demo",
+  "/demo-files",
   "/discovery",
   "/privacy",
   "/team",
@@ -140,6 +141,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xlsx|docx|pptx|pdf)$).*)",
   ],
 };

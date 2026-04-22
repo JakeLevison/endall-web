@@ -84,15 +84,11 @@ function PipelineView({ onTabChange }: { onTabChange: (tab: Tab) => void }) {
       {/* Revenue breakdown mini-chart */}
       {revenueExpanded && (
         <div style={{ margin: "0 20px 12px", padding: "12px 14px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg)", animation: "panel-slide 250ms ease-out" }}>
-          <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "10px" }}>Revenue by Quarter</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: "48px" }}>
-            {[{ q: "Q1", h: 45, v: "$62k" }, { q: "Q2", h: 65, v: "$89k" }, { q: "Q3", h: 55, v: "$74k" }, { q: "Q4", h: 85, v: "$59k" }].map((bar) => (
-              <div key={bar.q} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                <div style={{ width: "100%", height: `${bar.h}%`, background: "var(--brand-accent-light)", borderRadius: "3px", minHeight: "8px", transition: "height 500ms ease" }} />
-                <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>{bar.q}</span>
-              </div>
-            ))}
+          <div style={{ marginBottom: "6px" }}>
+            <div style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Revenue by Quarter</div>
+            <div style={{ fontSize: "10px", color: "var(--text-faint)", marginTop: "2px" }}>FY 2025, +74% YoY Q4</div>
           </div>
+          <RevenueChart />
         </div>
       )}
 
@@ -343,6 +339,116 @@ function TasksView() {
         ))}
       </div>
     </div>
+  );
+}
+
+/* ─── Revenue Chart ───────────────────────────────────────────────────── */
+// Chart geometry chosen so mobile scaling (SVG viewBox) keeps bar labels
+// legible at ~320px container widths.
+function RevenueChart() {
+  const BARS = [
+    { q: "Q1", v: 0.847, label: "$847K" },
+    { q: "Q2", v: 1.12, label: "$1.12M" },
+    { q: "Q3", v: 1.34, label: "$1.34M" },
+    { q: "Q4", v: 1.48, label: "$1.48M" },
+  ];
+  const YMAX = 1.5;                // $1.5M ceiling leaves headroom above Q4
+  const TARGET = 1.2;              // dashed target line
+  const CHART_TOP = 28;            // reserve space above bars for value labels
+  const CHART_BOTTOM = 160;        // baseline
+  const CHART_H = CHART_BOTTOM - CHART_TOP;
+  const LEFT = 44;                 // reserve space for Y-axis labels
+  const RIGHT = 400;               // right edge of plot area (bars/line end here)
+  const VB_W = 484;                // viewBox width reserves right margin for target label
+  const COL_W = (RIGHT - LEFT) / BARS.length;
+  const BAR_W = Math.min(60, COL_W * 0.65);
+  const yForValue = (v: number) => CHART_BOTTOM - (v / YMAX) * CHART_H;
+
+  const YTICKS = [
+    { v: YMAX, label: "$1.5M" },
+    { v: 1.0, label: "$1.0M" },
+    { v: 0.5, label: "$500K" },
+    { v: 0, label: "$0" },
+  ];
+
+  return (
+    <svg
+      viewBox={`0 0 ${VB_W} 180`}
+      role="img"
+      aria-label="Revenue by quarter, FY 2025"
+      style={{ width: "100%", height: "auto", display: "block" }}
+    >
+      {YTICKS.map((t) => (
+        <text
+          key={t.label}
+          x={LEFT - 6}
+          y={yForValue(t.v) + 3}
+          textAnchor="end"
+          fontSize="11"
+          fill="var(--text-muted)"
+        >
+          {t.label}
+        </text>
+      ))}
+
+      {BARS.map((bar, i) => {
+        const cx = LEFT + (i + 0.5) * COL_W;
+        const bx = cx - BAR_W / 2;
+        const by = yForValue(bar.v);
+        const h = CHART_BOTTOM - by;
+        return (
+          <g key={bar.q}>
+            <rect
+              x={bx}
+              y={by}
+              width={BAR_W}
+              height={h}
+              fill="var(--brand-accent-light)"
+              rx="3"
+            />
+            <text
+              x={cx}
+              y={by - 5}
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight="500"
+              fill="var(--text-primary)"
+            >
+              {bar.label}
+            </text>
+            <text
+              x={cx}
+              y={CHART_BOTTOM + 14}
+              textAnchor="middle"
+              fontSize="12"
+              fill="var(--text-muted)"
+            >
+              {bar.q}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Target line renders after bars so it overlays them */}
+      <line
+        x1={LEFT}
+        x2={RIGHT}
+        y1={yForValue(TARGET)}
+        y2={yForValue(TARGET)}
+        stroke="var(--text-faint)"
+        strokeDasharray="4 3"
+        strokeWidth="1"
+      />
+      <text
+        x={RIGHT + 4}
+        y={yForValue(TARGET) + 4}
+        textAnchor="start"
+        fontSize="11"
+        fill="var(--text-muted)"
+      >
+        Target $1.2M
+      </text>
+    </svg>
   );
 }
 
