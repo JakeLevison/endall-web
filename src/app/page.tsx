@@ -7,7 +7,6 @@ import HeroHeadline from "@/components/hero/HeroHeadline";
 import SocialProofTicker from "@/components/hero/SocialProofTicker";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import ValuePropSection from "@/components/sections/ValuePropSection";
-import CapabilityAccordion from "@/components/sections/CapabilityAccordion";
 import HowItWorksLifecycle from "@/components/sections/HowItWorksLifecycle";
 import AutonomyTiers from "@/components/sections/AutonomyTiers";
 import DashboardPreview from "@/components/sections/DashboardPreview";
@@ -51,19 +50,7 @@ export default function Home() {
           {/* 2. Why: "Here's the problem you have" */}
           <ValuePropSection />
 
-          {/* 3. How: expandable capability cards */}
-          <ScrollReveal>
-            <div
-              style={{
-                maxWidth: "1100px",
-                margin: "0 auto",
-                borderTop: "1px solid var(--border)",
-              }}
-            />
-            <CapabilityAccordion />
-          </ScrollReveal>
-
-          {/* 3a. How it works: the contractor lifecycle */}
+          {/* 3. How it works: the contractor lifecycle */}
           <ScrollReveal>
             <div
               style={{
@@ -82,22 +69,6 @@ export default function Home() {
             showVoiceCta
           />
 
-          {/* 3b. Autonomy tiers: "You decide how much Endall takes off your plate" */}
-          <div
-            style={{
-              maxWidth: "1100px",
-              margin: "0 auto",
-              borderTop: "1px solid var(--border)",
-            }}
-          />
-          <AutonomyTiers />
-
-          <InlineCTA
-            lead="Ready to choose your mode?"
-            cta="Talk to us"
-            href="/contact?intent=talk_sales"
-          />
-
           {/* 4. Proof: "Your entire operation. One screen." */}
           <div
             style={{
@@ -107,6 +78,16 @@ export default function Home() {
             }}
           />
           <DashboardPreview />
+
+          {/* 5. Autonomy tiers: "You decide how much Endall takes off your plate" */}
+          <div
+            style={{
+              maxWidth: "1100px",
+              margin: "0 auto",
+              borderTop: "1px solid var(--border)",
+            }}
+          />
+          <AutonomyTiers />
 
           {/* Social proof ticker (compact) */}
           <SocialProofTicker />

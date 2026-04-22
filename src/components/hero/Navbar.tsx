@@ -102,8 +102,7 @@ export default function Navbar() {
           style={{ flex: 1 }}
         >
           <a
-            href="/#features"
-            onClick={handleAnchorClick("features")}
+            href="/features"
             className="nav-link-hover"
             style={{
               fontFamily: "var(--font-sans), sans-serif",
@@ -313,8 +312,8 @@ export default function Navbar() {
           }}
         >
           <a
-            href="/#features"
-            onClick={(e) => { setMenuOpen(false); handleAnchorClick("features")(e); }}
+            href="/features"
+            onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-sans), sans-serif",
               fontSize: "16px",

@@ -1,14 +1,11 @@
 "use client";
 
 const teams = [
-  "Electrical Contractors",
-  "MEP Firms",
   "Mechanical Contractors",
+  "Electrical Contractors",
   "Plumbing Contractors",
   "Fire Protection",
   "Data Center Subcontractors",
-  "Commercial Electricians",
-  "Service Companies",
 ];
 
 export default function SocialProofTicker() {

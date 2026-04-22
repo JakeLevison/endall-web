@@ -175,19 +175,6 @@ export default function Testimonials() {
       style={{ padding: "80px 16px", overflow: "hidden" }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-mono), monospace",
-            fontSize: 13,
-            textTransform: "uppercase",
-            letterSpacing: 3,
-            color: "var(--text-muted)",
-            textAlign: "center",
-            marginBottom: 16,
-          }}
-        >
-          Testimonials
-        </p>
         <h2
           id="testimonials-heading"
           style={{
