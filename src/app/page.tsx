@@ -8,6 +8,7 @@ import SocialProofTicker from "@/components/hero/SocialProofTicker";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import ValuePropSection from "@/components/sections/ValuePropSection";
 import CapabilityAccordion from "@/components/sections/CapabilityAccordion";
+import HowItWorksLifecycle from "@/components/sections/HowItWorksLifecycle";
 import AutonomyTiers from "@/components/sections/AutonomyTiers";
 import DashboardPreview from "@/components/sections/DashboardPreview";
 import RoiCalculator from "@/components/sections/RoiCalculator";
@@ -44,13 +45,13 @@ export default function Home() {
         <Navbar />
 
         <main style={{ position: "relative", zIndex: 2 }}>
-          {/* 1. Hook — "We run your ___" */}
+          {/* 1. Hook: "We run your ___" */}
           <HeroHeadline />
 
-          {/* 2. Why — "Here's the problem you have" */}
+          {/* 2. Why: "Here's the problem you have" */}
           <ValuePropSection />
 
-          {/* 3. How — expandable capability cards */}
+          {/* 3. How: expandable capability cards */}
           <ScrollReveal>
             <div
               style={{
@@ -62,6 +63,18 @@ export default function Home() {
             <CapabilityAccordion />
           </ScrollReveal>
 
+          {/* 3a. How it works: the contractor lifecycle */}
+          <ScrollReveal>
+            <div
+              style={{
+                maxWidth: "1100px",
+                margin: "0 auto",
+                borderTop: "1px solid var(--border)",
+              }}
+            />
+            <HowItWorksLifecycle />
+          </ScrollReveal>
+
           <InlineCTA
             lead="Want to see this in action?"
             cta="Book a demo"
@@ -69,7 +82,7 @@ export default function Home() {
             showVoiceCta
           />
 
-          {/* 3b. Autonomy tiers — "You decide how much Endall takes off your plate" */}
+          {/* 3b. Autonomy tiers: "You decide how much Endall takes off your plate" */}
           <div
             style={{
               maxWidth: "1100px",
@@ -85,7 +98,7 @@ export default function Home() {
             href="/contact?intent=talk_sales"
           />
 
-          {/* 4. Proof — "Your entire operation. One screen." */}
+          {/* 4. Proof: "Your entire operation. One screen." */}
           <div
             style={{
               maxWidth: "1100px",
@@ -98,7 +111,7 @@ export default function Home() {
           {/* Social proof ticker (compact) */}
           <SocialProofTicker />
 
-          {/* 5. ROI — "Do the math." */}
+          {/* 5. ROI: "Do the math." */}
           <div
             style={{
               maxWidth: "1100px",
