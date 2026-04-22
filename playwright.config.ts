@@ -5,7 +5,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // 4 workers locally — matches the demo-preset E2E matrix (8 presets × 2
+  // companies = 16 combos). CI stays at 1 for determinism.
+  workers: process.env.CI ? 1 : 4,
   reporter: [['html'], ['json', { outputFile: 'test-results/results.json' }]],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',

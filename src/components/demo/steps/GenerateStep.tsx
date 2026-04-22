@@ -20,11 +20,7 @@ const LOADING_MESSAGES = [
   "Ready.",
 ];
 
-// Pre-generated NPV workbook (static asset). See public/demo-files/.
-const DEMO_NPV_FILE = {
-  filename: "NPV_Analysis_Demo.xlsx",
-  download_url: "/demo-files/Patriot_Electric_NPV.xlsx",
-};
+const FILENAME_SAFE_RE = /[^A-Za-z0-9._-]+/g;
 
 export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepProps) {
   const [phase, setPhase] = useState<Phase>("form");
@@ -38,34 +34,64 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
   // previously coerced empty input to 0 and pinned an un-deletable leading 0.
   const [contractValue, setContractValue] = useState("");
   const [loadingMsg, setLoadingMsg] = useState(LOADING_MESSAGES[0]);
-  const [error] = useState("");
-  const [file, setFile] = useState<{ filename: string; download_url: string } | null>(null);
+  const [error, setError] = useState("");
+  const [file, setFile] = useState<{ filename: string; blobUrl: string } | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    return () => timers.current.forEach(clearTimeout);
+    return () => {
+      timers.current.forEach(clearTimeout);
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
   }, []);
 
   const generate = async () => {
-    if (!companyName.trim()) return;
+    const name = companyName.trim();
+    if (!name) return;
     setPhase("generating");
+    setError("");
 
-    // Serve the pre-generated NPV workbook from /public/demo-files/ with
-    // staged loading messages so it still feels computed. Total time from
-    // click to downloadable file: ~3.2 seconds.
+    // Staged loading messages so the network call feels deliberate. Runs
+    // independently of the fetch so the animation stays smooth even if
+    // the bridge responds fast.
     LOADING_MESSAGES.forEach((msg, i) => {
       timers.current.push(setTimeout(() => setLoadingMsg(msg), i * 650));
     });
 
-    timers.current.push(
-      setTimeout(() => {
-        setFile({
-          filename: `NPV_${companyName.trim().replace(/\s+/g, "_")}.xlsx`,
-          download_url: DEMO_NPV_FILE.download_url,
-        });
-        setPhase("ready");
-      }, 3200)
-    );
+    // Contract value is optional in the UI; fall back to a sensible mid-size
+    // project number so the generated workbook still has anchors for the
+    // formulas to reference.
+    const contractNumber = contractValue ? Number(contractValue) : 350000;
+
+    try {
+      const resp = await fetch("/api/demo/npv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company_name: name,
+          contract_value: contractNumber,
+        }),
+      });
+      if (!resp.ok) {
+        const errBody = await resp.text().catch(() => "");
+        throw new Error(errBody || `HTTP ${resp.status}`);
+      }
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = blobUrl;
+
+      const safeName =
+        name.replace(FILENAME_SAFE_RE, "_").replace(/^_+|_+$/g, "") || "Sample_Company";
+      setFile({ filename: `${safeName}_NPV_Analysis.xlsx`, blobUrl });
+      setPhase("ready");
+    } catch (e) {
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setPhase("error");
+    }
   };
 
   return (
@@ -393,7 +419,7 @@ export default function GenerateStep({ onNext, onFileDownloaded }: GenerateStepP
           </p>
 
           <a
-            href={file.download_url}
+            href={file.blobUrl}
             download={file.filename}
             onClick={() => onFileDownloaded?.()}
             style={{
