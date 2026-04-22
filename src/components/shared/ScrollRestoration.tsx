@@ -23,9 +23,23 @@ export default function ScrollRestoration() {
     }
   }, []);
 
-  // Scroll to top on every route change (including initial mount)
+  // Scroll to top on every route change (including initial mount).
+  // If the URL carries a hash, scroll to that element instead so cross-page
+  // anchor links like `/#features` resolve correctly when navigating from
+  // another route. rAF lets the new page render before we measure.
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    const scrollToHashOrTop = () => {
+      const hash = window.location.hash;
+      if (hash.length > 1) {
+        const el = document.getElementById(hash.slice(1));
+        if (el) {
+          el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+          return;
+        }
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    };
+    requestAnimationFrame(scrollToHashOrTop);
   }, [pathname]);
 
   return null;

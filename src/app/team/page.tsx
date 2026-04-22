@@ -58,17 +58,19 @@ export default function AboutPage() {
               Our mission
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              Endall exists to give mechanical, electrical, and plumbing contractors the
-              operational firepower that only large general contractors can afford today.
-              We build AI that does the back-office work -- financial models, budgets,
-              estimates, proposals, competitive analysis -- so owners can focus on winning
-              jobs and running crews.
+              MEP contractors build the backbone of every commercial building. They run
+              technically sophisticated businesses on outdated back-office tools, and the
+              data center buildout is pushing them to scale faster than they can hire.
+              Endall is the ops team they&apos;ve never been able to build: AI agents that
+              answer the phone, prospect for new work, draft estimates, dispatch crews,
+              push invoices, and keep the books. Not software your team operates. A team
+              itself.
             </p>
           </section>
 
           <div style={{ borderTop: "1px solid var(--border)", marginBottom: 48 }} />
 
-          {/* Problem */}
+          {/* Why now */}
           <section style={{ marginBottom: 48 }}>
             <h2
               style={{
@@ -79,39 +81,22 @@ export default function AboutPage() {
                 marginBottom: 12,
               }}
             >
-              The problem we solve
+              Why now
             </h2>
-            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              Most MEP contractors run their operations on spreadsheets, phone calls, and
-              gut instinct. They lose bids because they can&apos;t turn around estimates fast
-              enough. They leave money on the table because nobody has time to build a real
-              financial model. Endall closes that gap with an AI operations platform that
-              produces the same deliverables a full-time analyst would -- in minutes, not
-              weeks.
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              The tools that cover the contractor back office today were built for the
+              last decade. They assumed a large office staff operating dashboards, and
+              priced themselves accordingly. Two things changed. AI became capable enough
+              to actually do the work, not just track it. The AI data center buildout
+              opened a ten-year window for MEP contractors who can scale their operations
+              as fast as they scale their crews.
             </p>
-          </section>
-
-          <div style={{ borderTop: "1px solid var(--border)", marginBottom: 48 }} />
-
-          {/* Why MEP */}
-          <section style={{ marginBottom: 48 }}>
-            <h2
-              style={{
-                fontFamily: "var(--font-sans), sans-serif",
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                marginBottom: 12,
-              }}
-            >
-              Why MEP contractors
-            </h2>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              MEP is the backbone of every building, but the trade is underserved by
-              technology. These are technically sophisticated businesses that deserve
-              modern operational tools. We chose this market because the impact is
-              immediate: faster estimates win more work, better financials improve margins,
-              and professional proposals build trust with GCs and building owners.
+              Endall is built for that window. Every function in the back office is an
+              agent, not a module. Every workflow runs end-to-end, not one form at a
+              time. A contractor with ten people in the field can run like they have a
+              hundred in the office. No implementation consultants. No training. Live in
+              48 hours.
             </p>
           </section>
 
@@ -123,7 +108,7 @@ export default function AboutPage() {
             }}
           />
 
-          {/* Meet the Founder */}
+          {/* Leadership */}
           <section style={{ marginBottom: 48 }}>
             <h2
               style={{
@@ -134,7 +119,7 @@ export default function AboutPage() {
                 marginBottom: 24,
               }}
             >
-              Meet the Founder
+              Leadership
             </h2>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 20 }}>
               <Image
@@ -167,25 +152,24 @@ export default function AboutPage() {
               </div>
             </div>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              Before founding Endall, Jake spent six years as Director of Business
-              Development at Post Harvest Technologies, a private investment and operating
-              platform dedicated to post-harvest infrastructure and logistics. He led
-              capital formation, deal origination, and investor relations {'\u2014'} building
-              institutional relationships and advancing transactions across acquisitions,
-              real estate, and development.
+              Before founding Endall, Jake spent six years at PHT Investment Group as
+              Director of Business Development, where he raised institutional capital,
+              sourced acquisitions, and worked directly with the operating teams of
+              industrial and infrastructure businesses. He watched skilled operators lose
+              bids, miss calls, and leave money on the table because they didn&apos;t
+              have the back-office capacity to keep up with their own growth. The tools
+              they needed either didn&apos;t exist or cost ten times what a growing
+              service business could justify. That gap is what led him to start Endall.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              Working closely with PHT&apos;s portfolio companies and their operations teams,
-              he saw the same pattern everywhere: skilled operators losing bids, missing
-              calls, and leaving money on the table because no one was covering the back
-              office. The tools they needed either didn&apos;t exist or cost ten times what a
-              growing service business could justify. That gap is what led him to start
-              Endall.
+              Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan
+              Stanley. He holds a B.A. in Philosophy, Politics, and Economics from the
+              University of Pennsylvania, where he played Division I baseball.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan Stanley.
-              He holds a B.A. in Philosophy, Politics, and Economics from the University
-              of Pennsylvania, where he played Division I baseball.
+              Jake is supported by a growing team across engineering, product, sales, and
+              channel partnerships, with advisors from construction, data centers, and
+              private markets.
             </p>
           </section>
 
