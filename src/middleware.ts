@@ -7,6 +7,7 @@ const PUBLIC_PREFIXES = [
   "/demo",
   "/discovery",
   "/features",
+  "/onboarding",
   "/privacy",
   "/team",
   "/terms",
