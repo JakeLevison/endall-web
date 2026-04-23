@@ -74,21 +74,29 @@ export const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
 ];
 
 export type SkillTag =
-  | "journeyman"
-  | "master"
-  | "foreman"
   | "apprentice"
-  | "mechanical-cert"
-  | "evse-cert"
+  | "journeyman-electrician"
+  | "master-electrician"
+  | "foreman"
+  | "nate"
+  | "epa-608"
+  | "osha-10"
+  | "osha-30"
+  | "bicsi"
+  | "nicet"
   | "other";
 
 export const SKILL_OPTIONS: { value: SkillTag; label: string }[] = [
   { value: "apprentice", label: "Apprentice" },
-  { value: "journeyman", label: "Journeyman" },
-  { value: "master", label: "Master" },
+  { value: "journeyman-electrician", label: "Journeyman Electrician" },
+  { value: "master-electrician", label: "Master Electrician" },
   { value: "foreman", label: "Foreman" },
-  { value: "mechanical-cert", label: "Mechanical cert" },
-  { value: "evse-cert", label: "EVSE cert" },
+  { value: "nate", label: "NATE" },
+  { value: "epa-608", label: "EPA 608" },
+  { value: "osha-10", label: "OSHA-10" },
+  { value: "osha-30", label: "OSHA-30" },
+  { value: "bicsi", label: "BICSI" },
+  { value: "nicet", label: "NICET" },
   { value: "other", label: "Other" },
 ];
 
