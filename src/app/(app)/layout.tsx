@@ -42,7 +42,8 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/command-center", label: "Command Center", icon: Activity },
-  { href: "/dispatch", label: "Dispatch", icon: Calendar },
+  { href: "/invoice-review", label: "Invoice review", icon: Calendar },
+  { href: "/dispatch", label: "Dispatch", icon: Calendar, disabled: true, tooltip: "Coming with D2" },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
@@ -57,9 +58,31 @@ const secondaryNav = [
   { href: "/outreach", label: "Outreach", icon: Send },
 ];
 
-function NavLink({ item, pathname }: { item: { href: string; label: string; icon: React.ElementType }; pathname: string }) {
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  disabled?: boolean;
+  tooltip?: string;
+};
+
+function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   const isActive = pathname === item.href
     || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+
+  if (item.disabled) {
+    return (
+      <span
+        title={item.tooltip}
+        aria-disabled="true"
+        className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[13px] cursor-not-allowed opacity-60"
+        style={{ color: "var(--text-muted)" }}
+      >
+        <item.icon className="size-4 shrink-0" />
+        {item.label}
+      </span>
+    );
+  }
 
   return (
     <Link

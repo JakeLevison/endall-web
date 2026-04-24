@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicRoute(pathname)) {
     if (user && (pathname === "/login" || pathname === "/signup")) {
-      return NextResponse.redirect(new URL("/dispatch", request.url));
+      return NextResponse.redirect(new URL("/invoice-review", request.url));
     }
     return supabaseResponse;
   }

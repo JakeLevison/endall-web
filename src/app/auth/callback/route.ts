@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") || "/dispatch";
+  const next = searchParams.get("next") || "/invoice-review";
 
   if (!code) {
     const loginUrl = new URL("/login", origin);
