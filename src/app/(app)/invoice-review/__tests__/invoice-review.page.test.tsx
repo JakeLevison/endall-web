@@ -64,7 +64,7 @@ describe("Dispatch page", () => {
     vi.restoreAllMocks();
   });
 
-  it("fires dispatch_page_viewed posthog event on mount", async () => {
+  it("fires invoice_review_page_viewed posthog event on mount", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
@@ -74,7 +74,7 @@ describe("Dispatch page", () => {
     );
     render(<DispatchPage />);
     await waitFor(() => {
-      expect(captureMock).toHaveBeenCalledWith("dispatch_page_viewed");
+      expect(captureMock).toHaveBeenCalledWith("invoice_review_page_viewed");
     });
   });
 

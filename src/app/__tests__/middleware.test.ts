@@ -48,7 +48,7 @@ describe("middleware", () => {
 
   it("bypass on: valid admin_key + tenant_id allows access", async () => {
     const req = makeRequest(
-      "/dispatch?admin_key=secret-admin-key&tenant_id=abc-123"
+      "/invoice-review?admin_key=secret-admin-key&tenant_id=abc-123"
     );
     const res = await middleware(req);
 
@@ -62,7 +62,7 @@ describe("middleware", () => {
     mockUser = { id: "user-1" };
     mockMembership = { tenant_id: "tenant-xyz" };
 
-    const req = makeRequest("/dispatch");
+    const req = makeRequest("/invoice-review");
     const res = await middleware(req);
 
     expect(res.status).toBe(200);
@@ -74,13 +74,13 @@ describe("middleware", () => {
     vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "false");
     mockUser = null;
 
-    const req = makeRequest("/dispatch");
+    const req = makeRequest("/invoice-review");
     const res = await middleware(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
     expect(location).toContain("/login");
-    expect(location).toContain("redirect=%2Fdispatch");
+    expect(location).toContain("redirect=%2Finvoice-review");
   });
 
   it("bypass off + session + no membership redirects to /no-tenant", async () => {

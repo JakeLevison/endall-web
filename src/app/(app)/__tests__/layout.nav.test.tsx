@@ -13,8 +13,15 @@ describe("App layout navigation", () => {
     expect(source).toMatch(/label:\s*"Command Center"/);
   });
 
-  it("includes a Dispatch link pointing to /dispatch", () => {
+  it("includes an Invoice review link pointing to /invoice-review", () => {
+    expect(source).toMatch(/href:\s*"\/invoice-review"/);
+    expect(source).toMatch(/label:\s*"Invoice review"/);
+  });
+
+  it("includes a disabled Dispatch nav slot with a Coming with D2 tooltip", () => {
     expect(source).toMatch(/href:\s*"\/dispatch"/);
     expect(source).toMatch(/label:\s*"Dispatch"/);
+    expect(source).toMatch(/disabled:\s*true/);
+    expect(source).toMatch(/tooltip:\s*"Coming with D2"/);
   });
 });

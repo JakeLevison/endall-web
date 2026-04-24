@@ -7,11 +7,11 @@ import { posthog } from "@/lib/posthog";
 import {
   JobStatusControl,
   type JobStatus,
-} from "@/components/dispatch/JobStatusControl";
+} from "@/components/invoice-review/JobStatusControl";
 import {
   InvoiceModal,
   type InvoiceJobSummary,
-} from "@/components/dispatch/InvoiceModal";
+} from "@/components/invoice-review/InvoiceModal";
 
 type DispatchJob = {
   id: string;
@@ -72,7 +72,7 @@ export default function DispatchPage() {
   const [invoiceJob, setInvoiceJob] = useState<InvoiceJobSummary | null>(null);
 
   useEffect(() => {
-    posthog.capture("dispatch_page_viewed");
+    posthog.capture("invoice_review_page_viewed");
   }, []);
 
   useEffect(() => {
