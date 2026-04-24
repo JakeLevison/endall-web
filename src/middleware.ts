@@ -1,7 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { parseTenantSlug } from "@/lib/subdomain";
 
 const PUBLIC_ROUTES = ["/", "/login", "/signup", "/no-tenant"];
+// Paths served by the (tenant) route group. Requests on a valid tenant
+// subdomain receive x-tenant-slug; requests on the main marketing domain
+// never reach these paths because they do not exist outside (tenant).
+const TENANT_PATH_PREFIXES = ["/approve", "/invoice", "/tech"];
 const PUBLIC_PREFIXES = [
   "/contact",
   "/demo",
@@ -39,6 +44,31 @@ function withTenantCookie(response: NextResponse, tenantId: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
+
+  // Subdomain-first routing. If the Host header resolves to a valid tenant
+  // slug, rewrite the request to the (tenant) route group by injecting an
+  // x-tenant-slug header and skipping the contractor auth pipeline. All
+  // subsequent logic (marketing public routes, Supabase session checks)
+  // belongs to the main endall.ai surface only.
+  const tenantSlug = parseTenantSlug(request.headers.get("host"));
+  if (tenantSlug) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-tenant-slug", tenantSlug);
+
+    // Any path that is not a tenant-facing surface gets a neutral 404
+    // redirect to /tenant-not-found. Keeps subdomains from leaking any
+    // Endall marketing content.
+    const isTenantPath = TENANT_PATH_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + "/"),
+    );
+    if (!isTenantPath && pathname !== "/" && !pathname.startsWith("/_next")) {
+      const notFoundUrl = request.nextUrl.clone();
+      notFoundUrl.pathname = "/tenant-not-found";
+      return NextResponse.rewrite(notFoundUrl, { request: { headers: requestHeaders } });
+    }
+
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   let supabaseResponse = NextResponse.next({ request });
 
