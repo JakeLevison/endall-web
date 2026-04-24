@@ -45,6 +45,17 @@ function withTenantCookie(response: NextResponse, tenantId: string) {
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
+  // Defense-in-depth: middleware owns x-tenant-slug and x-tenant-id. Strip
+  // any client-supplied values up front so no downstream handler can ever
+  // observe an attacker-controlled tenant header. The tenant-subdomain
+  // branch re-sets x-tenant-slug from the validated host; the contractor
+  // branch re-sets x-tenant-id from the Supabase session. Per PR #21
+  // threat model: docs/security/pr21-subdomain-routing-threat-model.md
+  // finding 1.
+  const baseHeaders = new Headers(request.headers);
+  baseHeaders.delete("x-tenant-slug");
+  baseHeaders.delete("x-tenant-id");
+
   // Subdomain-first routing. If the Host header resolves to a valid tenant
   // slug, rewrite the request to the (tenant) route group by injecting an
   // x-tenant-slug header and skipping the contractor auth pipeline. All
@@ -52,8 +63,8 @@ export async function middleware(request: NextRequest) {
   // belongs to the main endall.ai surface only.
   const tenantSlug = parseTenantSlug(request.headers.get("host"));
   if (tenantSlug) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-tenant-slug", tenantSlug);
+    const tenantHeaders = new Headers(baseHeaders);
+    tenantHeaders.set("x-tenant-slug", tenantSlug);
 
     // Any path that is not a tenant-facing surface gets a neutral 404
     // redirect to /tenant-not-found. Keeps subdomains from leaking any
@@ -64,13 +75,13 @@ export async function middleware(request: NextRequest) {
     if (!isTenantPath && pathname !== "/" && !pathname.startsWith("/_next")) {
       const notFoundUrl = request.nextUrl.clone();
       notFoundUrl.pathname = "/tenant-not-found";
-      return NextResponse.rewrite(notFoundUrl, { request: { headers: requestHeaders } });
+      return NextResponse.rewrite(notFoundUrl, { request: { headers: tenantHeaders } });
     }
 
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return NextResponse.next({ request: { headers: tenantHeaders } });
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({ request: { headers: baseHeaders } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,7 +95,13 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          // Rebuild with stripped tenant headers. request.headers now
+          // reflects the rotated Supabase cookies; baseHeaders from the
+          // initial snapshot does not. Re-strip each time to stay closed.
+          const rotatedHeaders = new Headers(request.headers);
+          rotatedHeaders.delete("x-tenant-slug");
+          rotatedHeaders.delete("x-tenant-id");
+          supabaseResponse = NextResponse.next({ request: { headers: rotatedHeaders } });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -114,7 +131,7 @@ export async function middleware(request: NextRequest) {
     const expectedKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
 
     if (adminKey && tenantId && expectedKey && adminKey === expectedKey) {
-      const headers = new Headers(request.headers);
+      const headers = new Headers(baseHeaders);
       headers.set("x-tenant-id", tenantId);
       return withTenantCookie(
         NextResponse.next({ request: { headers } }),
@@ -143,7 +160,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rebuild response with tenant header for downstream routes
-  const headers = new Headers(request.headers);
+  const headers = new Headers(baseHeaders);
   headers.set("x-tenant-id", membership.tenant_id);
   supabaseResponse = NextResponse.next({ request: { headers } });
   withTenantCookie(supabaseResponse, membership.tenant_id);

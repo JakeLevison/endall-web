@@ -32,8 +32,8 @@ use an ALIAS/ANAME at your DNS provider.
 
 Open the `endall-web` project in Vercel and add these domains:
 
-1. `endall.app` (apex) — root marketing fallback
-2. `*.endall.app` — tenant wildcard
+1. `endall.app` (apex) - root marketing fallback
+2. `*.endall.app` - tenant wildcard
 3. `www.endall.app` → redirects to `endall.ai` (optional, keeps users on
    the canonical marketing domain)
 
