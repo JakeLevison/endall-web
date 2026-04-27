@@ -45,6 +45,25 @@ function withTenantCookie(response: NextResponse, tenantId: string) {
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
+  // endall.app apex redirects to endall.ai. The .app domain hosts tenant
+  // surfaces at {slug}.endall.app only; the apex falling through to the
+  // contractor auth pipeline causes SEO duplicate content and wrong UX.
+  // Per PR #21 threat model finding 3
+  // (docs/security/pr21-subdomain-routing-threat-model.md). Subdomains of
+  // endall.app are unaffected and continue through tenant routing below.
+  const rawHost = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
+  if (rawHost === "endall.app") {
+    // Build the redirect URL with the setter form, not the relative-URL
+    // constructor. A pathname like "//evil.com" passed as the relative spec
+    // would let the URL parser reinterpret evil.com as the authority and
+    // redirect off-domain. The pathname setter normalizes leading "//" and
+    // cannot change the host.
+    const target = new URL("https://endall.ai");
+    target.pathname = pathname;
+    target.search = request.nextUrl.search;
+    return NextResponse.redirect(target, 308);
+  }
+
   // Defense-in-depth: middleware owns x-tenant-slug and x-tenant-id. Strip
   // any client-supplied values up front so no downstream handler can ever
   // observe an attacker-controlled tenant header. The tenant-subdomain

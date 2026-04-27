@@ -47,12 +47,16 @@ vi.mock("next/server", async (importOriginal) => {
     }
     return OriginalNextResponse.rewrite(url, init);
   });
+  const redirectSpy = vi.fn(
+    (url: URL | string, init?: number | ResponseInit) =>
+      OriginalNextResponse.redirect(url, init),
+  );
   const PatchedResponse = Object.assign(
     function () {
       return new OriginalNextResponse();
     },
     OriginalNextResponse,
-    { next: nextSpy, rewrite: rewriteSpy },
+    { next: nextSpy, rewrite: rewriteSpy, redirect: redirectSpy },
   );
   return { ...actual, NextResponse: PatchedResponse };
 });
@@ -184,6 +188,43 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-id")).toBe("legit-tenant-uuid");
     expect(downstreamHeaders!.get("x-tenant-slug")).toBeNull();
+  });
+
+  it("endall.app apex (no path): 308-redirects to endall.ai/", async () => {
+    // Threat model finding 3: apex must not fall through to the contractor
+    // auth pipeline. Subdomains of endall.app remain on tenant routing.
+    const req = makeRequest("/", { host: "endall.app" });
+    const res = await middleware(req);
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe("https://endall.ai/");
+  });
+
+  it("endall.app/contact: 308-redirects preserving path", async () => {
+    const req = makeRequest("/contact", { host: "endall.app" });
+    const res = await middleware(req);
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe("https://endall.ai/contact");
+  });
+
+  it("endall.app with path-injected authority (//evil.com): redirects on-domain, not off-domain", async () => {
+    // Open-redirect regression: a relative-URL constructor would resolve
+    // "//evil.com" against the base as the authority and produce
+    // https://evil.com/. The middleware uses the URL setter form so the
+    // host is locked to endall.ai regardless of what pathname contains.
+    const req = makeRequest("//evil.com", { host: "endall.app" });
+    const res = await middleware(req);
+    expect(res.status).toBe(308);
+    const location = res.headers.get("location") ?? "";
+    expect(new URL(location).host).toBe("endall.ai");
+  });
+
+  it("endall.app/?utm=test&ref=foo: 308-redirects preserving query string", async () => {
+    const req = makeRequest("/?utm=test&ref=foo", { host: "endall.app" });
+    const res = await middleware(req);
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe(
+      "https://endall.ai/?utm=test&ref=foo",
+    );
   });
 
   it("admin bypass path with client-supplied x-tenant-slug: stripped, bypass tenant-id wins", async () => {
