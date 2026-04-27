@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/lib/tenant-hook";
+import {
+  EmailIntegrationCard,
+  OutlookComingSoonCard,
+} from "@/components/integrations/EmailIntegrationCard";
 
 type QbStatus =
   | { connected: false }
@@ -37,8 +41,13 @@ export default function IntegrationsPage() {
   const params = useQueryParams();
   const adminKey = params?.admin_key || "";
   const tenantIdFromUrl = params?.tenant_id || "";
-  const connectedFlag = params?.connected || "";
-  const errorFlag = params?.error || "";
+  const providerFlag = params?.provider || "";
+  // Hide the QuickBooks success/error banners when an email-integration
+  // callback lands here. The EmailIntegrationCard owns those toasts.
+  const isEmailProviderCallback =
+    providerFlag === "gmail" || providerFlag === "microsoft";
+  const connectedFlag = isEmailProviderCallback ? "" : params?.connected || "";
+  const errorFlag = isEmailProviderCallback ? "" : params?.error || "";
 
   const [status, setStatus] = useState<QbStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -291,6 +300,9 @@ export default function IntegrationsPage() {
             </div>
           )}
         </section>
+
+        <EmailIntegrationCard />
+        <OutlookComingSoonCard />
       </div>
     </main>
   );
