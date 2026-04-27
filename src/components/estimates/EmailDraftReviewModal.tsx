@@ -244,8 +244,8 @@ export function EmailDraftReviewModal({ estimateId, open, onClose }: Props) {
                 </p>
               ) : (
                 <p className="text-xs text-amber-600">
-                  PDF rendering pending , the customer will receive a link to
-                  view the estimate online.
+                  PDF rendering is pending. The customer will receive a link
+                  to view the estimate online.
                 </p>
               )}
               <p className="text-xs text-neutral-500">

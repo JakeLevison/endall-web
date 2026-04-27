@@ -29,10 +29,14 @@ export async function GET(
     url.pathname = `/estimates/${encodeURIComponent(summary.estimate_id)}/public`;
     url.searchParams.set("token", token);
     const resp = await fetch(url, { cache: "no-store" });
-    if (resp.status === 404) return NOT_FOUND;
+    // Collapse every non-2xx to a uniform 404. This denies an enumeration
+    // oracle: the bridge's 502 / 500 / detail-bearing 4xx would otherwise
+    // distinguish "token resolves but estimate row missing" from "token
+    // does not resolve at all". H1 in the R2-8b security review.
+    if (!resp.ok) return NOT_FOUND;
     const text = await resp.text();
     return new NextResponse(text, {
-      status: resp.status,
+      status: 200,
       headers: {
         "Content-Type":
           resp.headers.get("content-type") || "application/json",
@@ -41,6 +45,8 @@ export async function GET(
     });
   } catch (err) {
     console.error("public approval proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
+    // Public surface returns the same 404 shape on infra failure to keep
+    // the oracle uniform (H3). Real cause is in the server log.
+    return NOT_FOUND;
   }
 }

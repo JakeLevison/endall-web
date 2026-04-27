@@ -18,10 +18,10 @@ export async function GET(
     url.pathname = `/estimates/${encodeURIComponent(summary.estimate_id)}/comments`;
     url.searchParams.set("token", token);
     const resp = await fetch(url, { cache: "no-store" });
-    if (resp.status === 404) return NOT_FOUND;
+    if (!resp.ok) return NOT_FOUND;
     const text = await resp.text();
     return new NextResponse(text, {
-      status: resp.status,
+      status: 200,
       headers: {
         "Content-Type":
           resp.headers.get("content-type") || "application/json",
@@ -30,7 +30,7 @@ export async function GET(
     });
   } catch (err) {
     console.error("public comments GET proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
+    return NOT_FOUND;
   }
 }
 
@@ -68,10 +68,10 @@ export async function POST(
       body: JSON.stringify({ body: text, token }),
       cache: "no-store",
     });
-    if (resp.status === 404) return NOT_FOUND;
+    if (!resp.ok) return NOT_FOUND;
     const out = await resp.text();
     return new NextResponse(out, {
-      status: resp.status,
+      status: 201,
       headers: {
         "Content-Type":
           resp.headers.get("content-type") || "application/json",
@@ -80,6 +80,6 @@ export async function POST(
     });
   } catch (err) {
     console.error("public comments POST proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
+    return NOT_FOUND;
   }
 }

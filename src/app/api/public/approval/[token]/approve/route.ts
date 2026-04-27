@@ -7,6 +7,10 @@ const NOT_FOUND = NextResponse.json({ error: "not found" }, { status: 404 });
 
 const SIGNATURE_BLOB_MAX_BYTES = 200_000;
 const SIGNED_NAME_MAX = 120;
+// PNG / JPEG only. SVG is HTML-equivalent for XSS purposes when later
+// rendered in <object> or via dangerouslySetInnerHTML, so do not allow
+// it through this public proxy. H4 in the R2-8b security review.
+const SIGNATURE_DATA_URL = /^data:image\/(png|jpe?g);base64,[A-Za-z0-9+/=]+$/;
 
 export async function POST(
   req: NextRequest,
@@ -32,11 +36,20 @@ export async function POST(
       { status: 400 },
     );
   }
-  if (typeof sig === "string" && sig.length > SIGNATURE_BLOB_MAX_BYTES) {
-    return NextResponse.json(
-      { error: "signature_blob too large" },
-      { status: 413 },
-    );
+  if (typeof sig === "string") {
+    // Buffer.byteLength counts honest bytes; sig.length is UTF-16 units.
+    if (Buffer.byteLength(sig, "utf8") > SIGNATURE_BLOB_MAX_BYTES) {
+      return NextResponse.json(
+        { error: "signature_blob too large" },
+        { status: 413 },
+      );
+    }
+    if (!SIGNATURE_DATA_URL.test(sig)) {
+      return NextResponse.json(
+        { error: "signature_blob must be a base64 data URL of a PNG or JPEG" },
+        { status: 400 },
+      );
+    }
   }
   const cleanName =
     typeof signedName === "string" ? signedName.slice(0, SIGNED_NAME_MAX) : null;
@@ -54,10 +67,10 @@ export async function POST(
       }),
       cache: "no-store",
     });
-    if (resp.status === 404) return NOT_FOUND;
+    if (!resp.ok) return NOT_FOUND;
     const text = await resp.text();
     return new NextResponse(text, {
-      status: resp.status,
+      status: 200,
       headers: {
         "Content-Type":
           resp.headers.get("content-type") || "application/json",
@@ -66,6 +79,6 @@ export async function POST(
     });
   } catch (err) {
     console.error("public approve proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
+    return NOT_FOUND;
   }
 }

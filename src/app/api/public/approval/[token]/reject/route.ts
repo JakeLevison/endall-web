@@ -40,10 +40,10 @@ export async function POST(
       }),
       cache: "no-store",
     });
-    if (resp.status === 404) return NOT_FOUND;
+    if (!resp.ok) return NOT_FOUND;
     const text = await resp.text();
     return new NextResponse(text, {
-      status: resp.status,
+      status: 200,
       headers: {
         "Content-Type":
           resp.headers.get("content-type") || "application/json",
@@ -52,6 +52,6 @@ export async function POST(
     });
   } catch (err) {
     console.error("public reject proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
+    return NOT_FOUND;
   }
 }

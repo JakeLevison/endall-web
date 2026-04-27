@@ -9,12 +9,23 @@
 
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import {
   CustomerApprovalView,
   type PublicEstimate,
 } from "@/components/estimates/CustomerApprovalView";
 
 export const dynamic = "force-dynamic";
+
+// The token is in the URL path. Without these directives, the URL can
+// leak via Referer to subresources, end up in browser history, or get
+// indexed if the customer ever pastes it into a public surface. H2 in
+// the R2-8b security review.
+export const metadata: Metadata = {
+  title: "Estimate approval",
+  robots: { index: false, follow: false, nocache: true },
+  other: { referrer: "no-referrer" },
+};
 
 async function fetchApproval(
   token: string,
