@@ -96,8 +96,24 @@ export function EmailIntegrationCard() {
     }
   }, []);
 
-  const handleConnect = useCallback(() => {
-    window.location.href = "/api/oauth/gmail/authorize";
+  const handleConnect = useCallback(async () => {
+    try {
+      const res = await fetch("/api/oauth/gmail/authorize", {
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        toast.error(`Could not start Gmail connect (${res.status}).`);
+        return;
+      }
+      const { auth_url } = (await res.json()) as { auth_url?: string };
+      if (typeof auth_url !== "string" || !auth_url) {
+        toast.error("Could not start Gmail connect (no auth URL).");
+        return;
+      }
+      window.location.href = auth_url;
+    } catch (err) {
+      toast.error((err as Error).message || "Could not start Gmail connect.");
+    }
   }, []);
 
   const handleDisconnect = useCallback(async () => {

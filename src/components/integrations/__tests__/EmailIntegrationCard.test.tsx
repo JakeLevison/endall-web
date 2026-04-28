@@ -169,6 +169,59 @@ describe("EmailIntegrationCard", () => {
     });
   });
 
+  it("connect button fetches /api/oauth/gmail/authorize and navigates to auth_url", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ connected: false, provider: "gmail" }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ auth_url: "https://accounts.google.test/oauth?state=abc" }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<EmailIntegrationCard />);
+
+    const user = userEvent.setup();
+    const connectBtn = await screen.findByTestId("gmail-connect");
+    await user.click(connectBtn);
+
+    await waitFor(() => {
+      const authorizeCall = fetchMock.mock.calls.find((c) =>
+        String(c[0]).includes("/api/oauth/gmail/authorize"),
+      );
+      expect(authorizeCall).toBeTruthy();
+    });
+
+    await waitFor(() => {
+      expect(window.location.href).toBe(
+        "https://accounts.google.test/oauth?state=abc",
+      );
+    });
+  });
+
+  it("connect button shows an error toast when /api/oauth/gmail/authorize fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ connected: false, provider: "gmail" }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ error: "bridge unavailable" }, 502));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<EmailIntegrationCard />);
+
+    const user = userEvent.setup();
+    const connectBtn = await screen.findByTestId("gmail-connect");
+    await user.click(connectBtn);
+
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
+        expect.stringContaining("Could not start Gmail connect"),
+      );
+    });
+  });
+
   it("disconnect button posts to /api/oauth/gmail/disconnect and refetches", async () => {
     const fetchMock = vi
       .fn()

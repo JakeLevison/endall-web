@@ -2,9 +2,11 @@
  * Customer-facing estimate approval page.
  *
  * Server fetches /api/public/approval/{token}. The proxy resolves the
- * token to estimate_id via SUPABASE_SERVICE_ROLE_KEY and round-trips
- * to the bridge. Any miss (token not found, expired, used) returns a
- * uniform 404 so we never leak an enumeration oracle.
+ * token to estimate_id by calling the bridge's unauthenticated
+ * GET /public/approval/{token} (R2-8c) and round-trips for the full
+ * estimate payload. Any miss (token not found, expired, used, or any
+ * infra failure) returns a uniform 404 so we never leak an enumeration
+ * oracle. No service-role key is involved on this path.
  */
 
 import { headers } from "next/headers";

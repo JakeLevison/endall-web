@@ -1,18 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { lookupApprovalByToken } from "@/lib/approval-token";
+import { resolveApprovalMetaViaBridge } from "@/lib/approval-bridge";
 
 const BRIDGE_URL =
   process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
 
-const NOT_FOUND = NextResponse.json(
-  { error: "not found" },
-  { status: 404 },
-);
+// Factory rather than a singleton: NextResponse bodies are streams and
+// can only be consumed once, so two concurrent requests sharing one
+// instance would race on the body reader.
+const notFound = () =>
+  NextResponse.json({ error: "not found" }, { status: 404 });
 
 /**
- * Public token-only resolver. Maps `/approve/{token}` to the bridge's
- * `/estimates/{id}/public?token=` because the bridge does not (yet)
- * expose a token-only endpoint. See /tmp/r2-8b-questions.md (1).
+ * Public token resolver. Calls the bridge's unauthenticated
+ * `GET /public/approval/{token}` (R2-8c) to validate the token and
+ * obtain estimate_id, then forwards to `/estimates/{id}/public?token=`
+ * for the full estimate payload the approval view renders.
  *
  * On any miss returns a uniform 404 to deny enumeration oracles.
  */
@@ -21,19 +23,19 @@ export async function GET(
   context: { params: Promise<{ token: string }> },
 ) {
   const { token } = await context.params;
-  const summary = await lookupApprovalByToken(token);
-  if (!summary) return NOT_FOUND;
+  const meta = await resolveApprovalMetaViaBridge(token);
+  if (!meta) return notFound();
 
   try {
     const url = new URL(BRIDGE_URL);
-    url.pathname = `/estimates/${encodeURIComponent(summary.estimate_id)}/public`;
+    url.pathname = `/estimates/${encodeURIComponent(meta.estimate_id)}/public`;
     url.searchParams.set("token", token);
     const resp = await fetch(url, { cache: "no-store" });
     // Collapse every non-2xx to a uniform 404. This denies an enumeration
     // oracle: the bridge's 502 / 500 / detail-bearing 4xx would otherwise
     // distinguish "token resolves but estimate row missing" from "token
     // does not resolve at all". H1 in the R2-8b security review.
-    if (!resp.ok) return NOT_FOUND;
+    if (!resp.ok) return notFound();
     const text = await resp.text();
     return new NextResponse(text, {
       status: 200,
@@ -47,6 +49,6 @@ export async function GET(
     console.error("public approval proxy failed:", err);
     // Public surface returns the same 404 shape on infra failure to keep
     // the oracle uniform (H3). Real cause is in the server log.
-    return NOT_FOUND;
+    return notFound();
   }
 }
