@@ -15,7 +15,6 @@ vi.mock("next/navigation", () => ({
 
 import IntegrationsPage from "../page";
 
-const BRIDGE_URL = "https://ask-endall-bridge-production.up.railway.app";
 const TENANT_ID = "109d88ca-983a-4bfd-9e79-c64061fd0727";
 const ADMIN_KEY = "test-key-123";
 
@@ -85,7 +84,9 @@ describe("IntegrationsPage", () => {
     render(<IntegrationsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/^not connected$/i)).toBeInTheDocument();
+      // The QB card and the Gmail card both render "Not connected"; assert
+      // at least one (QB) is present.
+      expect(screen.getAllByText(/^not connected$/i).length).toBeGreaterThanOrEqual(1);
     });
     expect(
       screen.getByRole("button", { name: /connect quickbooks/i }),
@@ -106,24 +107,52 @@ describe("IntegrationsPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/Sandbox Company US 1096/)).toBeInTheDocument();
     });
+    // QB Disconnect plus, when Gmail status mock matches connected:true,
+    // a second Disconnect from the Gmail card. Only the QB Disconnect is
+    // load-bearing for this test.
     expect(
-      screen.getByRole("button", { name: /disconnect/i }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("button", { name: /disconnect/i }).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
-  it("connect button constructs correct authorize URL", async () => {
+  it("connect button (bypass mode) fetches bridge with X-Admin-Key and navigates to auth_url", async () => {
     const nav = setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}`);
-    mockFetchStatus({ connected: false });
+    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
+      const u = typeof url === "string" ? url : url.toString();
+      if (u.includes("/quickbooks/status")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ connected: false }),
+        } as unknown as Response;
+      }
+      if (u.includes("/integrations/quickbooks/authorize")) {
+        // The bridge contract (R2-8c) is JSON {auth_url} with admin_key
+        // forwarded only via X-Admin-Key, never in the query string.
+        const headers = (init?.headers ?? {}) as Record<string, string>;
+        if (headers["X-Admin-Key"] !== ADMIN_KEY) {
+          throw new Error("expected X-Admin-Key header");
+        }
+        if (u.includes("admin_key=")) {
+          throw new Error("admin_key must not appear in the URL");
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ auth_url: "https://intuit.test/oauth?state=xyz" }),
+        } as unknown as Response;
+      }
+      return { ok: false, status: 404, json: async () => ({}) } as unknown as Response;
+    });
+    (globalThis.fetch as unknown) = fetchMock;
 
     render(<IntegrationsPage />);
     const btn = await screen.findByRole("button", { name: /connect quickbooks/i });
     fireEvent.click(btn);
 
-    expect(nav.href).toBe(
-      `${BRIDGE_URL}/integrations/quickbooks/authorize?tenant_id=${encodeURIComponent(
-        TENANT_ID,
-      )}&admin_key=${encodeURIComponent(ADMIN_KEY)}`,
-    );
+    await waitFor(() => {
+      expect(nav.href).toBe("https://intuit.test/oauth?state=xyz");
+    });
   });
 
   it("success banner appears when connected=1 in query", async () => {

@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTenant } from "@/lib/tenant-hook";
+import {
+  EmailIntegrationCard,
+  OutlookComingSoonCard,
+} from "@/components/integrations/EmailIntegrationCard";
 
 type QbStatus =
   | { connected: false }
@@ -37,8 +41,13 @@ export default function IntegrationsPage() {
   const params = useQueryParams();
   const adminKey = params?.admin_key || "";
   const tenantIdFromUrl = params?.tenant_id || "";
-  const connectedFlag = params?.connected || "";
-  const errorFlag = params?.error || "";
+  const providerFlag = params?.provider || "";
+  // Hide the QuickBooks success/error banners when an email-integration
+  // callback lands here. The EmailIntegrationCard owns those toasts.
+  const isEmailProviderCallback =
+    providerFlag === "gmail" || providerFlag === "microsoft";
+  const connectedFlag = isEmailProviderCallback ? "" : params?.connected || "";
+  const errorFlag = isEmailProviderCallback ? "" : params?.error || "";
 
   const [status, setStatus] = useState<QbStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,15 +107,36 @@ export default function IntegrationsPage() {
     fetchStatus();
   }, [params, fetchStatus]);
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (!tenantId) return;
-    if (bypassMode) {
-      const url = `${BRIDGE_URL}/integrations/quickbooks/authorize?tenant_id=${encodeURIComponent(
-        tenantId,
-      )}&admin_key=${encodeURIComponent(adminKey)}`;
-      window.location.href = url;
-    } else {
-      window.location.href = "/api/quickbooks/authorize";
+    try {
+      let res: Response;
+      if (bypassMode) {
+        // Bypass mode (admin debugging): hit the bridge directly with
+        // X-Admin-Key. The bridge returns { auth_url }; navigate to it.
+        const url = new URL(BRIDGE_URL);
+        url.pathname = "/integrations/quickbooks/authorize";
+        url.searchParams.set("tenant_id", tenantId);
+        res = await fetch(url, {
+          headers: { "X-Admin-Key": adminKey },
+          cache: "no-store",
+        });
+      } else {
+        // Session mode: hit our proxy, which holds admin_key server-side.
+        res = await fetch("/api/quickbooks/authorize", { cache: "no-store" });
+      }
+      if (!res.ok) {
+        setLoadError(`authorize request failed (${res.status})`);
+        return;
+      }
+      const { auth_url } = (await res.json()) as { auth_url?: string };
+      if (typeof auth_url !== "string" || !auth_url) {
+        setLoadError("authorize returned no auth URL");
+        return;
+      }
+      window.location.href = auth_url;
+    } catch (err) {
+      setLoadError((err as Error).message || "authorize request failed");
     }
   };
 
@@ -291,6 +321,9 @@ export default function IntegrationsPage() {
             </div>
           )}
         </section>
+
+        <EmailIntegrationCard />
+        <OutlookComingSoonCard />
       </div>
     </main>
   );
