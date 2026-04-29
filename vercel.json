@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api-bridge/public/oauth/consume-session",
+      "destination": "https://ask-endall-bridge-production.up.railway.app/public/oauth/consume-session"
+    }
+  ]
+}

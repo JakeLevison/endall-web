@@ -2,7 +2,34 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { parseTenantSlug } from "@/lib/subdomain";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/no-tenant"];
+// Constant-time string compare. Equivalent to crypto.timingSafeEqual
+// from node:crypto but works on the Edge runtime, where node:crypto is
+// not available. Returns false on length mismatch (matching the Node
+// behavior of throwing) and otherwise XORs the byte arrays in full
+// regardless of where the first mismatch is, so the comparison time
+// does not leak how many leading bytes matched. The early length
+// return leaks only candidate length, which the cookie/URL parser
+// already bounds before we reach this function.
+const _TS_ENC = new TextEncoder();
+function timingSafeEqualString(a: string, b: string): boolean {
+  const ab = _TS_ENC.encode(a);
+  const bb = _TS_ENC.encode(b);
+  if (ab.length !== bb.length) return false;
+  let diff = 0;
+  for (let i = 0; i < ab.length; i++) diff |= ab[i] ^ bb[i];
+  return diff === 0;
+}
+
+// Exact-match public routes. /oauth/handshake is here (not in
+// PUBLIC_PREFIXES) so a future /oauth/<anything-else> path stays
+// authenticated by default instead of inheriting public access.
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/signup",
+  "/no-tenant",
+  "/oauth/handshake",
+];
 // Paths served by the (tenant) route group. Requests on a valid tenant
 // subdomain receive x-tenant-slug; requests on the main marketing domain
 // never reach these paths because they do not exist outside (tenant).
@@ -142,14 +169,56 @@ export async function middleware(request: NextRequest) {
 
   // --- Protected routes below ---
 
-  // Bypass path: admin_key + tenant_id in URL
+  // Bypass path: cookie set by /oauth/handshake (R2-8d) OR direct
+  // admin_key + tenant_id in URL (legacy R2-8c admin debugging URL).
   const bypassEnabled = process.env.ADMIN_KEY_BYPASS_ENABLED === "true";
   if (bypassEnabled) {
-    const adminKey = searchParams.get("admin_key");
-    const tenantId = searchParams.get("tenant_id");
     const expectedKey = process.env.ASK_ENDALL_ADMIN_KEY || "";
 
-    if (adminKey && tenantId && expectedKey && adminKey === expectedKey) {
+    // Cookie path (R2-8d): host-only HttpOnly endall_session is set by
+    // /oauth/handshake/route.ts after it consumes a single-use session_id
+    // from the bridge. Cookie value is JSON {admin_key, tenant_id}. The
+    // middleware decodes it server-side and rewrites the request URL so
+    // the page sees admin_key + tenant_id via useSearchParams() without
+    // either ever appearing in the browser URL.
+    const sessionRaw = request.cookies.get("endall_session")?.value;
+    if (sessionRaw && expectedKey) {
+      try {
+        const parsed = JSON.parse(sessionRaw) as {
+          admin_key?: string;
+          tenant_id?: string;
+        };
+        const cookieAdminKey = parsed.admin_key || "";
+        const cookieTenantId = parsed.tenant_id || "";
+        if (
+          cookieAdminKey &&
+          cookieTenantId &&
+          timingSafeEqualString(cookieAdminKey, expectedKey)
+        ) {
+          const rewriteUrl = request.nextUrl.clone();
+          rewriteUrl.searchParams.set("admin_key", cookieAdminKey);
+          rewriteUrl.searchParams.set("tenant_id", cookieTenantId);
+          const headers = new Headers(baseHeaders);
+          headers.set("x-tenant-id", cookieTenantId);
+          const response = NextResponse.rewrite(rewriteUrl, {
+            request: { headers },
+          });
+          return withTenantCookie(response, cookieTenantId);
+        }
+      } catch {
+        // Malformed cookie - fall through.
+      }
+    }
+
+    const adminKey = searchParams.get("admin_key");
+    const tenantId = searchParams.get("tenant_id");
+
+    if (
+      adminKey &&
+      tenantId &&
+      expectedKey &&
+      timingSafeEqualString(adminKey, expectedKey)
+    ) {
       const headers = new Headers(baseHeaders);
       headers.set("x-tenant-id", tenantId);
       return withTenantCookie(

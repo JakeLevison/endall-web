@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTenant } from "@/lib/tenant-hook";
 import {
   EmailIntegrationCard,
@@ -22,32 +22,30 @@ const BRIDGE_URL =
   process.env.NEXT_PUBLIC_BRIDGE_URL ||
   "https://ask-endall-bridge-production.up.railway.app";
 
-function useQueryParams(): Record<string, string> | null {
-  const [params, setParams] = useState<Record<string, string> | null>(null);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    const out: Record<string, string> = {};
-    url.searchParams.forEach((v, k) => {
-      out[k] = v;
-    });
-    setParams(out);
-  }, []);
-  return params;
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <IntegrationsPageInner />
+    </Suspense>
+  );
 }
 
-export default function IntegrationsPage() {
+function IntegrationsPageInner() {
   const router = useRouter();
-  const params = useQueryParams();
-  const adminKey = params?.admin_key || "";
-  const tenantIdFromUrl = params?.tenant_id || "";
-  const providerFlag = params?.provider || "";
+  // useSearchParams reflects the routing-layer URL, which is what the
+  // middleware rewrites server-side after consuming endall_session
+  // cookie. The browser address bar stays clean (no admin_key); the
+  // page reads admin_key + tenant_id from the rewritten URL only.
+  const params = useSearchParams();
+  const adminKey = params?.get("admin_key") || "";
+  const tenantIdFromUrl = params?.get("tenant_id") || "";
+  const providerFlag = params?.get("provider") || "";
   // Hide the QuickBooks success/error banners when an email-integration
   // callback lands here. The EmailIntegrationCard owns those toasts.
   const isEmailProviderCallback =
     providerFlag === "gmail" || providerFlag === "microsoft";
-  const connectedFlag = isEmailProviderCallback ? "" : params?.connected || "";
-  const errorFlag = isEmailProviderCallback ? "" : params?.error || "";
+  const connectedFlag = isEmailProviderCallback ? "" : params?.get("connected") || "";
+  const errorFlag = isEmailProviderCallback ? "" : params?.get("error") || "";
 
   const [status, setStatus] = useState<QbStatus | null>(null);
   const [loading, setLoading] = useState(true);

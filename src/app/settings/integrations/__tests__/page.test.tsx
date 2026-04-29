@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 
 const routerReplaceMock = vi.fn();
+let mockSearchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: routerReplaceMock,
@@ -11,6 +12,7 @@ vi.mock("next/navigation", () => ({
     prefetch: vi.fn(),
     forward: vi.fn(),
   }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 import IntegrationsPage from "../page";
@@ -19,8 +21,13 @@ const TENANT_ID = "109d88ca-983a-4bfd-9e79-c64061fd0727";
 const ADMIN_KEY = "test-key-123";
 
 function setLocation(search: string) {
+  // Set both window.location (for the connected-banner cleanup useEffect
+  // which still operates on the browser URL) and useSearchParams's
+  // mocked return value (which the page reads for admin_key/tenant_id
+  // since R2-8d, since the middleware rewrites those server-side).
   const url = `https://endall.ai/settings/integrations${search}`;
   const u = new URL(url);
+  mockSearchParams = new URLSearchParams(u.search);
   const navHolder = { href: u.href };
   const loc = {
     get href() {
