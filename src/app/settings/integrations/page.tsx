@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTenant } from "@/lib/tenant-hook";
 import {
@@ -23,6 +23,14 @@ const BRIDGE_URL =
   "https://ask-endall-bridge-production.up.railway.app";
 
 export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <IntegrationsPageInner />
+    </Suspense>
+  );
+}
+
+function IntegrationsPageInner() {
   const router = useRouter();
   // useSearchParams reflects the routing-layer URL, which is what the
   // middleware rewrites server-side after consuming endall_session
