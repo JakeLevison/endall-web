@@ -205,6 +205,115 @@ describe("DispatchPage", () => {
     render(<DispatchPage />);
     expect(await screen.findByTestId("dispatch-partial-warning")).toBeTruthy();
   });
+
+  it("renders error state when Approve returns 5xx", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED))
+      .mockResolvedValueOnce(jsonResponse({ detail: "boom" }, 500));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    const button = await screen.findByTestId("dispatch-approve");
+    await userEvent.click(button);
+
+    expect(await screen.findByTestId("dispatch-error")).toBeTruthy();
+    expect(screen.getByText(/Approval failed/i)).toBeTruthy();
+  });
+
+  it("renders the overridden status without an Approve button", async () => {
+    const overridden = { ...FIXTURE_PROPOSED, status: "overridden" };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(overridden)),
+    );
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-status-badge").textContent).toBe(
+        "Overridden",
+      ),
+    );
+    expect(screen.queryByTestId("dispatch-approve")).toBeNull();
+  });
+
+  it("disables Approve and updates label while approving", async () => {
+    let resolveApprove: ((v: Response) => void) | null = null;
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED))
+      .mockImplementationOnce(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveApprove = resolve;
+          }),
+      );
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    const button = (await screen.findByTestId(
+      "dispatch-approve",
+    )) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    await userEvent.click(button);
+
+    // While the approve fetch is in flight, the button must be disabled
+    // and labeled "Approving..." so a fast double-click cannot fire a
+    // second request.
+    await waitFor(() => {
+      const inflight = screen.getByTestId(
+        "dispatch-approve",
+      ) as HTMLButtonElement;
+      expect(inflight.disabled).toBe(true);
+      expect(inflight.textContent).toMatch(/Approving/);
+    });
+
+    await act(async () => {
+      resolveApprove?.(jsonResponse({ ...FIXTURE_PROPOSED, status: "approved" }));
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-status-badge").textContent).toBe(
+        "Approved",
+      ),
+    );
+  });
+
+  it("invalid ?date param falls through to default view date", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "not-a-date");
+    withFrozenNow("2026-04-25T10:00:00", () => {
+      render(<DispatchPage />);
+    });
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
+    // Bad ?date= should not be passed through; default-view-date is
+    // computed instead. At 10:00 local on 2026-04-25, default is today.
+    expect(fetchSpy.mock.calls[0][0]).toContain("/api/day-plans/2026-04-25");
+  });
+
+  it("renders no-assignments message on a proposed plan with empty tech list", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        jsonResponse({
+          ...FIXTURE_PROPOSED,
+          tech_assignments: [],
+          job_summaries: {},
+        }),
+      ),
+    );
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    expect(await screen.findByTestId("dispatch-no-assignments")).toBeTruthy();
+    // Approve still surfaces because plan is proposed.
+    expect(screen.getByTestId("dispatch-approve")).toBeTruthy();
+  });
 });
 
 // ---------------------------------------------------------------------------

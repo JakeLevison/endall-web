@@ -7,7 +7,10 @@ import {
 const BRIDGE_URL =
   process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// YYYY-MM-DD with month 01-12 and day 01-31. The bridge is the source of
+// truth for date semantics, but rejecting structurally-bad values at the
+// edge avoids forwarding 400s to the bridge log surface.
+const DATE_PATTERN = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 // POST /api/day-plans/{date}/approve
 //

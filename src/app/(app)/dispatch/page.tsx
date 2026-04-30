@@ -49,7 +49,13 @@ function defaultViewDate(now: Date = new Date()): string {
 }
 
 function isValidDate(s: string | null): s is string {
-  return !!s && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  // Same shape as the API DATE_PATTERN; structurally-bad ?date= params
+  // fall through to defaultViewDate() instead of being passed to the
+  // proxy.
+  return (
+    !!s &&
+    /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(s)
+  );
 }
 
 function formatHumanDate(iso: string): string {
