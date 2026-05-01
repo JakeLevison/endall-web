@@ -3,6 +3,10 @@
     {
       "source": "/api-bridge/public/oauth/consume-session",
       "destination": "https://ask-endall-bridge-production.up.railway.app/public/oauth/consume-session"
+    },
+    {
+      "source": "/api/oauth/google/callback",
+      "destination": "https://ask-endall-bridge-production.up.railway.app/integrations/gmail/callback"
     }
   ]
 }
