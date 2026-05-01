@@ -487,18 +487,59 @@ function TeamTab() {
 
 /* ─── Integrations Tab ────────────────────────────────────────────── */
 
-const integrations = [
-  { name: "Gmail", description: "Sync emails and send messages from your CRM.", icon: Mail, connected: false },
-  { name: "Google Calendar", description: "Sync meetings and schedule events.", icon: Calendar, connected: false },
-  { name: "Slack", description: "Get notifications and updates in Slack.", icon: MessageSquare, connected: false },
-  { name: "Telegram", description: "Receive alerts and control via Telegram.", icon: Send, connected: false },
-  { name: "Zoho Mail", description: "Connect your Zoho Mail account.", icon: Mail, connected: false },
-  { name: "Brevo", description: "Email campaigns and marketing automation.", icon: Mail, connected: false },
-  { name: "LinkedIn", description: "Import contacts and track engagement.", icon: Link, connected: false },
-  { name: "Webhooks", description: "Send and receive data via HTTP webhooks.", icon: Webhook, connected: false },
+type Integration = {
+  slug: string;
+  name: string;
+  description: string;
+  icon: typeof Mail;
+  available: boolean;
+};
+
+const integrations: Integration[] = [
+  { slug: "gmail", name: "Gmail", description: "Send estimate approvals from your inbox so customers reply to you.", icon: Mail, available: true },
+  { slug: "google-calendar", name: "Google Calendar", description: "Sync meetings and schedule events.", icon: Calendar, available: false },
+  { slug: "slack", name: "Slack", description: "Get notifications and updates in Slack.", icon: MessageSquare, available: false },
+  { slug: "telegram", name: "Telegram", description: "Receive alerts and control via Telegram.", icon: Send, available: false },
+  { slug: "zoho-mail", name: "Zoho Mail", description: "Connect your Zoho Mail account.", icon: Mail, available: false },
+  { slug: "brevo", name: "Brevo", description: "Email campaigns and marketing automation.", icon: Mail, available: false },
+  { slug: "linkedin", name: "LinkedIn", description: "Import contacts and track engagement.", icon: Link, available: false },
+  { slug: "webhooks", name: "Webhooks", description: "Send and receive data via HTTP webhooks.", icon: Webhook, available: false },
 ];
 
+async function startGmailOAuth(setError: (msg: string | null) => void) {
+  setError(null);
+  try {
+    const res = await fetch("/api/oauth/gmail/authorize", { cache: "no-store" });
+    if (!res.ok) {
+      setError(`Could not start Gmail connect (${res.status}).`);
+      return;
+    }
+    const { auth_url } = (await res.json()) as { auth_url?: string };
+    if (typeof auth_url !== "string" || !auth_url) {
+      setError("Could not start Gmail connect (no auth URL).");
+      return;
+    }
+    window.location.href = auth_url;
+  } catch (err) {
+    setError((err as Error).message || "Could not start Gmail connect.");
+  }
+}
+
 function IntegrationsTab() {
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleConnect = async (slug: string) => {
+    if (connecting) return;
+    if (slug !== "gmail") return;
+    setConnecting(slug);
+    try {
+      await startGmailOAuth(setError);
+    } finally {
+      setConnecting(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -506,37 +547,50 @@ function IntegrationsTab() {
         <p className="text-[11px] text-[var(--text-muted)]">Connect external services to your workspace.</p>
       </div>
       <Separator className="bg-[var(--overlay-soft)]" />
+
+      {error && (
+        <div className="px-3 py-2 rounded-md border border-red-500/30 bg-red-500/10 text-[12px] text-red-300">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {integrations.map((int) => (
-          <div
-            key={int.name}
-            className="p-4 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-weak)] transition-colors"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="size-9 rounded-lg bg-[var(--overlay-soft)] border border-[var(--border)] flex items-center justify-center">
-                <int.icon className="size-4 text-[var(--text-tertiary)]" />
-              </div>
-              <Badge
-                variant="outline"
-                className={`text-[10px] font-normal ${
-                  int.connected
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                    : "bg-zinc-500/10 text-[var(--text-muted)] border-zinc-500/20"
-                }`}
-              >
-                {int.connected ? "Connected" : "Not connected"}
-              </Badge>
-            </div>
-            <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">{int.name}</p>
-            <p className="text-[11px] text-[var(--text-muted)] mb-3 leading-relaxed">{int.description}</p>
-            <Button
-              variant="ghost"
-              className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent"
+        {integrations.map((int) => {
+          const isConnecting = connecting === int.slug;
+          return (
+            <div
+              key={int.slug}
+              className="p-4 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-weak)] transition-colors"
             >
-              Connect
-            </Button>
-          </div>
-        ))}
+              <div className="flex items-start justify-between mb-3">
+                <div className="size-9 rounded-lg bg-[var(--overlay-soft)] border border-[var(--border)] flex items-center justify-center">
+                  <int.icon className="size-4 text-[var(--text-tertiary)]" />
+                </div>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-normal bg-zinc-500/10 text-[var(--text-muted)] border-zinc-500/20"
+                >
+                  {int.available ? "Not connected" : "Coming soon"}
+                </Badge>
+              </div>
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">{int.name}</p>
+              <p className="text-[11px] text-[var(--text-muted)] mb-3 leading-relaxed">{int.description}</p>
+              <Button
+                variant="ghost"
+                data-testid={`settings-${int.slug}-connect`}
+                onClick={int.available ? () => handleConnect(int.slug) : undefined}
+                disabled={!int.available || isConnecting}
+                className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {int.available
+                  ? isConnecting
+                    ? "Starting…"
+                    : "Connect"
+                  : "Coming soon"}
+              </Button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
