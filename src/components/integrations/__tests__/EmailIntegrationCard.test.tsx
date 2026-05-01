@@ -169,6 +169,37 @@ describe("EmailIntegrationCard", () => {
     });
   });
 
+  it("shows success toast (not failure) when status is connected even if URL has a downstream error", async () => {
+    // Bridge contract: after token persistence, mint_redirect_session
+    // can fail and the bridge redirects with ?error=session_mint_failed
+    // (no connected=1). Tokens are already stored, so /status returns
+    // connected. Showing "Gmail connection failed" here is the bug.
+    setSearch("?error=session_mint_failed&provider=gmail");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          connected: true,
+          provider: "gmail",
+          account_email: "ops@acme.test",
+          connected_at: "2026-04-25T10:00:00Z",
+          scope: "openid email gmail.send",
+          status: "connected",
+          last_refresh_error: null,
+        }),
+      ),
+    );
+
+    render(<EmailIntegrationCard />);
+
+    await waitFor(() => {
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Gmail connected successfully.",
+      );
+    });
+    expect(toastError).not.toHaveBeenCalled();
+  });
+
   it("connect button fetches /api/oauth/gmail/authorize and navigates to auth_url", async () => {
     const fetchMock = vi
       .fn()

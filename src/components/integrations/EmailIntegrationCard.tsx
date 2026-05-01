@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type GmailStatus =
@@ -38,7 +38,13 @@ function readableError(code: string): string {
   return ERROR_LABELS[code] || `Gmail connection failed (${code}).`;
 }
 
-function consumeUrlFlags() {
+type CallbackFlags = {
+  connected: string | null;
+  error: string | null;
+  provider: string | null;
+};
+
+function consumeUrlFlags(): CallbackFlags | null {
   if (typeof window === "undefined") return null;
   const url = new URL(window.location.href);
   const connected = url.searchParams.get("connected");
@@ -50,6 +56,7 @@ function consumeUrlFlags() {
   url.searchParams.delete("error");
   url.searchParams.delete("provider");
   url.searchParams.delete("admin_key");
+  url.searchParams.delete("session_id");
   const next =
     url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : "");
   window.history.replaceState({}, "", next);
@@ -61,6 +68,8 @@ export function EmailIntegrationCard() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pendingFlags, setPendingFlags] = useState<CallbackFlags | null>(null);
+  const flagsHandledRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
     setLoading(true);
@@ -87,14 +96,34 @@ export function EmailIntegrationCard() {
   }, [fetchStatus]);
 
   useEffect(() => {
-    const flags = consumeUrlFlags();
-    if (!flags) return;
-    if (flags.connected === "1" && flags.provider !== "microsoft") {
-      toast.success("Gmail connected successfully.");
-    } else if (flags.error) {
-      toast.error(readableError(flags.error));
-    }
+    setPendingFlags(consumeUrlFlags());
   }, []);
+
+  useEffect(() => {
+    if (!pendingFlags) return;
+    if (loading) return;
+    if (flagsHandledRef.current) return;
+    flagsHandledRef.current = true;
+
+    const isMicrosoft = pendingFlags.provider === "microsoft";
+    const urlSaysConnected = pendingFlags.connected === "1";
+    const statusSaysConnected =
+      !!status &&
+      status.connected &&
+      status.status === "connected";
+
+    // Trust the live status over URL params: the bridge can emit
+    // ?error=session_mint_failed (or similar post-persist errors) AFTER
+    // tokens are already stored. The connection is real; the URL error
+    // reflects a downstream cookie-handshake hiccup the user does not
+    // need to see as a failure. Showing the failure toast on a working
+    // connection is the bug we are fixing.
+    if ((urlSaysConnected || statusSaysConnected) && !isMicrosoft) {
+      toast.success("Gmail connected successfully.");
+    } else if (pendingFlags.error) {
+      toast.error(readableError(pendingFlags.error));
+    }
+  }, [pendingFlags, loading, status]);
 
   const handleConnect = useCallback(async () => {
     try {
