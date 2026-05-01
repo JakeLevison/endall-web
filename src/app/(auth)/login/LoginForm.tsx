@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/invoice-review";
+  const redirect = searchParams.get("redirect") || "/dashboard";
   const urlError = searchParams.get("error");
 
   const [email, setEmail] = useState("");

@@ -30,15 +30,15 @@ beforeEach(() => {
 });
 
 describe("auth callback route", () => {
-  it("valid code exchanges session and redirects to /invoice-review", async () => {
+  it("valid code exchanges session and redirects to /dashboard", async () => {
     const req = new NextRequest(
-      new URL("/auth/callback?code=valid-code&next=/invoice-review", "https://endall.ai")
+      new URL("/auth/callback?code=valid-code&next=/dashboard", "https://endall.ai")
     );
     const res = await GET(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
-    expect(location).toContain("/invoice-review");
+    expect(location).toContain("/dashboard");
   });
 
   it("missing code redirects to /login with error", async () => {
