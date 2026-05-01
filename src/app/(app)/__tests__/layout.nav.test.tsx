@@ -18,10 +18,15 @@ describe("App layout navigation", () => {
     expect(source).toMatch(/label:\s*"Invoice review"/);
   });
 
-  it("includes a disabled Dispatch nav slot with a Coming with D2 tooltip", () => {
+  it("includes an enabled Dispatch nav link pointing to /dispatch", () => {
     expect(source).toMatch(/href:\s*"\/dispatch"/);
     expect(source).toMatch(/label:\s*"Dispatch"/);
-    expect(source).toMatch(/disabled:\s*true/);
-    expect(source).toMatch(/tooltip:\s*"Coming with D2"/);
+    // Now that R2-9b is live, the Dispatch slot must NOT carry the
+    // disabled / tooltip flags. A regression that re-disables the link
+    // should fail this test.
+    expect(source).not.toMatch(
+      /href:\s*"\/dispatch",[\s\S]{0,120}disabled:\s*true/,
+    );
+    expect(source).not.toMatch(/tooltip:\s*"Coming with D2"/);
   });
 });

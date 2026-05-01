@@ -43,7 +43,7 @@ const primaryNav = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/command-center", label: "Command Center", icon: Activity },
   { href: "/invoice-review", label: "Invoice review", icon: Calendar },
-  { href: "/dispatch", label: "Dispatch", icon: Calendar, disabled: true, tooltip: "Coming with D2" },
+  { href: "/dispatch", label: "Dispatch", icon: Calendar },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
