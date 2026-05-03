@@ -15,6 +15,15 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
 }));
 
+let mockTenantState: {
+  tenant_id: string | null;
+  loading: boolean;
+  error: string | null;
+} = { tenant_id: null, loading: false, error: "no_session" };
+vi.mock("@/lib/tenant-hook", () => ({
+  useTenant: () => mockTenantState,
+}));
+
 import IntegrationsPage from "../page";
 
 const TENANT_ID = "109d88ca-983a-4bfd-9e79-c64061fd0727";
@@ -69,20 +78,70 @@ function mockFetchStatus(body: unknown, ok = true) {
 describe("IntegrationsPage", () => {
   beforeEach(() => {
     routerReplaceMock.mockClear();
+    mockTenantState = { tenant_id: null, loading: false, error: "no_session" };
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("renders unauthorized when no tenant resolvable", async () => {
+  it("renders sign-in message when no tenant resolvable", async () => {
     setLocation("");
+    mockTenantState = { tenant_id: null, loading: false, error: "no_session" };
     render(<IntegrationsPage />);
     await waitFor(() => {
       expect(
-        screen.getByText(/unauthorized\. please include admin_key/i),
+        screen.getByText(/couldn.t determine your workspace/i),
       ).toBeInTheDocument();
     });
+    // The stale admin_key copy must not return.
+    expect(
+      screen.queryByText(/please include admin_key/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders nothing (no admin_key flash) while tenant is still loading", async () => {
+    // OAuth callback redirect lands here with no admin_key/tenant_id in
+    // the URL. useTenant() needs a tick to resolve the Supabase session;
+    // during that tick, the page must not flash the unauthorized message.
+    setLocation("?connected=1&provider=gmail");
+    mockTenantState = { tenant_id: null, loading: true, error: null };
+    mockFetchStatus({ connected: false });
+    const { container } = render(<IntegrationsPage />);
+
+    // Nothing rendered for the page surface.
+    expect(container.firstChild).toBeNull();
+    // And specifically the admin_key copy is absent.
+    expect(
+      screen.queryByText(/please include admin_key/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/couldn.t determine your workspace/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("post-OAuth redirect resolves to connected UI once tenant hook returns the session tenant", async () => {
+    setLocation("?connected=1&provider=gmail");
+    mockTenantState = {
+      tenant_id: TENANT_ID,
+      loading: false,
+      error: null,
+    };
+    mockFetchStatus({
+      connected: true,
+      company_name: "Sandbox Company US 1096",
+      environment: "sandbox",
+      connected_at: "2026-04-14T12:00:00+00:00",
+      auto_push_enabled: true,
+    });
+    render(<IntegrationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Sandbox Company US 1096/)).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText(/please include admin_key/i),
+    ).not.toBeInTheDocument();
   });
 
   it("renders not-connected state when status returns connected: false", async () => {

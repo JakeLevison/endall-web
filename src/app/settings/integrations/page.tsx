@@ -54,7 +54,7 @@ function IntegrationsPageInner() {
   const [showConnectedBanner, setShowConnectedBanner] = useState(false);
 
   const bypassMode = !!adminKey;
-  const { tenant_id: sessionTenantId } = useTenant();
+  const { tenant_id: sessionTenantId, loading: tenantLoading } = useTenant();
   const tenantId = tenantIdFromUrl || sessionTenantId || "";
 
   useEffect(() => {
@@ -198,10 +198,16 @@ function IntegrationsPageInner() {
   }
 
   if (!bypassMode && !tenantId) {
+    // While useTenant is still resolving the Supabase session, render
+    // nothing instead of flashing an unauthorized message. The OAuth
+    // callback path (handshake -> /settings/integrations) lands here
+    // with no admin_key and no tenant_id in the URL; the session-derived
+    // tenant_id arrives a tick later.
+    if (tenantLoading) return null;
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full rounded-lg border border-white/10 p-6 text-sm text-white/80">
-          Unauthorized. Please include admin_key in the URL.
+          Couldn&apos;t determine your workspace. Please sign in again.
         </div>
       </main>
     );
