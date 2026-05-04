@@ -194,3 +194,94 @@ describe("POST /api/day-plans/[date]/approve", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("POST /api/day-plans/[date]/override", () => {
+  it("returns 403 when session is unresolved", async () => {
+    mockResolution = { ok: false, code: "NO_SESSION" };
+    const { POST } = await import("../day-plans/[date]/override/route");
+    const { NextRequest } = await import("next/server");
+    const req = new NextRequest(
+      "http://localhost/api/day-plans/2026-04-25/override",
+      { method: "POST", body: "{}" },
+    );
+    const res = await POST(req, {
+      params: Promise.resolve({ date: "2026-04-25" }),
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects malformed date with 400", async () => {
+    const { POST } = await import("../day-plans/[date]/override/route");
+    const { NextRequest } = await import("next/server");
+    const req = new NextRequest(
+      "http://localhost/api/day-plans/foo/override",
+      { method: "POST", body: "{}" },
+    );
+    const res = await POST(req, {
+      params: Promise.resolve({ date: "foo" }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("forwards X-Tenant-Id and request body to the bridge", async () => {
+    const fetchSpy = vi.fn<(input: URL | string, init?: RequestInit) => Promise<Response>>();
+    fetchSpy.mockResolvedValue(
+      new Response(JSON.stringify({ status: "overridden" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    const { POST } = await import("../day-plans/[date]/override/route");
+    const { NextRequest } = await import("next/server");
+    const payload = {
+      tech_assignments: [
+        { tech_id: "tech-1", job_ids: ["job-1"], sequence_order: ["job-1"] },
+      ],
+      notes: "moved bath GFCI to Bea",
+    };
+    const req = new NextRequest(
+      "http://localhost/api/day-plans/2026-04-25/override",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const res = await POST(req, {
+      params: Promise.resolve({ date: "2026-04-25" }),
+    });
+    expect(res.status).toBe(200);
+    const calledUrl = fetchSpy.mock.calls[0][0];
+    const urlStr = typeof calledUrl === "string" ? calledUrl : calledUrl.toString();
+    expect(urlStr).toContain("/day-plans/2026-04-25/override");
+    const init = fetchSpy.mock.calls[0][1];
+    expect(init?.method).toBe("POST");
+    expect(((init?.headers ?? {}) as Record<string, string>)["X-Tenant-Id"]).toBe(
+      "ten-abc",
+    );
+    expect(String(init?.body ?? "")).toContain("moved bath GFCI to Bea");
+  });
+
+  it("passes 409 from bridge through to client (race with 6am expiry)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({ detail: "plan has expired; cannot override" }),
+          { status: 409, headers: { "Content-Type": "application/json" } },
+        ),
+      ),
+    );
+    const { POST } = await import("../day-plans/[date]/override/route");
+    const { NextRequest } = await import("next/server");
+    const req = new NextRequest(
+      "http://localhost/api/day-plans/2026-04-25/override",
+      { method: "POST", body: "{}" },
+    );
+    const res = await POST(req, {
+      params: Promise.resolve({ date: "2026-04-25" }),
+    });
+    expect(res.status).toBe(409);
+  });
+});
