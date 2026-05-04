@@ -7,6 +7,10 @@
     {
       "source": "/api/oauth/google/callback",
       "destination": "https://ask-endall-bridge-production.up.railway.app/integrations/gmail/callback"
+    },
+    {
+      "source": "/api/webhooks/stripe",
+      "destination": "https://ask-endall-bridge-production.up.railway.app/api/webhooks/stripe"
     }
   ]
 }
