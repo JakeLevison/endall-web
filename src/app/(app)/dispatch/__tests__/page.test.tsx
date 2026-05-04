@@ -390,3 +390,286 @@ describe("DispatchPage default date logic", () => {
     expect(fetchSpy.mock.calls[0][0]).toContain("/api/day-plans/2026-05-01");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Override mode (Slice 2).
+//
+// Backend contract: POST /day-plans/{date}/override accepts
+// { tech_assignments, notes? } and flips status to "overridden". Response
+// is the un-expanded DayPlanOut shape, so the page refetches GET to
+// repopulate tech_name + job_summaries before re-rendering.
+// ---------------------------------------------------------------------------
+
+const FIXTURE_PROPOSED_TWO_TECHS = {
+  id: "dp-2",
+  tenant_id: "tenant-A",
+  plan_date: "2026-04-25",
+  status: "proposed",
+  approved_at: null,
+  tech_assignments: [
+    {
+      tech_id: "tech-1",
+      tech_name: "Alex Carter",
+      job_ids: ["job-1", "job-2"],
+      sequence_order: ["job-1", "job-2"],
+      travel_minutes_estimated: 12,
+    },
+    {
+      tech_id: "tech-2",
+      tech_name: "Bea Diaz",
+      job_ids: ["job-3"],
+      sequence_order: ["job-3"],
+      travel_minutes_estimated: 8,
+    },
+  ],
+  job_summaries: {
+    "job-1": {
+      title: "Bathroom GFCI",
+      address: "123 Loudoun St, Leesburg, VA",
+      customer_name: "Patricia Henson",
+    },
+    "job-2": {
+      title: "Panel upgrade",
+      address: "45 Catoctin Cir",
+      customer_name: "Mark Reilly",
+    },
+    "job-3": {
+      title: "EV charger install",
+      address: "9 Market St",
+      customer_name: "Karina Vance",
+    },
+  },
+};
+
+const FIXTURE_OVERRIDDEN = {
+  ...FIXTURE_PROPOSED_TWO_TECHS,
+  id: "dp-2",
+  status: "overridden",
+};
+
+describe("DispatchPage override mode", () => {
+  it("Override button visible only on proposed; hidden on approved/overridden/expired", async () => {
+    mockSearchParams.set("date", "2026-04-25");
+
+    // proposed: visible
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(FIXTURE_PROPOSED)),
+    );
+    const proposed = render(<DispatchPage />);
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-override-entry")).toBeTruthy(),
+    );
+    proposed.unmount();
+
+    // approved: hidden
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(FIXTURE_APPROVED)),
+    );
+    const approved = render(<DispatchPage />);
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-status-badge").textContent).toBe(
+        "Approved",
+      ),
+    );
+    expect(screen.queryByTestId("dispatch-override-entry")).toBeNull();
+    approved.unmount();
+
+    // overridden: hidden
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        jsonResponse({ ...FIXTURE_PROPOSED, status: "overridden" }),
+      ),
+    );
+    const overridden = render(<DispatchPage />);
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-status-badge").textContent).toBe(
+        "Overridden",
+      ),
+    );
+    expect(screen.queryByTestId("dispatch-override-entry")).toBeNull();
+    overridden.unmount();
+
+    // expired: hidden (terminal banner replaces the buttons entirely)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(FIXTURE_EXPIRED)),
+    );
+    const expired = render(<DispatchPage />);
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-expired")).toBeTruthy(),
+    );
+    expect(screen.queryByTestId("dispatch-override-entry")).toBeNull();
+    expired.unmount();
+  });
+
+  it("clicking Override enters edit mode: Approve hidden, Save+Cancel visible", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(FIXTURE_PROPOSED_TWO_TECHS)),
+    );
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    const enter = await screen.findByTestId("dispatch-override-entry");
+    await userEvent.click(enter);
+
+    expect(await screen.findByTestId("dispatch-override-editor")).toBeTruthy();
+    expect(screen.getByTestId("dispatch-override-save")).toBeTruthy();
+    expect(screen.getByTestId("dispatch-override-cancel")).toBeTruthy();
+    expect(screen.queryByTestId("dispatch-approve")).toBeNull();
+    expect(screen.queryByTestId("dispatch-override-entry")).toBeNull();
+  });
+
+  it("moving a job between techs updates draft state without firing a fetch", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED_TWO_TECHS));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+
+    // job-1 starts under tech-1 (Alex Carter). Move it to tech-2 (Bea Diaz).
+    const select = screen.getByTestId(
+      "dispatch-edit-tech-select-job-1",
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("tech-1");
+    await userEvent.selectOptions(select, "tech-2");
+
+    // After the move, the select for job-1 should now report tech-2 because
+    // the row re-renders under tech-2's section with the new fromTechId.
+    await waitFor(() => {
+      const after = screen.getByTestId(
+        "dispatch-edit-tech-select-job-1",
+      ) as HTMLSelectElement;
+      expect(after.value).toBe("tech-2");
+    });
+
+    // Only the initial GET should have fired; no save call yet.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("marking a job unassigned removes it from all tech sections", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(FIXTURE_PROPOSED_TWO_TECHS)),
+    );
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+
+    const select = screen.getByTestId(
+      "dispatch-edit-tech-select-job-3",
+    ) as HTMLSelectElement;
+    await userEvent.selectOptions(select, "__unassigned__");
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("dispatch-edit-tech-select-job-3")).toBeNull(),
+    );
+    // The other jobs are still rendered.
+    expect(screen.getByTestId("dispatch-edit-tech-select-job-1")).toBeTruthy();
+    expect(screen.getByTestId("dispatch-edit-tech-select-job-2")).toBeTruthy();
+  });
+
+  it("Save POSTs tech_assignments to /override, refetches, badge becomes Overridden", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED_TWO_TECHS))
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_OVERRIDDEN))
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_OVERRIDDEN));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+    await userEvent.click(screen.getByTestId("dispatch-override-save"));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("dispatch-status-badge").textContent).toBe(
+        "Overridden",
+      ),
+    );
+    // Editor unmounted on success.
+    expect(screen.queryByTestId("dispatch-override-editor")).toBeNull();
+
+    // Fetch sequence: initial GET, POST /override, refetch GET.
+    expect(fetchSpy.mock.calls[1][0]).toMatch(/\/override$/);
+    const init = fetchSpy.mock.calls[1][1] as RequestInit;
+    expect(init.method).toBe("POST");
+    const body = JSON.parse(String(init.body));
+    expect(Array.isArray(body.tech_assignments)).toBe(true);
+    expect(body.tech_assignments).toHaveLength(2);
+    expect(body.tech_assignments[0].tech_id).toBe("tech-1");
+    // Refetch URL is the GET shape, not /override.
+    expect(fetchSpy.mock.calls[2][0]).toMatch(/\/api\/day-plans\/2026-04-25$/);
+  });
+
+  it("Save returning 409 exits edit mode and refetches (race with 6am expiry)", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED_TWO_TECHS))
+      .mockResolvedValueOnce(jsonResponse({ detail: "expired" }, 409))
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_EXPIRED));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+    await userEvent.click(screen.getByTestId("dispatch-override-save"));
+
+    expect(await screen.findByTestId("dispatch-expired")).toBeTruthy();
+    expect(screen.queryByTestId("dispatch-override-editor")).toBeNull();
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it("Save returning 5xx surfaces an inline error and preserves edit mode", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED_TWO_TECHS))
+      .mockResolvedValueOnce(jsonResponse({ detail: "boom" }, 500));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+    await userEvent.click(screen.getByTestId("dispatch-override-save"));
+
+    expect(await screen.findByTestId("dispatch-override-error")).toBeTruthy();
+    expect(screen.getByText(/Save failed \(500\)/)).toBeTruthy();
+    // Editor still mounted; drafts preserved (job-1 still has its select).
+    expect(screen.getByTestId("dispatch-override-editor")).toBeTruthy();
+    expect(screen.getByTestId("dispatch-edit-tech-select-job-1")).toBeTruthy();
+  });
+
+  it("Cancel returns to view mode without firing a save fetch", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(FIXTURE_PROPOSED_TWO_TECHS));
+    vi.stubGlobal("fetch", fetchSpy);
+    mockSearchParams.set("date", "2026-04-25");
+    render(<DispatchPage />);
+
+    await userEvent.click(await screen.findByTestId("dispatch-override-entry"));
+    // Make a draft change to confirm it gets discarded.
+    await userEvent.selectOptions(
+      screen.getByTestId("dispatch-edit-tech-select-job-1"),
+      "tech-2",
+    );
+
+    await userEvent.click(screen.getByTestId("dispatch-override-cancel"));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("dispatch-override-editor")).toBeNull(),
+    );
+    // View mode renders the Override entry button again.
+    expect(screen.getByTestId("dispatch-override-entry")).toBeTruthy();
+    expect(screen.getByTestId("dispatch-approve")).toBeTruthy();
+    // Only the initial GET fired; no /override POST.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+});
