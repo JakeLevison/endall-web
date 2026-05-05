@@ -41,7 +41,7 @@ export default function AboutPage() {
               marginBottom: 48,
             }}
           >
-            An AI ops team for MEP contractors.
+            An AI ops team for MEP and specialty contractors.
           </h1>
 
           {/* Mission */}
@@ -58,20 +58,30 @@ export default function AboutPage() {
               Our mission
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              Most MEP contractors run sophisticated operations on unsophisticated tools.
-              The phone gets missed, the estimate goes out late, the invoice sits for a
-              week, and growth hits a ceiling that has nothing to do with the work in the
-              field.
+              The trades are at an inflection point. AI is reshaping what tools can do,
+              and the AI buildout is reshaping what the trades have to deliver. Both
+              shifts hit at once.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              Endall exists to lift that ceiling. We build AI agents that run the back
-              office end to end: answering calls, qualifying leads, drafting estimates,
-              dispatching crews, pushing invoices, closing the books. Not tools your team
-              operates. A team that operates alongside them.
+              Endall is built for that moment. We are not a tool your team operates. We
+              are a team of AI agents that operates the back office itself. A lead calls
+              in and gets qualified on the first ring. A quote is drafted before close of
+              business. A crew is dispatched on the morning schedule. An invoice is sent
+              the day the job closes. No portal to log into to make any of it happen.
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              Our agents sit alongside the platforms your team already uses, or they
+              replace the office headcount you would otherwise need to hire. Either way,
+              the work runs without your people running it.
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
+              Our customers are mechanical, electrical, plumbing, fire protection,
+              low-voltage, and controls contractors. The firms now bidding the data
+              center, power, and mission-critical work that everyone is racing to deliver.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
               A contractor with ten people in the field should be able to run like they
-              have a hundred in the office. That&apos;s the standard we build to.
+              have a hundred in the office. That is the standard we build to.
             </p>
           </section>
 
@@ -91,20 +101,24 @@ export default function AboutPage() {
               Why now
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              The back-office tools MEP contractors use today were built for a world where
-              AI could track work but not do it, and where demand grew at a normal pace.
-              Both assumptions broke in the same eighteen months.
+              Two assumptions held for decades. The first was that the back office needed
+              people to run it. The second was that demand grew at a normal pace. Both
+              broke in the same eighteen months.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
-              AI agents can now run the workflows the old tools were designed to monitor.
-              And the AI data center buildout has opened a ten-year demand window that MEP
-              contractors cannot hire their way into fast enough. The constraint has moved
-              from tools to operations, and from crews to capacity.
+              AI agents now run the workflows old tools were designed to monitor. And
+              demand is no longer normal. U.S. data center construction starts ran 138%
+              above the prior year through late 2025, with 2026 on pace for more than
+              $115 billion in spending. The Associated Builders and Contractors estimates
+              the construction industry needs 349,000 net new workers in 2026 alone, on
+              top of normal hiring. Worker shortages are now the leading cause of project
+              delays in the country.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)" }}>
-              Endall is built for that window. Every back-office function runs as an agent.
-              Every workflow runs end to end. No implementation consultants, no training,
-              live in 48 hours.
+              The constraint has moved from tools to operations, and from crews to
+              capacity. You cannot hire your way through a ten-year demand window when the
+              industry is already short hundreds of thousands of people. The only path is
+              to multiply the back office.
             </p>
           </section>
 
@@ -167,7 +181,7 @@ export default function AboutPage() {
               bids, miss calls, and leave money on the table because they didn&apos;t
               have the back-office capacity to keep up with their own growth. The tools
               they needed either didn&apos;t exist or cost ten times what a growing
-              service business could justify. That gap is what led him to start Endall.
+              specialty contractor could justify. That gap is what led him to start Endall.
             </p>
             <p style={{ fontSize: 17, lineHeight: 1.9, color: "var(--text-secondary)", marginBottom: 16 }}>
               Prior to PHT, Jake held roles at Blockworks, M&amp;T Bank, and Morgan
