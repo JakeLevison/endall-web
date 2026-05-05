@@ -12,5 +12,15 @@
       "source": "/api/webhooks/stripe",
       "destination": "https://ask-endall-bridge-production.up.railway.app/api/webhooks/stripe"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/day-plans/tick-22h",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/day-plans/tick-6am",
+      "schedule": "0 * * * *"
+    }
   ]
 }
