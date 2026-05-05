@@ -38,7 +38,6 @@ function jsonResponse(body: unknown, status = 200): Response {
 const validDraft = {
   status: "draft_prepared",
   approval_id: "appr-1",
-  approval_token: "tok-abc",
   approval_url: "https://acme.endall.app/approve/tok-abc",
   draft: {
     to: "ops@acme.test",

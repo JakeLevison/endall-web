@@ -6,7 +6,6 @@ import { toast } from "sonner";
 export type DraftPrepareResponse = {
   status: "draft_prepared";
   approval_id: string;
-  approval_token: string;
   approval_url: string;
   draft: { to: string; subject: string; body: string };
   pdf_storage_path: string | null;
