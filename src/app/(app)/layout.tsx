@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import ChatPanel from "@/components/chat/ChatPanel";
-import ComposeDialog from "@/components/email/ComposeDialog";
 import QuickSearch from "@/components/search/QuickSearch";
 import { createClient } from "@/lib/supabase/client";
 import { posthog } from "@/lib/posthog";
@@ -178,7 +177,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const [composeOpen, setComposeOpen] = useState(false);
   const [toast, setToast] = useState<{ filename: string; downloadUrl: string } | null>(null);
 
   // Listen for file-ready events from ChatPanel
@@ -267,14 +265,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
           <ThemeToggle />
-          {/* Compose email button */}
-          <button
-            onClick={() => setComposeOpen(true)}
-            className="transition-colors p-1.5" style={{ color: "var(--text-muted)" }}
-            title="Compose email"
-          >
-            <Mail className="size-4" />
-          </button>
 
           {/* User menu */}
           <DropdownMenu>
@@ -328,9 +318,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onClose={() => setChatOpen(false)}
         onExpandFullPage={() => router.push("/dashboard/ask-endall")}
       />
-
-      {/* Email Compose Dialog */}
-      <ComposeDialog open={composeOpen} onOpenChange={setComposeOpen} />
 
       {/* Quick Search */}
       <QuickSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
