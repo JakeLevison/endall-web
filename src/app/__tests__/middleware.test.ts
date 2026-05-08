@@ -309,3 +309,49 @@ describe("middleware", () => {
     expect(location).toContain("/login");
   });
 });
+
+// Module-load guard: ADMIN_KEY_BYPASS_ENABLED='true' + NODE_ENV='production'
+// must throw at import. Tests use vi.resetModules + dynamic import so each
+// case re-evaluates the module against freshly-stubbed env vars. See
+// claude-handoff/2026-05-05/environment-isolation-audit.md Finding V2.
+describe("middleware module-load guard (Finding V2)", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+  });
+
+  it("bypass=true + NODE_ENV=production throws on import", async () => {
+    vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "true");
+    vi.stubEnv("NODE_ENV", "production");
+
+    await expect(import("../../middleware")).rejects.toThrow(
+      /ADMIN_KEY_BYPASS_ENABLED/,
+    );
+  });
+
+  it("bypass=true + NODE_ENV=development does not throw", async () => {
+    vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "true");
+    vi.stubEnv("NODE_ENV", "development");
+
+    await expect(import("../../middleware")).resolves.toHaveProperty(
+      "middleware",
+    );
+  });
+
+  it("bypass=false + NODE_ENV=production does not throw", async () => {
+    vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "false");
+    vi.stubEnv("NODE_ENV", "production");
+
+    await expect(import("../../middleware")).resolves.toHaveProperty(
+      "middleware",
+    );
+  });
+
+  it("bypass undefined + NODE_ENV=production does not throw", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    await expect(import("../../middleware")).resolves.toHaveProperty(
+      "middleware",
+    );
+  });
+});

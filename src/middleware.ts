@@ -2,6 +2,26 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { parseTenantSlug } from "@/lib/subdomain";
 
+// Hard guard: ADMIN_KEY_BYPASS_ENABLED must never be true in production.
+// The bypass path below accepts admin_key + tenant_id as authentication,
+// so anyone holding ASK_ENDALL_ADMIN_KEY can authenticate as any tenant.
+// Vercel env scoping is the only boundary today; this throw is the
+// belt-and-suspenders code-level invariant. The throw runs at module
+// evaluation, so a misconfigured deploy surfaces as a visible 500
+// (MIDDLEWARE_INVOCATION_FAILED) rather than silently accepting prod
+// admin-key requests. Audit reference:
+// claude-handoff/2026-05-05/environment-isolation-audit.md Finding V2.
+if (
+  process.env.ADMIN_KEY_BYPASS_ENABLED === "true" &&
+  process.env.NODE_ENV === "production"
+) {
+  throw new Error(
+    "ADMIN_KEY_BYPASS_ENABLED='true' is not permitted when NODE_ENV='production'. " +
+      "This flag enables admin-key tenant impersonation and is dev-only. " +
+      "See claude-handoff/2026-05-05/environment-isolation-audit.md Finding V2.",
+  );
+}
+
 // Constant-time string compare. Equivalent to crypto.timingSafeEqual
 // from node:crypto but works on the Edge runtime, where node:crypto is
 // not available. Returns false on length mismatch (matching the Node
