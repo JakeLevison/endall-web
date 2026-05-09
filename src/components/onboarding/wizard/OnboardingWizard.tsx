@@ -31,6 +31,39 @@ function isStepId(v: string | null): v is StepId {
   return !!v && (STEP_ORDER as string[]).includes(v);
 }
 
+function isSuccessStatus(status: number): boolean {
+  return status === 200 || status === 201 || status === 204;
+}
+
+async function readErrorMessage(res: Response): Promise<string> {
+  let text = "";
+  try {
+    text = await res.text();
+  } catch {
+    return `Save failed (${res.status})`;
+  }
+  if (!text) return `Save failed (${res.status})`;
+  try {
+    const json = JSON.parse(text);
+    const detail =
+      json && typeof json === "object"
+        ? (json as { detail?: unknown; error?: unknown; message?: unknown })
+        : null;
+    const candidate =
+      detail && typeof detail.detail === "string"
+        ? detail.detail
+        : detail && typeof detail.error === "string"
+          ? detail.error
+          : detail && typeof detail.message === "string"
+            ? detail.message
+            : "";
+    if (candidate) return candidate;
+  } catch {
+    // not JSON; fall through to raw text
+  }
+  return text;
+}
+
 export function OnboardingWizard({
   adminEmail,
   tenantName,
@@ -61,7 +94,7 @@ export function OnboardingWizard({
         setState((prev) => ({ ...prev, ...parsed }));
       }
     } catch {
-      // ignore — fresh state wins
+      // ignore; fresh state wins
     } finally {
       setHydrated(true);
     }
@@ -73,7 +106,7 @@ export function OnboardingWizard({
     try {
       window.localStorage.setItem(key, JSON.stringify(state));
     } catch {
-      // quota errors, Safari private mode — best-effort only
+      // quota errors, Safari private mode; best-effort only
     }
   }, [hydrated, key, state]);
 
@@ -109,6 +142,13 @@ export function OnboardingWizard({
     ): Promise<boolean> => {
       setSaving(true);
       setSubmitError(null);
+      if (!token) {
+        setSubmitError(
+          "Onboarding session is missing its invite token. Reload the page from your invite link."
+        );
+        setSaving(false);
+        return false;
+      }
       try {
         const res = await fetch(STEP_ENDPOINTS[stepKey], {
           method: stepKey === "tech-roster" || stepKey === "integrations"
@@ -116,34 +156,30 @@ export function OnboardingWizard({
             : stepKey === "pricing"
               ? "POST"
               : "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ tenantId, ...(payload as object) }),
         });
-        if (res.status === 501) {
-          // Stubbed endpoint — accept and move on. Backend work is a separate
-          // session per the handoff plan.
-          return true;
-        }
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          setSubmitError(
-            text || `Save failed (${res.status}). Your data is still here — try again.`
-          );
+        if (!isSuccessStatus(res.status)) {
+          const message = await readErrorMessage(res);
+          setSubmitError(`${message}. Your data is still here, try again.`);
           return false;
         }
         return true;
       } catch (err) {
         setSubmitError(
           err instanceof Error
-            ? `${err.message}. Your data is still here — try again.`
-            : "Network error. Your data is still here — try again."
+            ? `${err.message}. Your data is still here, try again.`
+            : "Network error. Your data is still here, try again."
         );
         return false;
       } finally {
         setSaving(false);
       }
     },
-    [tenantId]
+    [tenantId, token]
   );
 
   const resetBoundary = useCallback(() => setEpoch((e) => e + 1), []);
@@ -151,13 +187,23 @@ export function OnboardingWizard({
   const handleFinish = useCallback(async () => {
     setSaving(true);
     setSubmitError(null);
+    if (!token) {
+      setSubmitError(
+        "Onboarding session is missing its invite token. Reload the page from your invite link."
+      );
+      setSaving(false);
+      return;
+    }
     try {
       const res = await fetch("/api/onboarding/complete", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ tenantId }),
       });
-      if (res.ok || res.status === 501) {
+      if (isSuccessStatus(res.status)) {
         setState((prev) => ({
           ...prev,
           review: { completedAt: new Date().toISOString() },
@@ -168,14 +214,14 @@ export function OnboardingWizard({
         router.push("/dispatch");
         return;
       }
-      const text = await res.text().catch(() => "");
-      setSubmitError(text || `Unable to finish (${res.status}).`);
+      const message = await readErrorMessage(res);
+      setSubmitError(message);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Network error.");
     } finally {
       setSaving(false);
     }
-  }, [tenantId, router, key]);
+  }, [tenantId, token, router, key]);
 
   // Stable onChange callbacks keyed to the step slice.
   const onChange = useMemo(

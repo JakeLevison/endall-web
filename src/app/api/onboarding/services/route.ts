@@ -1,5 +1,10 @@
-import { notImplemented } from "../_stub";
+import { type NextRequest } from "next/server";
+import { proxyOnboardingStep } from "../_proxy";
 
-export async function PATCH() {
-  return notImplemented("services");
+export async function PATCH(req: NextRequest) {
+  return proxyOnboardingStep(req, {
+    method: "PATCH",
+    pathTemplate: "/tenants/{tenant_id}/services",
+    step: "services",
+  });
 }
