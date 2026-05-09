@@ -6,6 +6,15 @@ vi.mock("@/lib/posthog", () => ({
   posthog: { capture: vi.fn() },
 }));
 
+const toastSuccess = vi.fn();
+const toastError = vi.fn();
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => toastSuccess(...args),
+    error: (...args: unknown[]) => toastError(...args),
+  },
+}));
+
 const JOB: InvoiceJobSummary = {
   job_id: "job-xyz",
   caller_name: "Acme Plumbing",
@@ -55,13 +64,15 @@ describe("InvoiceModal QB post-generation view", () => {
   beforeEach(() => {
     // jsdom anchor.click() is a no-op, which is fine — the test just needs
     // the modal to transition past generation. No mocks required.
+    toastSuccess.mockClear();
+    toastError.mockClear();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("renders the green pushed badge after auto-push completes", async () => {
+  it("renders the green header badge + fires success toast after auto-push completes", async () => {
     const fetchMock = makeFetchRouter([
       {
         url: "/api/invoices/generate",
@@ -94,11 +105,19 @@ describe("InvoiceModal QB post-generation view", () => {
     await generateInvoice();
 
     await waitFor(() => {
-      expect(screen.getByTestId("qb-badge-pushed")).toHaveTextContent("qb-777");
+      expect(screen.getByTestId("qb-header-pushed-badge")).toHaveTextContent(
+        "qb-777",
+      );
     });
+    await waitFor(() => {
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Pushed to QuickBooks, invoice qb-777",
+      );
+    });
+    expect(screen.queryByTestId("qb-push-error-banner")).not.toBeInTheDocument();
   });
 
-  it("shows amber failure badge + retry that triggers manual push", async () => {
+  it("shows red failure banner + fires error toast + retry triggers manual push", async () => {
     let pollCount = 0;
     let retryCalled = false;
     const fetchMock = makeFetchRouter([
@@ -142,9 +161,17 @@ describe("InvoiceModal QB post-generation view", () => {
     await generateInvoice();
 
     await waitFor(() => {
-      expect(screen.getByTestId("qb-badge-failed")).toBeInTheDocument();
+      const banner = screen.getByTestId("qb-push-error-banner");
+      expect(banner).toBeInTheDocument();
+      expect(banner).toHaveTextContent(/QuickBooks push failed/i);
+      expect(banner).toHaveTextContent(/502: intuit boom/);
     });
     expect(pollCount).toBeGreaterThanOrEqual(1);
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(
+        "QuickBooks push failed: 502: intuit boom",
+      );
+    });
 
     fireEvent.click(screen.getByTestId("qb-retry-button"));
 
@@ -152,8 +179,12 @@ describe("InvoiceModal QB post-generation view", () => {
       expect(retryCalled).toBe(true);
     });
     await waitFor(() => {
-      expect(screen.getByTestId("qb-badge-pushed")).toHaveTextContent("qb-retry");
+      expect(screen.getByTestId("qb-header-pushed-badge")).toHaveTextContent(
+        "qb-retry",
+      );
     });
+    // Banner clears once the retry persists a qb_invoice_id.
+    expect(screen.queryByTestId("qb-push-error-banner")).not.toBeInTheDocument();
   });
 
   it("exposes a manual Push button when auto-push is disabled + connected", async () => {
@@ -203,7 +234,9 @@ describe("InvoiceModal QB post-generation view", () => {
       expect(pushCalled).toBe(true);
     });
     await waitFor(() => {
-      expect(screen.getByTestId("qb-badge-pushed")).toHaveTextContent("qb-manual");
+      expect(screen.getByTestId("qb-header-pushed-badge")).toHaveTextContent(
+        "qb-manual",
+      );
     });
   });
 
@@ -243,5 +276,15 @@ describe("InvoiceModal QB post-generation view", () => {
     expect(msg.textContent).toMatch(/connect quickbooks/i);
     const link = msg.querySelector("a");
     expect(link?.getAttribute("href")).toBe("/settings/integrations");
+    // No-push-attempted state: neither the success badge nor the failure
+    // banner is rendered, and no toast fires.
+    expect(
+      screen.queryByTestId("qb-header-pushed-badge"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("qb-push-error-banner"),
+    ).not.toBeInTheDocument();
+    expect(toastSuccess).not.toHaveBeenCalled();
+    expect(toastError).not.toHaveBeenCalled();
   });
 });
