@@ -22,9 +22,12 @@ import {
   FileEdit,
   Search,
 } from "lucide-react";
-import { useAllLogs, type AgentLog } from "@/lib/ops-api";
+import {
+  useAllLogs,
+  useCommandCenterStats,
+  type AgentLog,
+} from "@/lib/ops-api";
 import { QUICK_ACTIONS, type SavedFile } from "@/hooks/useChat";
-import { createClient } from "@/lib/supabase/client";
 import { posthog } from "@/lib/posthog";
 import { agentDisplayName, isSuccessStatus } from "@/lib/command-center";
 
@@ -449,68 +452,33 @@ export default function CommandCenterPage() {
     mutate,
   } = useAllLogs(50);
 
-  const [stats, setStats] = useState<PipelineStats>({
-    totalContacts: null,
-    leadsThisWeek: null,
-    emailsSent: null,
-    callsHandled: null,
-  });
+  const { data: rawStats, error: statsError } = useCommandCenterStats();
   const [files, setFiles] = useState<SavedFile[]>([]);
 
   useEffect(() => {
     posthog.capture("command_center_viewed");
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const supabase = createClient();
-      try {
-        const contactsRes = await supabase
-          .from("contacts")
-          .select("id", { count: "exact", head: true });
-        if (!cancelled) {
-          setStats((prev) => ({
-            ...prev,
-            totalContacts: contactsRes.count ?? 0,
-          }));
-        }
-      } catch {
-        // supabase unavailable -- leave as null to show stub
-      }
+  // The bridge endpoint is the only source of truth. When the fetch
+  // fails or the tenant is unresolved we keep every card at null so the
+  // UI renders muted dashes (never "0", which would silently hide the
+  // outage from the contractor).
+  const stats: PipelineStats = useMemo(() => {
+    if (statsError || !rawStats) {
+      return {
+        totalContacts: null,
+        leadsThisWeek: null,
+        emailsSent: null,
+        callsHandled: null,
+      };
     }
-    load();
-    return () => {
-      cancelled = true;
+    return {
+      totalContacts: rawStats.total_contacts ?? null,
+      leadsThisWeek: rawStats.leads_this_week ?? null,
+      emailsSent: rawStats.emails_sent_this_week ?? null,
+      callsHandled: rawStats.calls_handled_this_week ?? null,
     };
-  }, []);
-
-  // TODO: wire bridge endpoint for leads_this_week / emails_sent /
-  // calls_handled. The ops-api bridge currently exposes /api/agent-logs,
-  // /api/agent-performance, /api/agent-status. Until a dedicated
-  // pipeline-summary endpoint exists, derive what we can from logs.
-  useEffect(() => {
-    if (!logs.length) return;
-    const weekAgo = Date.now() - 7 * 86_400_000;
-    const recent = logs.filter(
-      (l) => new Date(l.created_at).getTime() >= weekAgo
-    );
-    const emails = recent.filter(
-      (l) => l.agent_id === "email" || l.agent_id === "email-001"
-    ).length;
-    const calls = recent.filter(
-      (l) => l.agent_id === "front_desk" || l.agent_id === "fr-001"
-    ).length;
-    const leads = recent.filter((l) =>
-      (l.action || "").toLowerCase().includes("qualif")
-    ).length;
-    setStats((prev) => ({
-      ...prev,
-      leadsThisWeek: leads,
-      emailsSent: emails,
-      callsHandled: calls,
-    }));
-  }, [logs]);
+  }, [rawStats, statsError]);
 
   useEffect(() => {
     let cancelled = false;

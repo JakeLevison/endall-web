@@ -51,6 +51,13 @@ export interface AgentStatusResponse {
   status: string;
 }
 
+export interface CommandCenterStats {
+  total_contacts: number;
+  leads_this_week: number;
+  emails_sent_this_week: number;
+  calls_handled_this_week: number;
+}
+
 // ── Fetcher ─────────────────────────────────────────────────────────
 
 async function fetchApi<T>(
@@ -97,6 +104,14 @@ export function getAgentStatus(
 ): Promise<AgentStatusResponse> {
   return fetchApi<AgentStatusResponse>("/api/agent-status", {
     agent_id: agentId,
+    tenant_id: tenantId,
+  });
+}
+
+export function getCommandCenterStats(
+  tenantId: string,
+): Promise<CommandCenterStats> {
+  return fetchApi<CommandCenterStats>("/command-center/stats", {
     tenant_id: tenantId,
   });
 }
@@ -155,6 +170,18 @@ export function useAllStatuses() {
     {
       refreshInterval: REFRESH_MS,
       fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
+    },
+  );
+}
+
+export function useCommandCenterStats() {
+  const { tenant_id: tenantId } = useTenant();
+  return useSWR<CommandCenterStats | null>(
+    tenantId ? ["ops:command-center-stats", tenantId] : null,
+    () => getCommandCenterStats(tenantId as string),
+    {
+      refreshInterval: REFRESH_MS,
+      fallbackData: null,
     },
   );
 }
