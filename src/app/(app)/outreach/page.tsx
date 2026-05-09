@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Send, Clock, CheckCircle, XCircle, Filter } from "lucide-react";
+import { Plus, Send, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -30,24 +30,12 @@ import {
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import { useTenant } from "@/lib/tenant-hook";
-
-type Prospect = {
-  id: string;
-  company_name: string;
-  contact_name: string;
-  contact_title: string;
-  email: string;
-  phone: string;
-  city: string;
-  state: string;
-  employee_count: string;
-  priority: "A" | "B" | "C";
-  status: string;
-  qualifying_signal: string;
-  last_contacted: string | null;
-  next_follow_up: string | null;
-  notes: string;
-};
+import {
+  mapProspectRow,
+  priorityLetterToTier,
+  type PriorityLetter,
+  type Prospect,
+} from "@/lib/outreach";
 
 const statusColor: Record<string, string> = {
   new: "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20",
@@ -95,9 +83,7 @@ export default function OutreachPage() {
   const [newPhone, setNewPhone] = useState("");
   const [newCity, setNewCity] = useState("");
   const [newState, setNewState] = useState("");
-  const [newSize, setNewSize] = useState("");
-  const [newPriority, setNewPriority] = useState<"A" | "B" | "C">("B");
-  const [newSignal, setNewSignal] = useState("");
+  const [newPriority, setNewPriority] = useState<PriorityLetter>("B");
 
   useEffect(() => {
     async function fetch() {
@@ -106,29 +92,11 @@ export default function OutreachPage() {
         const { data } = await supabase
           .from("outreach_prospects")
           .select("*")
-          .order("priority")
+          .order("tier")
           .order("created_at", { ascending: false });
 
         if (data) {
-          setProspects(
-            data.map((p: Record<string, unknown>) => ({
-              id: p.id as string,
-              company_name: (p.company_name as string) || "",
-              contact_name: (p.contact_name as string) || "",
-              contact_title: (p.contact_title as string) || "",
-              email: (p.email as string) || "",
-              phone: (p.phone as string) || "",
-              city: (p.city as string) || "",
-              state: (p.state as string) || "",
-              employee_count: (p.employee_count as string) || "",
-              priority: (p.priority as "A" | "B" | "C") || "B",
-              status: (p.status as string) || "new",
-              qualifying_signal: (p.qualifying_signal as string) || "",
-              last_contacted: p.last_contacted as string | null,
-              next_follow_up: p.next_follow_up as string | null,
-              notes: (p.notes as string) || "",
-            }))
-          );
+          setProspects(data.map(mapProspectRow));
         }
       } catch {
         // Table might not exist yet
@@ -148,39 +116,18 @@ export default function OutreachPage() {
           company_name: newCompany.trim(),
           contact_name: newContact.trim() || null,
           contact_title: newTitle.trim() || null,
-          email: newEmail.trim() || null,
-          phone: newPhone.trim() || null,
+          contact_email: newEmail.trim() || null,
+          contact_phone: newPhone.trim() || null,
           city: newCity.trim() || null,
           state: newState.trim() || null,
-          employee_count: newSize.trim() || null,
-          priority: newPriority,
-          qualifying_signal: newSignal.trim() || null,
+          tier: priorityLetterToTier(newPriority),
           tenant_id: tenantId,
         })
         .select()
         .single();
 
       if (data) {
-        setProspects((prev) => [
-          {
-            id: data.id,
-            company_name: data.company_name || "",
-            contact_name: data.contact_name || "",
-            contact_title: data.contact_title || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            city: data.city || "",
-            state: data.state || "",
-            employee_count: data.employee_count || "",
-            priority: data.priority || "B",
-            status: "new",
-            qualifying_signal: data.qualifying_signal || "",
-            last_contacted: null,
-            next_follow_up: null,
-            notes: "",
-          },
-          ...prev,
-        ]);
+        setProspects((prev) => [mapProspectRow(data), ...prev]);
       }
     } catch {
       // silent
@@ -193,9 +140,7 @@ export default function OutreachPage() {
     setNewPhone("");
     setNewCity("");
     setNewState("");
-    setNewSize("");
     setNewPriority("B");
-    setNewSignal("");
     setDialogOpen(false);
   };
 
@@ -207,7 +152,11 @@ export default function OutreachPage() {
       const supabase = createClient();
       await supabase
         .from("outreach_prospects")
-        .update({ status: newStatus, last_contacted: newStatus !== "new" ? new Date().toISOString() : null })
+        .update({
+          status: newStatus,
+          last_contacted_at:
+            newStatus !== "new" ? new Date().toISOString() : null,
+        })
         .eq("id", id);
     } catch {
       // silent
@@ -299,7 +248,6 @@ export default function OutreachPage() {
                 <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden md:table-cell">Location</TableHead>
                 <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Priority</TableHead>
                 <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)]">Status</TableHead>
-                <TableHead className="h-9 text-[11px] uppercase tracking-wide text-[var(--text-muted)] hidden lg:table-cell">Signal</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -307,11 +255,10 @@ export default function OutreachPage() {
                 <TableRow key={p.id} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors">
                   <TableCell className="py-2.5">
                     <p className="text-[13px] text-[var(--text-primary)] font-medium">{p.company_name}</p>
-                    {p.employee_count && <p className="text-[11px] text-[var(--text-muted)]">{p.employee_count} employees</p>}
                   </TableCell>
                   <TableCell className="py-2.5">
                     <p className="text-[13px] text-[var(--text-secondary)]">{p.contact_name || "—"}</p>
-                    {p.email && <p className="text-[11px] text-[var(--text-muted)]">{p.email}</p>}
+                    {p.contact_email && <p className="text-[11px] text-[var(--text-muted)]">{p.contact_email}</p>}
                   </TableCell>
                   <TableCell className="py-2.5 hidden md:table-cell">
                     <p className="text-[13px] text-[var(--text-tertiary)]">{p.city && p.state ? `${p.city}, ${p.state}` : "—"}</p>
@@ -332,9 +279,6 @@ export default function OutreachPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </TableCell>
-                  <TableCell className="py-2.5 hidden lg:table-cell">
-                    <p className="text-[11px] text-[var(--text-muted)] max-w-[200px] truncate">{p.qualifying_signal || "—"}</p>
                   </TableCell>
                 </TableRow>
               ))}
@@ -379,12 +323,8 @@ export default function OutreachPage() {
               <Input value={newState} onChange={(e) => setNewState(e.target.value)} placeholder="TX" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
             <div>
-              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Employees</Label>
-              <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="50-100" className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
-            </div>
-            <div>
               <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Priority</Label>
-              <Select value={newPriority} onValueChange={(v) => setNewPriority(v as "A" | "B" | "C")}>
+              <Select value={newPriority} onValueChange={(v) => setNewPriority(v as PriorityLetter)}>
                 <SelectTrigger className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8">
                   <SelectValue />
                 </SelectTrigger>
@@ -394,10 +334,6 @@ export default function OutreachPage() {
                   <SelectItem value="C" className="text-[12px] text-[var(--text-secondary)]">C — Low</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="col-span-2">
-              <Label className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Qualifying signal</Label>
-              <Input value={newSignal} onChange={(e) => setNewSignal(e.target.value)} placeholder="Expanding to commercial, recently hired..." className="bg-[var(--overlay-soft)] border-[var(--border)] text-[13px] text-[var(--text-primary)] h-8" />
             </div>
           </div>
           <DialogFooter>
