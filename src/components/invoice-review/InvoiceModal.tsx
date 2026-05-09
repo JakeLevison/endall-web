@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { posthog } from "@/lib/posthog";
 
 export type InvoiceJobSummary = {
@@ -48,6 +49,10 @@ export function InvoiceModal({
     qb_push_error: null,
   });
   const [pushing, setPushing] = useState(false);
+  const toastedFor = useRef<{ pushed: string | null; error: string | null }>({
+    pushed: null,
+    error: null,
+  });
 
   const reset = useCallback(() => {
     setAmount("");
@@ -59,7 +64,31 @@ export function InvoiceModal({
     setQbConn(null);
     setQbState({ qb_invoice_id: null, qb_push_error: null });
     setPushing(false);
+    toastedFor.current = { pushed: null, error: null };
   }, []);
+
+  // Fire one toast per distinct outcome so the contractor sees push status
+  // even if their attention is elsewhere when the polling settles. Tracking
+  // the last-toasted value prevents duplicate toasts across re-renders.
+  useEffect(() => {
+    if (
+      qbState.qb_invoice_id &&
+      toastedFor.current.pushed !== qbState.qb_invoice_id
+    ) {
+      toastedFor.current.pushed = qbState.qb_invoice_id;
+      toast.success(
+        `Pushed to QuickBooks, invoice ${qbState.qb_invoice_id}`,
+      );
+    }
+    if (
+      qbState.qb_push_error &&
+      !qbState.qb_invoice_id &&
+      toastedFor.current.error !== qbState.qb_push_error
+    ) {
+      toastedFor.current.error = qbState.qb_push_error;
+      toast.error(`QuickBooks push failed: ${qbState.qb_push_error}`);
+    }
+  }, [qbState.qb_invoice_id, qbState.qb_push_error]);
 
   useEffect(() => {
     if (!open) reset();
@@ -244,9 +273,24 @@ export function InvoiceModal({
           color: "var(--text-primary)",
         }}
       >
-        <h2 className="text-[14px] font-medium">
-          {generated ? "Invoice generated" : "Generate invoice"}
-        </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-[14px] font-medium">
+            {generated ? "Invoice generated" : "Generate invoice"}
+          </h2>
+          {generated && qbState.qb_invoice_id ? (
+            <span
+              data-testid="qb-header-pushed-badge"
+              className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium"
+              style={{
+                background: "rgba(16, 185, 129, 0.15)",
+                color: "#10b981",
+                border: "1px solid rgba(16, 185, 129, 0.4)",
+              }}
+            >
+              Pushed to QuickBooks, invoice {qbState.qb_invoice_id}
+            </span>
+          ) : null}
+        </div>
         <div
           className="rounded-md border p-3 text-[12px] space-y-0.5"
           style={{
@@ -326,6 +370,38 @@ export function InvoiceModal({
           </>
         )}
 
+        {generated && !qbState.qb_invoice_id && qbState.qb_push_error && (
+          <div
+            role="alert"
+            data-testid="qb-push-error-banner"
+            className="rounded-md border p-3 text-[12px] space-y-2"
+            style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              borderColor: "rgba(239, 68, 68, 0.5)",
+              color: "#ef4444",
+            }}
+          >
+            <div className="font-medium">
+              QuickBooks push failed: {qbState.qb_push_error}
+            </div>
+            <button
+              type="button"
+              data-testid="qb-retry-button"
+              onClick={handlePush}
+              disabled={pushing}
+              className="rounded-md px-2 py-1 text-[11px] font-medium border"
+              style={{
+                borderColor: "rgba(239, 68, 68, 0.5)",
+                color: "#ef4444",
+                background: "transparent",
+                opacity: pushing ? 0.6 : 1,
+              }}
+            >
+              {pushing ? "Retrying..." : "Retry push"}
+            </button>
+          </div>
+        )}
+
         {generated && (
           <div
             data-testid="qb-push-area"
@@ -338,52 +414,6 @@ export function InvoiceModal({
             <div className="text-[var(--text-tertiary)]">
               Invoice <strong>{generated.invoice_number}</strong> created.
             </div>
-            {qbState.qb_invoice_id && (
-              <div
-                data-testid="qb-badge-pushed"
-                className="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium"
-                style={{
-                  background: "rgba(16, 185, 129, 0.15)",
-                  color: "#10b981",
-                  border: "1px solid rgba(16, 185, 129, 0.4)",
-                }}
-              >
-                Pushed to QuickBooks · {qbState.qb_invoice_id}
-              </div>
-            )}
-            {!qbState.qb_invoice_id && qbState.qb_push_error && (
-              <div className="space-y-1">
-                <div
-                  data-testid="qb-badge-failed"
-                  className="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-medium"
-                  style={{
-                    background: "rgba(245, 158, 11, 0.15)",
-                    color: "#f59e0b",
-                    border: "1px solid rgba(245, 158, 11, 0.4)",
-                  }}
-                >
-                  Push failed
-                </div>
-                <div className="text-[11px] text-[var(--text-muted)]">
-                  {qbState.qb_push_error}
-                </div>
-                <button
-                  type="button"
-                  data-testid="qb-retry-button"
-                  onClick={handlePush}
-                  disabled={pushing}
-                  className="rounded-md px-2 py-1 text-[11px] font-medium border"
-                  style={{
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                    background: "transparent",
-                    opacity: pushing ? 0.6 : 1,
-                  }}
-                >
-                  {pushing ? "Retrying..." : "Retry push"}
-                </button>
-              </div>
-            )}
             {!qbState.qb_invoice_id &&
               !qbState.qb_push_error &&
               qbConn?.connected && (
