@@ -38,16 +38,20 @@ vi.mock("@/lib/ops-api", async () => {
       isValidating: false,
       mutate: vi.fn(),
     }),
+    useCommandCenterStats: () => ({
+      data: {
+        total_contacts: 42,
+        leads_this_week: 3,
+        emails_sent_this_week: 7,
+        calls_handled_this_week: 5,
+      },
+      error: undefined,
+      isLoading: false,
+      isValidating: false,
+      mutate: vi.fn(),
+    }),
   };
 });
-
-vi.mock("@/lib/supabase/client", () => ({
-  createClient: () => ({
-    from: () => ({
-      select: () => Promise.resolve({ count: 42, data: null, error: null }),
-    }),
-  }),
-}));
 
 vi.mock("@/lib/posthog", () => ({
   posthog: { capture: vi.fn() },
