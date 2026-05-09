@@ -61,27 +61,31 @@ export default function SequencesPage() {
     async function fetchSequences() {
       try {
         const { data, error } = await supabase
-          .from("sequences")
+          .from("outreach_sequences")
           .select("*")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
 
         if (data && data.length > 0) {
-          setSequences(data.map((s: Record<string, unknown>) => ({
-            id: s.id as string,
-            name: (s.name as string) || "",
-            status: (s.status as Sequence["status"]) || "draft",
-            steps: (s.steps as number) || 0,
-            enrolled: (s.enrolled as number) || 0,
-            reply_rate: (s.reply_rate as number) || 0,
-            created_at: s.created_at ? (s.created_at as string).split("T")[0] : "",
-          })));
+          setSequences(data.map((s: Record<string, unknown>) => {
+            const stepsValue = s.steps;
+            const stepCount = Array.isArray(stepsValue) ? stepsValue.length : 0;
+            const status: Sequence["status"] = s.is_active ? "active" : "draft";
+            return {
+              id: s.id as string,
+              name: (s.name as string) || "",
+              status,
+              steps: stepCount,
+              enrolled: 0,
+              reply_rate: 0,
+              created_at: s.created_at ? (s.created_at as string).split("T")[0] : "",
+            };
+          }));
         } else {
           setSequences([]);
         }
       } catch {
-        // Supabase query failed — show empty state
         setSequences([]);
       } finally {
         setLoading(false);

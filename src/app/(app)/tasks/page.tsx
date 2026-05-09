@@ -47,7 +47,15 @@ type Task = {
   contact_name: string | null;
 };
 
-const statuses = ["Backlog", "Todo", "In Progress", "Done"];
+const statuses = ["backlog", "todo", "in_progress", "done"] as const;
+type StatusKey = typeof statuses[number];
+
+const STATUS_LABEL: Record<StatusKey, string> = {
+  backlog: "Backlog",
+  todo: "Todo",
+  in_progress: "In Progress",
+  done: "Done",
+};
 
 const priorityOptions = ["urgent", "high", "medium", "low", "none"];
 
@@ -63,9 +71,9 @@ const priorityColor = (priority: string) => {
 
 const statusColor = (status: string) => {
   switch (status) {
-    case "Done": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-    case "In Progress": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-    case "Todo": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    case "done": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    case "in_progress": return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    case "todo": return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     default: return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
   }
 };
@@ -148,7 +156,7 @@ function KanbanBoard({ tasks, onMove }: { tasks: Task[]; onMove: (taskId: string
             onDrop={(e) => handleDrop(e, status)}
           >
             <div className="flex items-center justify-between mb-2 px-1">
-              <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{status}</h3>
+              <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{STATUS_LABEL[status as StatusKey] ?? status}</h3>
               <span className="text-[11px] text-[var(--text-faint)]">{statusTasks.length}</span>
             </div>
             <div className="space-y-2 min-h-[80px]">
@@ -219,7 +227,7 @@ function TaskTableView({ tasks }: { tasks: Task[] }) {
               <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">{task.title}</TableCell>
               <TableCell className="py-2.5">
                 <Badge variant="outline" className={`text-[11px] font-normal ${statusColor(task.status)}`}>
-                  {task.status}
+                  {STATUS_LABEL[task.status as StatusKey] ?? task.status}
                 </Badge>
               </TableCell>
               <TableCell className="py-2.5">
@@ -244,7 +252,7 @@ function CreateTaskDialog({ onCreated }: { onCreated: (task: Task) => void }) {
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("Todo");
+  const [status, setStatus] = useState<StatusKey>("todo");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState("");
   const [project, setProject] = useState("");
@@ -252,7 +260,7 @@ function CreateTaskDialog({ onCreated }: { onCreated: (task: Task) => void }) {
   const resetForm = () => {
     setTitle("");
     setDescription("");
-    setStatus("Todo");
+    setStatus("todo");
     setPriority("medium");
     setDueDate("");
     setProject("");
@@ -346,13 +354,13 @@ function CreateTaskDialog({ onCreated }: { onCreated: (task: Task) => void }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label className="text-[13px] text-[var(--text-tertiary)]">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={(v) => setStatus(v as StatusKey)}>
                 <SelectTrigger className="h-9 border-[var(--border)] bg-[var(--overlay-weak)] text-[13px] text-[var(--text-primary)]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-950 border-[var(--border)]">
                   {statuses.map((s) => (
-                    <SelectItem key={s} value={s} className="text-[13px] text-[var(--text-secondary)]">{s}</SelectItem>
+                    <SelectItem key={s} value={s} className="text-[13px] text-[var(--text-secondary)]">{STATUS_LABEL[s]}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -436,7 +444,7 @@ export default function TasksPage() {
             id: t.id,
             title: t.title || "",
             description: t.description,
-            status: t.status || "Backlog",
+            status: t.status || "backlog",
             priority: t.priority || "none",
             assignee: t.assignee,
             project: t.project,
