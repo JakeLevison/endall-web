@@ -155,11 +155,13 @@ function Section({
 
 function ActivityFeedSection({
   logs,
+  isLoading,
   isValidating,
   mutate,
   onVisible,
 }: {
   logs: AgentLog[];
+  isLoading: boolean;
   isValidating: boolean;
   mutate: () => void;
   onVisible: (s: string) => void;
@@ -184,9 +186,24 @@ function ActivityFeedSection({
         </button>
       }
     >
-      {items.length === 0 ? (
+      {isLoading && items.length === 0 ? (
+        <ul className="space-y-1" aria-busy="true">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <li
+              key={i}
+              className="flex items-center gap-3 py-2 border-b last:border-0"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <span className="h-3 w-14 rounded bg-[var(--overlay-soft)] animate-pulse shrink-0" />
+              <span className="h-3 w-24 rounded bg-[var(--overlay-soft)] animate-pulse shrink-0" />
+              <span className="h-3 flex-1 rounded bg-[var(--overlay-soft)] animate-pulse" />
+              <span className="h-4 w-16 rounded-full bg-[var(--overlay-soft)] animate-pulse shrink-0" />
+            </li>
+          ))}
+        </ul>
+      ) : items.length === 0 ? (
         <p className="text-[13px] text-[var(--text-muted)]">
-          No recent agent activity.
+          No recent agent activity. The feed will populate as agents process calls, emails, and estimates.
         </p>
       ) : (
         <ul className="space-y-1">
@@ -305,9 +322,11 @@ function PipelineSummarySection({
 
 function WorkflowHistorySection({
   files,
+  isLoading,
   onVisible,
 }: {
   files: SavedFile[];
+  isLoading: boolean;
   onVisible: (s: string) => void;
 }) {
   return (
@@ -317,7 +336,16 @@ function WorkflowHistorySection({
       icon={FileSpreadsheet}
       onVisible={onVisible}
     >
-      {files.length === 0 ? (
+      {isLoading && files.length === 0 ? (
+        <div className="space-y-2" aria-busy="true">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-9 rounded bg-[var(--overlay-soft)] animate-pulse"
+            />
+          ))}
+        </div>
+      ) : files.length === 0 ? (
         <div
           className="rounded-md border border-dashed p-6 text-center"
           style={{ borderColor: "var(--border)" }}
@@ -448,12 +476,14 @@ export default function CommandCenterPage() {
 
   const {
     data: logs = [],
+    isLoading: logsLoading,
     isValidating,
     mutate,
   } = useAllLogs(50);
 
   const { data: rawStats, error: statsError } = useCommandCenterStats();
   const [files, setFiles] = useState<SavedFile[]>([]);
+  const [filesLoading, setFilesLoading] = useState(true);
 
   useEffect(() => {
     posthog.capture("command_center_viewed");
@@ -489,6 +519,9 @@ export default function CommandCenterPage() {
       })
       .catch(() => {
         if (!cancelled) setFiles([]);
+      })
+      .finally(() => {
+        if (!cancelled) setFilesLoading(false);
       });
     return () => {
       cancelled = true;
@@ -518,6 +551,7 @@ export default function CommandCenterPage() {
 
       <ActivityFeedSection
         logs={logs}
+        isLoading={logsLoading}
         isValidating={isValidating}
         mutate={() => mutate()}
         onVisible={onSectionVisible}
@@ -525,7 +559,11 @@ export default function CommandCenterPage() {
 
       <PipelineSummarySection stats={stats} onVisible={onSectionVisible} />
 
-      <WorkflowHistorySection files={files} onVisible={onSectionVisible} />
+      <WorkflowHistorySection
+        files={files}
+        isLoading={filesLoading}
+        onVisible={onSectionVisible}
+      />
 
       <QuickActionsSection onVisible={onSectionVisible} />
     </div>

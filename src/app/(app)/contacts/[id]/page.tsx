@@ -169,10 +169,55 @@ export default function ContactDetailPage({
     }
   };
 
-  if (loading || !contact) {
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col" aria-busy="true">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
+          <div className="h-4 w-48 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-7 w-20 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="flex-1 flex overflow-hidden">
+          <div className="w-80 shrink-0 border-r border-[var(--border)] p-5 space-y-3">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="size-10 rounded-full bg-[var(--overlay-soft)] animate-pulse" />
+              <div className="h-4 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-8 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1 p-5">
+            <div className="h-4 w-20 rounded bg-[var(--overlay-soft)] animate-pulse mb-4" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 mb-3 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!contact) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+        <div className="flex items-center gap-1.5 text-[13px] mb-4">
+          <Link href="/contacts" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+            Contacts
+          </Link>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">Not found</span>
+        </div>
+        <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">Contact not found</p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            This contact may have been deleted or never existed.
+          </p>
+          <Link href="/contacts">
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+              Back to contacts
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -228,15 +273,15 @@ export default function ContactDetailPage({
           <div className="space-y-3">
             <div>
               <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Email</p>
-              <p className="text-[13px] text-[var(--text-secondary)]">{contact.email}</p>
+              <p className="text-[13px] text-[var(--text-secondary)] break-all">{contact.email || "—"}</p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Phone</p>
-              <p className="text-[13px] text-[var(--text-secondary)]">{contact.phone}</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{contact.phone || "—"}</p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Company</p>
-              <p className="text-[13px] text-[var(--text-secondary)]">{contact.company}</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{contact.company || "—"}</p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Stage</p>
@@ -246,7 +291,7 @@ export default function ContactDetailPage({
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-0.5">Owner</p>
-              <p className="text-[13px] text-[var(--text-secondary)]">{contact.owner}</p>
+              <p className="text-[13px] text-[var(--text-secondary)]">{contact.owner || "Unassigned"}</p>
             </div>
           </div>
         </div>

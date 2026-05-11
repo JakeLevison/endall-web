@@ -306,7 +306,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Content */}
         <main className="flex-1 overflow-auto">
-          <React.Suspense fallback={<div className="p-6"><p className="text-[13px] text-[var(--text-muted)]">Loading...</p></div>}>
+          <React.Suspense
+            fallback={
+              <div className="p-6" aria-busy="true">
+                <div className="h-5 w-40 rounded bg-[var(--overlay-soft)] animate-pulse mb-6" />
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-16 rounded bg-[var(--overlay-soft)] animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+            }
+          >
             {children}
           </React.Suspense>
         </main>

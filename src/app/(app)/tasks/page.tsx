@@ -488,8 +488,25 @@ export default function TasksPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+      <div className="p-6" aria-busy="true">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-5 w-24 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-8 w-24 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="h-8 w-64 rounded bg-[var(--overlay-soft)] animate-pulse mb-4" />
+        <div className="flex gap-3 overflow-x-auto">
+          {Array.from({ length: 4 }).map((_, col) => (
+            <div key={col} className="min-w-[220px] w-[220px] shrink-0 space-y-2">
+              <div className="h-3 w-20 rounded bg-[var(--overlay-soft)] animate-pulse mb-2" />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-20 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse"
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -524,8 +541,9 @@ export default function TasksPage() {
         </TabsList>
         <TabsContent value="board" className="mt-4">
           {tasks.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-[13px] text-[var(--text-muted)]">No tasks yet. Create your first task.</p>
+            <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-lg">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">No tasks yet</p>
+              <p className="text-[12px] text-[var(--text-muted)]">Create a task to start tracking follow-ups and to-dos.</p>
             </div>
           ) : (
             <KanbanBoard tasks={tasks} onMove={handleMoveTask} />
@@ -533,8 +551,9 @@ export default function TasksPage() {
         </TabsContent>
         <TabsContent value="table" className="mt-4">
           {tasks.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-[13px] text-[var(--text-muted)]">No tasks yet. Create your first task.</p>
+            <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-lg">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">No tasks yet</p>
+              <p className="text-[12px] text-[var(--text-muted)]">Create a task to start tracking follow-ups and to-dos.</p>
             </div>
           ) : (
             <TaskTableView tasks={tasks} />
@@ -600,7 +619,18 @@ function ProjectsList() {
     setDialogOpen(false);
   };
 
-  if (loading) return <p className="text-[13px] text-[var(--text-muted)] py-8 text-center">Loading...</p>;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4" aria-busy="true">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-28 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <>

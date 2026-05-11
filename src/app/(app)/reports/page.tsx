@@ -236,8 +236,19 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+      <div className="p-6" aria-busy="true">
+        <div className="h-5 w-24 rounded bg-[var(--overlay-soft)] animate-pulse mb-6" />
+        <div className="h-8 w-72 rounded bg-[var(--overlay-soft)] animate-pulse mb-6" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse"
+            />
+          ))}
+        </div>
+        <div className="h-48 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse mb-4" />
+        <div className="h-40 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse" />
       </div>
     );
   }

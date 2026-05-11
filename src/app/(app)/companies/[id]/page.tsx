@@ -48,34 +48,6 @@ type AssociatedDeal = {
   stage: string;
 };
 
-const fallbackCompanies: Record<string, CompanyDetail> = {
-  "1": { name: "Acme Corp", domain: "acmecorp.com", industry: "Technology", size: "51-200", city: "San Francisco", state: "CA", country: "US", owner: "Jake" },
-  "2": { name: "TechLabs", domain: "techlabs.io", industry: "SaaS", size: "11-50", city: "Austin", state: "TX", country: "US", owner: "Jake" },
-  "3": { name: "BrightPath", domain: "brightpath.co", industry: "Consulting", size: "1-10", city: "New York", state: "NY", country: "US", owner: "Jake" },
-  "4": { name: "NovaSoft", domain: "novasoft.com", industry: "Technology", size: "201-500", city: "Seattle", state: "WA", country: "US", owner: "Jake" },
-  "5": { name: "GreenLeaf", domain: "greenleaf.org", industry: "Non-Profit", size: "11-50", city: "Portland", state: "OR", country: "US", owner: "Jake" },
-  "6": { name: "Skyline Dev", domain: "skylinedev.com", industry: "Development", size: "11-50", city: "Denver", state: "CO", country: "US", owner: "Jake" },
-  "7": { name: "CloudNine", domain: "cloudnine.io", industry: "Cloud Services", size: "51-200", city: "Chicago", state: "IL", country: "US", owner: "Jake" },
-  "8": { name: "DataFlow", domain: "dataflow.com", industry: "Data Analytics", size: "51-200", city: "Boston", state: "MA", country: "US", owner: "Jake" },
-};
-
-const fallbackActivities: Activity[] = [
-  { id: "a1", type: "email", title: "Partnership proposal sent", description: "Sent updated partnership terms and pricing structure.", date: "2026-03-25" },
-  { id: "a2", type: "call", title: "Quarterly review call", description: "Discussed Q1 results and expansion plans.", date: "2026-03-23" },
-  { id: "a3", type: "meeting", title: "Strategy session", description: "On-site meeting to align on product roadmap.", date: "2026-03-20" },
-  { id: "a4", type: "note", title: "Internal note", description: "Key stakeholder is transitioning roles. Monitor for impact.", date: "2026-03-18" },
-];
-
-const fallbackContacts: AssociatedContact[] = [
-  { id: "c1", name: "Sarah Chen", email: "sarah@acmecorp.com" },
-  { id: "c2", name: "David Kim", email: "david@acmecorp.com" },
-];
-
-const fallbackDeals: AssociatedDeal[] = [
-  { id: "d1", name: "Enterprise License", amount: "$48,000", stage: "Proposal Sent" },
-  { id: "d2", name: "Consulting Engagement", amount: "$12,000", stage: "Qualified" },
-];
-
 const activityIcon = (type: Activity["type"]) => {
   switch (type) {
     case "email": return <Mail className="size-3.5" />;
@@ -188,12 +160,11 @@ export default function CompanyDetailPage({
           setDeals([]);
         }
       } catch {
-        // Supabase query failed — use fallback data
-        const fallback = fallbackCompanies[id] || fallbackCompanies["1"];
-        setCompany(fallback);
-        setActivities(fallbackActivities);
-        setContacts(fallbackContacts);
-        setDeals(fallbackDeals);
+        // Supabase query failed — render not-found state below
+        setCompany(null);
+        setActivities([]);
+        setContacts([]);
+        setDeals([]);
       } finally {
         setLoading(false);
       }
@@ -201,10 +172,55 @@ export default function CompanyDetailPage({
     fetchData();
   }, [id]);
 
-  if (loading || !company) {
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col" aria-busy="true">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
+          <div className="h-4 w-48 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-7 w-20 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="flex-1 flex overflow-hidden">
+          <div className="w-80 shrink-0 border-r border-[var(--border)] p-5 space-y-3">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="size-10 rounded-full bg-[var(--overlay-soft)] animate-pulse" />
+              <div className="h-4 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-8 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1 p-5">
+            <div className="h-4 w-20 rounded bg-[var(--overlay-soft)] animate-pulse mb-4" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 mb-3 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!company) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+        <div className="flex items-center gap-1.5 text-[13px] mb-4">
+          <Link href="/companies" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+            Companies
+          </Link>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">Not found</span>
+        </div>
+        <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">Company not found</p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            This company may have been deleted or never existed.
+          </p>
+          <Link href="/companies">
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+              Back to companies
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

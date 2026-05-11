@@ -144,8 +144,20 @@ export default function SequencesPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+      <div className="p-6" aria-busy="true">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-5 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-8 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="h-9 bg-[var(--overlay-weak)]" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 border-t border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse"
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -164,12 +176,21 @@ export default function SequencesPage() {
       </div>
 
       {sequences.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-[var(--border)] rounded-lg">
           <div className="size-10 rounded-lg bg-[var(--overlay-soft)] border border-[var(--border)] flex items-center justify-center mb-4">
             <Mail className="size-5 text-[var(--text-muted)]" />
           </div>
-          <p className="text-[13px] text-[var(--text-muted)] mb-1">No sequences yet</p>
-          <p className="text-[11px] text-[var(--text-muted)]">Create multi-step email cadences with smart scheduling and auto-unenroll.</p>
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">No sequences yet</p>
+          <p className="text-[11px] text-[var(--text-muted)] mb-4 max-w-sm">
+            Create multi-step email cadences with smart scheduling and auto-unenroll on reply.
+          </p>
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
+          >
+            <Plus className="size-4 mr-1" />
+            Create sequence
+          </Button>
         </div>
       ) : (
         <div className="border border-[var(--border)] rounded-lg overflow-hidden">
@@ -197,10 +218,10 @@ export default function SequencesPage() {
                       {seq.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{seq.steps}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{seq.enrolled}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{seq.reply_rate}%</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{seq.created_at}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{seq.steps || "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{seq.enrolled > 0 ? seq.enrolled : "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{seq.reply_rate > 0 ? `${seq.reply_rate}%` : "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden md:table-cell">{seq.created_at || "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -246,7 +267,7 @@ export default function SequencesPage() {
                     }`}
                   >
                     <p className={`text-[13px] ${selectedTemplate === t.id ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}`}>{t.name}</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">{t.description} — {t.steps.length} steps</p>
+                    <p className="text-[11px] text-[var(--text-muted)]">{t.description} · {t.steps.length} steps</p>
                   </button>
                 ))}
               </div>
