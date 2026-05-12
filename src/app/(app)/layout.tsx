@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Activity,
   Calendar,
+  FileCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -43,6 +44,7 @@ const primaryNav = [
   { href: "/command-center", label: "Command Center", icon: Activity },
   { href: "/invoice-review", label: "Invoice review", icon: Calendar },
   { href: "/dispatch", label: "Dispatch", icon: Calendar },
+  { href: "/permitting", label: "Permitting", icon: FileCheck },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
