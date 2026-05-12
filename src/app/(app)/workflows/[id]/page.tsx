@@ -49,22 +49,6 @@ const triggerLabels: Record<string, string> = {
   webhook: "Webhook",
 };
 
-const fallbackWorkflow: Workflow = {
-  id: "1",
-  name: "New Lead Assignment",
-  status: "active",
-  trigger_type: "record_created",
-  enrolled: 340,
-};
-
-const fallbackNodes: WorkflowNode[] = [
-  { id: "n1", node_type: "trigger", node_order: 1, config: { trigger_type: "record_created", description: "When a new contact is created" } },
-  { id: "n2", node_type: "condition", node_order: 2, config: { field: "lifecycle_stage", operator: "equals", value: "Lead", description: "If lifecycle stage is Lead" } },
-  { id: "n3", node_type: "action", node_order: 3, config: { action: "assign_owner", value: "Round robin", description: "Assign owner via round robin" } },
-  { id: "n4", node_type: "delay", node_order: 4, config: { delay_days: "1", description: "Wait 1 day" } },
-  { id: "n5", node_type: "action", node_order: 5, config: { action: "send_notification", value: "Slack", description: "Send Slack notification to sales team" } },
-];
-
 const statusColor = (status: string) => {
   switch (status) {
     case "active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -124,7 +108,6 @@ export default function WorkflowDetailPage({
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [nodes, setNodes] = useState<WorkflowNode[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newNodeType, setNewNodeType] = useState<WorkflowNode["node_type"]>("action");
   const [newDescription, setNewDescription] = useState("");
@@ -170,9 +153,8 @@ export default function WorkflowDetailPage({
           setNodes([]);
         }
       } catch {
-        setWorkflow(fallbackWorkflow);
-        setNodes(fallbackNodes);
-        setUsingFallback(true);
+        setWorkflow(null);
+        setNodes([]);
       } finally {
         setLoading(false);
       }
@@ -185,16 +167,14 @@ export default function WorkflowDetailPage({
     const newStatus = workflow.status === "active" ? "paused" : "active";
     setWorkflow({ ...workflow, status: newStatus });
 
-    if (!usingFallback) {
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("workflows")
-          .update({ status: newStatus })
-          .eq("id", id);
-      } catch {
-        // Silently fail
-      }
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("workflows")
+        .update({ status: newStatus })
+        .eq("id", id);
+    } catch {
+      // Silently fail
     }
   };
 
@@ -219,33 +199,29 @@ export default function WorkflowDetailPage({
       config,
     };
 
-    if (usingFallback) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("workflow_nodes")
+        .insert({
+          workflow_id: id,
+          node_type: newNodeType,
+          node_order: nextOrder,
+          config,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setNodes((prev) => [...prev, {
+        id: data.id,
+        node_type: data.node_type,
+        node_order: data.node_order,
+        config: data.config || {},
+      }]);
+    } catch {
       setNodes((prev) => [...prev, newNode]);
-    } else {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("workflow_nodes")
-          .insert({
-            workflow_id: id,
-            node_type: newNodeType,
-            node_order: nextOrder,
-            config,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        setNodes((prev) => [...prev, {
-          id: data.id,
-          node_type: data.node_type,
-          node_order: data.node_order,
-          config: data.config || {},
-        }]);
-      } catch {
-        setNodes((prev) => [...prev, newNode]);
-      }
     }
 
     setNewNodeType("action");
@@ -257,18 +233,57 @@ export default function WorkflowDetailPage({
 
   const handleDeleteNode = async (nodeId: string) => {
     setNodes((prev) => prev.filter((n) => n.id !== nodeId));
-    if (!usingFallback) {
-      try {
-        const supabase = createClient();
-        await supabase.from("workflow_nodes").delete().eq("id", nodeId);
-      } catch { /* silent */ }
-    }
+    try {
+      const supabase = createClient();
+      await supabase.from("workflow_nodes").delete().eq("id", nodeId);
+    } catch { /* silent */ }
   };
 
-  if (loading || !workflow) {
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col" aria-busy="true">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
+          <div className="h-4 w-48 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-14 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            <div className="h-7 w-20 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-2xl mx-auto space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i}>
+                <div className="h-20 rounded-lg bg-[var(--overlay-soft)] animate-pulse" />
+                {i < 4 && <div className="flex justify-center py-1"><div className="w-px h-6 bg-[var(--overlay-medium)]" /></div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!workflow) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+        <div className="flex items-center gap-1.5 text-[13px] mb-4">
+          <Link href="/workflows" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+            Workflows
+          </Link>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">Not found</span>
+        </div>
+        <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">Workflow not found</p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            This workflow may have been deleted or never existed.
+          </p>
+          <Link href="/workflows">
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+              Back to workflows
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -304,8 +319,18 @@ export default function WorkflowDetailPage({
         <div className="max-w-2xl mx-auto">
           {/* Node flow */}
           {nodes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-[13px] text-[var(--text-muted)]">No nodes yet. Add a trigger to start building this workflow.</p>
+            <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">No nodes yet</p>
+              <p className="text-[12px] text-[var(--text-muted)] mb-4">
+                Add a trigger to start building this workflow.
+              </p>
+              <Button
+                className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
+                onClick={() => setDialogOpen(true)}
+              >
+                <Plus className="size-4 mr-1" />
+                Add node
+              </Button>
             </div>
           ) : (
             <div className="relative">
@@ -367,17 +392,6 @@ export default function WorkflowDetailPage({
             </div>
           )}
 
-          {nodes.length === 0 && (
-            <div className="flex justify-center mt-4">
-              <Button
-                className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
-                onClick={() => setDialogOpen(true)}
-              >
-                <Plus className="size-4 mr-1" />
-                Add node
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 
