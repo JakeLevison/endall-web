@@ -37,24 +37,6 @@ type Activity = {
   date: string;
 };
 
-const fallbackDeals: Record<string, DealDetail> = {
-  "1": { name: "Enterprise Platform License", amount: "$48,000", stage: "Proposal Sent", closeDate: "2026-04-15", owner: "Jake", contactName: "Sarah Chen", contactId: "1", companyName: "Acme Corp", companyId: "1" },
-  "2": { name: "Consulting Engagement", amount: "$12,000", stage: "Qualified", closeDate: "2026-04-30", owner: "Jake", contactName: "Marcus Johnson", contactId: "2", companyName: "TechLabs", companyId: "2" },
-  "3": { name: "Annual Subscription", amount: "$24,000", stage: "Negotiation", closeDate: "2026-05-01", owner: "Jake", contactName: "Emily Rodriguez", contactId: "3", companyName: "BrightPath", companyId: "3" },
-  "4": { name: "Implementation Services", amount: "$36,000", stage: "Meeting Scheduled", closeDate: "2026-04-20", owner: "Jake", contactName: "David Kim", contactId: "4", companyName: "NovaSoft", companyId: "4" },
-  "5": { name: "Starter Plan", amount: "$6,000", stage: "Closed Won", closeDate: "2026-03-30", owner: "Jake", contactName: "Lisa Thompson", contactId: "5", companyName: "GreenLeaf", companyId: "5" },
-  "6": { name: "Custom Integration", amount: "$18,000", stage: "Proposal Sent", closeDate: "2026-04-10", owner: "Jake", contactName: "James Wilson", contactId: "6", companyName: "Skyline Dev", companyId: "6" },
-  "7": { name: "Pro Subscription", amount: "$9,600", stage: "Qualified", closeDate: "2026-05-15", owner: "Jake", contactName: "Anna Petrov", contactId: "7", companyName: "CloudNine", companyId: "7" },
-  "8": { name: "Data Migration", amount: "$15,000", stage: "Closed Lost", closeDate: "2026-03-28", owner: "Jake", contactName: "Robert Chang", contactId: "8", companyName: "DataFlow", companyId: "8" },
-};
-
-const fallbackActivities: Activity[] = [
-  { id: "a1", type: "email", title: "Proposal sent", description: "Sent pricing proposal with implementation timeline.", date: "2026-03-25" },
-  { id: "a2", type: "call", title: "Negotiation call", description: "Discussed terms and discount options.", date: "2026-03-23" },
-  { id: "a3", type: "meeting", title: "Demo presentation", description: "Full product walkthrough with decision makers.", date: "2026-03-20" },
-  { id: "a4", type: "note", title: "Internal note", description: "Budget approved on their side. Awaiting final sign-off from legal.", date: "2026-03-18" },
-];
-
 const stageColor = (stage: string) => {
   switch (stage) {
     case "Closed Won": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -149,10 +131,9 @@ export default function DealDetailPage({
           setActivities([]);
         }
       } catch {
-        // Supabase query failed — use fallback data
-        const fallback = fallbackDeals[id] || fallbackDeals["1"];
-        setDeal(fallback);
-        setActivities(fallbackActivities);
+        // Supabase query failed — render not-found state below
+        setDeal(null);
+        setActivities([]);
       } finally {
         setLoading(false);
       }
@@ -160,10 +141,55 @@ export default function DealDetailPage({
     fetchData();
   }, [id]);
 
-  if (loading || !deal) {
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col" aria-busy="true">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
+          <div className="h-4 w-48 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-7 w-20 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="flex-1 flex overflow-hidden">
+          <div className="w-80 shrink-0 border-r border-[var(--border)] p-5 space-y-3">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="size-10 rounded-full bg-[var(--overlay-soft)] animate-pulse" />
+              <div className="h-4 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            </div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-8 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1 p-5">
+            <div className="h-4 w-20 rounded bg-[var(--overlay-soft)] animate-pulse mb-4" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 mb-3 rounded bg-[var(--overlay-soft)] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!deal) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+        <div className="flex items-center gap-1.5 text-[13px] mb-4">
+          <Link href="/deals" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+            Deals
+          </Link>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">Not found</span>
+        </div>
+        <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">Deal not found</p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            This deal may have been deleted or never existed.
+          </p>
+          <Link href="/deals">
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+              Back to deals
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -252,7 +278,12 @@ export default function DealDetailPage({
         <div className="flex-1 overflow-y-auto p-5 min-w-0">
           <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">Activity</h3>
           {activities.length === 0 ? (
-            <p className="text-[13px] text-[var(--text-muted)]">No activities yet.</p>
+            <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">No activity yet</p>
+              <p className="text-[12px] text-[var(--text-muted)]">
+                Emails, calls, meetings, and notes for this deal will appear here.
+              </p>
+            </div>
           ) : (
             <div className="space-y-3">
               {activities.map((activity) => (
