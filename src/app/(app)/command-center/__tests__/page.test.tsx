@@ -105,11 +105,11 @@ describe("CommandCenterPage", () => {
     expect(within(section).getByText("Calls Handled")).toBeInTheDocument();
   });
 
-  it("renders workflow history empty state without breaking layout", () => {
+  it("renders workflow history empty state without breaking layout", async () => {
     render(<CommandCenterPage />);
     const section = screen.getByText("Workflow History").closest("section")!;
     expect(
-      within(section).getByText(/no workflow files yet/i)
+      await within(section).findByText(/no workflow files yet/i)
     ).toBeInTheDocument();
   });
 

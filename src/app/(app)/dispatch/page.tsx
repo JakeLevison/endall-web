@@ -205,11 +205,20 @@ export default function DispatchPage() {
 
       {state.kind === "loading" && (
         <div
-          className="rounded-md border p-6 text-sm"
-          style={{ borderColor: "var(--border-soft)", color: "var(--text-muted)" }}
+          className="rounded-md border p-4"
+          style={{ borderColor: "var(--border-soft)" }}
           data-testid="dispatch-loading"
+          aria-busy="true"
+          aria-label="Loading plan"
         >
-          Loading plan...
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+                <div className="h-16 rounded bg-[var(--overlay-soft)] animate-pulse" />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

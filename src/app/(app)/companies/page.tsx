@@ -180,8 +180,21 @@ export default function CompaniesPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+      <div className="p-6" aria-busy="true">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-5 w-32 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-8 w-28 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="h-8 w-64 rounded bg-[var(--overlay-soft)] animate-pulse mb-4" />
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="h-9 bg-[var(--overlay-weak)]" />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 border-t border-[var(--border)] bg-[var(--overlay-weak)] animate-pulse"
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -214,8 +227,24 @@ export default function CompaniesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-[13px] text-[var(--text-muted)]">No companies yet. Add your first company.</p>
+        <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-lg">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">
+            {companies.length === 0 ? "No companies yet" : "No matches"}
+          </p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            {companies.length === 0
+              ? "Add a company to group contacts and track pipeline by account."
+              : "Try a different search term."}
+          </p>
+          {companies.length === 0 && (
+            <Button
+              onClick={() => setCreateOpen(true)}
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
+            >
+              <Plus className="size-4 mr-1" />
+              Add company
+            </Button>
+          )}
         </div>
       ) : (
         <div className="border border-[var(--border)] rounded-lg overflow-hidden">
@@ -234,11 +263,11 @@ export default function CompaniesPage() {
               {filtered.map((company) => (
                 <TableRow key={company.id} onClick={() => router.push(`/companies/${company.id}`)} className="border-[var(--border)] hover:bg-[var(--overlay-weak)] cursor-pointer transition-colors">
                   <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">{company.name}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{company.domain}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">{company.industry}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.contacts}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.deals}</TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.owner}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">{company.domain || "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">{company.industry || "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.contacts > 0 ? company.contacts : "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.deals > 0 ? company.deals : "—"}</TableCell>
+                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">{company.owner || "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -46,22 +46,6 @@ type Step = {
   delay_days: number;
 };
 
-const fallbackSequence: Sequence = {
-  id: "1",
-  name: "Cold Outreach - SaaS",
-  status: "active",
-  enrolled: 142,
-  reply_rate: 18.3,
-};
-
-const fallbackSteps: Step[] = [
-  { id: "s1", step_order: 1, type: "email", subject: "Quick intro + how we help teams like yours", body: "Hi {{first_name}},\n\nI noticed your team is scaling fast...", delay_days: 0 },
-  { id: "s2", step_order: 2, type: "delay", subject: "", body: "", delay_days: 3 },
-  { id: "s3", step_order: 3, type: "email", subject: "Following up — any thoughts?", body: "Hi {{first_name}},\n\nJust bumping this to the top of your inbox...", delay_days: 0 },
-  { id: "s4", step_order: 4, type: "delay", subject: "", body: "", delay_days: 5 },
-  { id: "s5", step_order: 5, type: "task", subject: "Call if no reply", body: "Review contact activity and attempt phone call", delay_days: 0 },
-];
-
 const statusColor = (status: string) => {
   switch (status) {
     case "active": return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
@@ -172,9 +156,8 @@ export default function SequenceDetailPage({
           setSteps([]);
         }
       } catch {
-        setSequence(fallbackSequence);
-        setSteps(fallbackSteps);
-        setUsingFallback(true);
+        setSequence(null);
+        setSteps([]);
       } finally {
         setLoading(false);
       }
@@ -301,10 +284,43 @@ export default function SequenceDetailPage({
     setNewBody((prev) => prev + tag);
   };
 
-  if (loading || !sequence) {
+  if (loading) {
+    return (
+      <div className="h-full flex flex-col" aria-busy="true">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)]">
+          <div className="h-4 w-48 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          <div className="h-7 w-24 rounded bg-[var(--overlay-soft)] animate-pulse" />
+        </div>
+        <div className="flex-1 p-6 space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-20 rounded bg-[var(--overlay-soft)] animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!sequence) {
     return (
       <div className="p-6">
-        <p className="text-[13px] text-[var(--text-muted)]">Loading...</p>
+        <div className="flex items-center gap-1.5 text-[13px] mb-4">
+          <Link href="/sequences" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+            Sequences
+          </Link>
+          <ChevronRight className="size-3 text-[var(--text-faint)]" />
+          <span className="text-[var(--text-primary)]">Not found</span>
+        </div>
+        <div className="border border-dashed border-[var(--border)] rounded-lg p-10 text-center">
+          <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">Sequence not found</p>
+          <p className="text-[12px] text-[var(--text-muted)] mb-4">
+            This sequence may have been deleted or never existed.
+          </p>
+          <Link href="/sequences">
+            <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+              Back to sequences
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }
