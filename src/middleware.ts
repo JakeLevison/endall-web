@@ -134,11 +134,23 @@ export async function middleware(request: NextRequest) {
 
     // Any path that is not a tenant-facing surface gets a neutral 404
     // redirect to /tenant-not-found. Keeps subdomains from leaking any
-    // Endall marketing content.
+    // Endall marketing content. /api/ is allowlisted because route
+    // handlers return JSON (no marketing content to leak) and the
+    // tenant pages depend on them — both server-side (page.tsx calling
+    // /api/public/approval/{token}) and client-side (CustomerApprovalView
+    // hitting /approve, /reject, /comments). Without this, every API
+    // request on a tenant subdomain gets rewritten to /tenant-not-found
+    // and the page's `await res.json()` throws on HTML, surfacing as a
+    // bogus 404 to the customer.
     const isTenantPath = TENANT_PATH_PREFIXES.some(
       (p) => pathname === p || pathname.startsWith(p + "/"),
     );
-    if (!isTenantPath && pathname !== "/" && !pathname.startsWith("/_next")) {
+    if (
+      !isTenantPath &&
+      pathname !== "/" &&
+      !pathname.startsWith("/_next") &&
+      !pathname.startsWith("/api/")
+    ) {
       const notFoundUrl = request.nextUrl.clone();
       notFoundUrl.pathname = "/tenant-not-found";
       return NextResponse.rewrite(notFoundUrl, { request: { headers: tenantHeaders } });

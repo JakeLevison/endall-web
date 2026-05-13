@@ -174,6 +174,28 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
     expect(downstreamHeaders!.get("x-tenant-slug")).toBe("acme");
   });
 
+  it("/api/public/approval/{token} on tenant subdomain passes through (not rewritten to /tenant-not-found)", async () => {
+    // Regression: the /approve/{token} page server-side fetches its own
+    // /api/public/approval/{token} route. Without an /api/ allowlist in
+    // the subdomain branch, that fetch was rewritten to /tenant-not-found
+    // (HTML), res.json() threw, fetchApproval returned null, and the page
+    // surfaced as a bogus 404 to the customer.
+    const { NextResponse } = await import("next/server");
+    const rewriteSpy = NextResponse.rewrite as unknown as ReturnType<
+      typeof vi.fn
+    >;
+    rewriteSpy.mockClear();
+
+    const req = makeRequest("/api/public/approval/9IFBgrS2d7rMowG9", {
+      host: "cornerstone-mep.endall.app",
+    });
+    await middleware(req);
+
+    expect(rewriteSpy).not.toHaveBeenCalled();
+    expect(downstreamHeaders).not.toBeNull();
+    expect(downstreamHeaders!.get("x-tenant-slug")).toBe("cornerstone-mep");
+  });
+
   it("authenticated dispatch request with client-supplied x-tenant-id: overwritten with membership tenant", async () => {
     mockUser = { id: "user-1" };
     mockMembership = { tenant_id: "legit-tenant-uuid" };
