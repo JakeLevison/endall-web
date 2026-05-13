@@ -16,6 +16,7 @@ import {
   CustomerApprovalView,
   type PublicEstimate,
 } from "@/components/estimates/CustomerApprovalView";
+import { resolveApprovalMetaViaBridge } from "@/lib/approval-bridge";
 
 export const dynamic = "force-dynamic";
 
@@ -29,27 +30,39 @@ export const metadata: Metadata = {
   other: { referrer: "no-referrer" },
 };
 
-async function fetchApproval(
-  token: string,
-  origin: string,
-): Promise<PublicEstimate | null> {
-  try {
-    const url = new URL(origin);
-    url.pathname = `/api/public/approval/${encodeURIComponent(token)}`;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as PublicEstimate;
-  } catch {
+const BRIDGE_URL =
+  process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
+
+// Calls the bridge directly instead of round-tripping through our own
+// /api/public/approval/{token} proxy. The SSR self-fetch path was
+// failing silently in production (silent catch -> notFound -> bogus
+// 404 to the customer) for deployment-specific reasons even though the
+// /api/ route worked when hit externally. Same Node runtime, same
+// bridge call as the route handler — no HTTPS loop, no middleware
+// rerouting, errors are logged instead of swallowed.
+async function fetchApproval(token: string): Promise<PublicEstimate | null> {
+  const meta = await resolveApprovalMetaViaBridge(token);
+  if (!meta) {
+    console.error("approve page: token did not resolve via bridge");
     return null;
   }
-}
-
-function originFromHeaders(host: string | null): string {
-  const h = (host || "").trim();
-  if (!h) return "http://localhost:3000";
-  const proto =
-    h.startsWith("localhost") || h.includes("127.0.0.1") ? "http" : "https";
-  return `${proto}://${h}`;
+  try {
+    const url = new URL(BRIDGE_URL);
+    url.pathname = `/estimates/${encodeURIComponent(meta.estimate_id)}/public`;
+    url.searchParams.set("token", token);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) {
+      console.error("approve page: bridge estimate fetch non-2xx", {
+        status: resp.status,
+        estimate_id: meta.estimate_id,
+      });
+      return null;
+    }
+    return (await resp.json()) as PublicEstimate;
+  } catch (err) {
+    console.error("approve page: bridge estimate fetch threw", err);
+    return null;
+  }
 }
 
 function tenantLabelFromSlug(slug: string): string {
@@ -72,9 +85,8 @@ export default async function ApprovePage({
   }
 
   const hdrs = await headers();
-  const origin = originFromHeaders(hdrs.get("host"));
   const tenantSlug = hdrs.get("x-tenant-slug") || "";
-  const initial = await fetchApproval(token, origin);
+  const initial = await fetchApproval(token);
   if (!initial) {
     notFound();
   }
