@@ -134,13 +134,20 @@ export default function ContactsPage() {
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
   const [duplicateOpen, setDuplicateOpen] = useState(false);
 
-  // Fetch companies for dropdown
+  // Fetch companies for dropdown. Explicit tenant filter is defense in depth
+  // on top of the RLS policy from migration 075; if RLS is ever misconfigured
+  // we still scope the result set to the current tenant.
   useEffect(() => {
+    if (!tenantId) return;
     const supabase = createClient();
-    supabase.from("companies").select("id, name").then(({ data }) => {
-      if (data) setCompaniesList(data);
-    });
-  }, []);
+    supabase
+      .from("companies")
+      .select("id, name")
+      .eq("tenant_id", tenantId)
+      .then(({ data }) => {
+        if (data) setCompaniesList(data);
+      });
+  }, [tenantId]);
 
   function resetCreateForm() {
     setNewFirstName("");
