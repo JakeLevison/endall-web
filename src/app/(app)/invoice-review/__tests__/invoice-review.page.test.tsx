@@ -13,10 +13,7 @@ vi.mock("swr", () => {
   const React = require("react");
   return {
     default: (_key: string, fetcher: (url: string) => Promise<unknown>) => {
-      const [data, setData] = React.useState<unknown>({
-        jobs: [],
-        grouped_by_date: {},
-      });
+      const [data, setData] = React.useState<unknown>([]);
       React.useEffect(() => {
         let cancelled = false;
         Promise.resolve(fetcher(_key))
@@ -69,7 +66,7 @@ describe("Dispatch page", () => {
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({ jobs: [], grouped_by_date: {} }),
+        json: async () => [],
       } as Response))
     );
     render(<DispatchPage />);
@@ -83,7 +80,7 @@ describe("Dispatch page", () => {
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({ jobs: [], grouped_by_date: {} }),
+        json: async () => [],
       } as Response))
     );
     render(<DispatchPage />);
@@ -98,43 +95,75 @@ describe("Dispatch page", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders jobs grouped into Today and This week", async () => {
+  it("renders jobs grouped into Today and This week from the unified endpoint", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({
-          jobs: [
-            {
-              id: "j-today",
-              caller_name: "Alice",
-              caller_phone: "555",
-              job_type: "AC repair",
-              preferred_date: todayIso(),
-              address: null,
-              status: "pending",
-              notes: null,
-            },
-            {
-              id: "j-week",
-              caller_name: "Bob",
-              caller_phone: "556",
-              job_type: "Furnace",
-              preferred_date: daysFromTodayIso(3),
-              address: null,
-              status: "confirmed",
-              notes: null,
-            },
-          ],
-          grouped_by_date: {},
-        }),
+        json: async () => [
+          {
+            id: "j-today",
+            source: "voice_jobs",
+            source_id: "vj-today",
+            title: "Alice — AC repair",
+            status: "pending",
+            scheduled_at: todayIso(),
+            address: null,
+            customer_id: null,
+            tenant_id: "t-1",
+            created_at: todayIso(),
+          },
+          {
+            id: "j-week",
+            source: "jobs",
+            source_id: "job-week",
+            title: "Bob — Furnace",
+            status: "confirmed",
+            scheduled_at: daysFromTodayIso(3),
+            address: null,
+            customer_id: "cust-bob",
+            tenant_id: "t-1",
+            created_at: todayIso(),
+          },
+        ],
       } as Response))
     );
     render(<DispatchPage />);
     await waitFor(() => {
-      expect(screen.getByText("Alice")).toBeInTheDocument();
-      expect(screen.getByText("Bob")).toBeInTheDocument();
+      expect(screen.getByText(/Alice — AC repair/)).toBeInTheDocument();
+      expect(screen.getByText(/Bob — Furnace/)).toBeInTheDocument();
     });
+    // Source badges render for both source types.
+    expect(screen.getByTestId("source-badge-voice_jobs")).toBeInTheDocument();
+    expect(screen.getByTestId("source-badge-jobs")).toBeInTheDocument();
+  });
+
+  it("renders voice_jobs rows with null customer_id without crashing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => [
+          {
+            id: "j-voice",
+            source: "voice_jobs",
+            source_id: "vj-1",
+            title: "Caller booked via voice",
+            status: "pending",
+            scheduled_at: todayIso(),
+            address: "123 Main",
+            customer_id: null,
+            tenant_id: "t-1",
+            created_at: todayIso(),
+          },
+        ],
+      } as Response))
+    );
+    render(<DispatchPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/Caller booked via voice/)).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("source-badge-voice_jobs")).toBeInTheDocument();
   });
 
   it("shows Generate invoice button only on completed jobs", async () => {
@@ -142,31 +171,32 @@ describe("Dispatch page", () => {
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({
-          jobs: [
-            {
-              id: "j-complete",
-              caller_name: "Carol",
-              caller_phone: "557",
-              job_type: "Tune-up",
-              preferred_date: todayIso(14),
-              address: null,
-              status: "completed",
-              notes: null,
-            },
-            {
-              id: "j-pending",
-              caller_name: "Dan",
-              caller_phone: "558",
-              job_type: "Inspection",
-              preferred_date: todayIso(15),
-              address: null,
-              status: "pending",
-              notes: null,
-            },
-          ],
-          grouped_by_date: {},
-        }),
+        json: async () => [
+          {
+            id: "j-complete",
+            source: "jobs",
+            source_id: "job-c",
+            title: "Carol",
+            status: "completed",
+            scheduled_at: todayIso(14),
+            address: null,
+            customer_id: "cust-carol",
+            tenant_id: "t-1",
+            created_at: todayIso(),
+          },
+          {
+            id: "j-pending",
+            source: "voice_jobs",
+            source_id: "vj-p",
+            title: "Dan",
+            status: "pending",
+            scheduled_at: todayIso(15),
+            address: null,
+            customer_id: null,
+            tenant_id: "t-1",
+            created_at: todayIso(),
+          },
+        ],
       } as Response))
     );
     render(<DispatchPage />);
