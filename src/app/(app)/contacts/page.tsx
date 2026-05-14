@@ -40,7 +40,6 @@ import { useTenant } from "@/lib/tenant-hook";
 import { enrichFromEmail } from "@/lib/enrichment";
 import { normalizePhone } from "@/lib/normalize-phone";
 import ExportButton from "@/components/shared/ExportButton";
-import type { Contact as DBContact } from "@/lib/types";
 
 type DuplicateMatch = {
   id: string;
@@ -51,8 +50,24 @@ type DuplicateMatch = {
   matchedOn: "email" | "phone";
 };
 
+type UnifiedSource = "contacts" | "voice_contacts" | "outreach_prospects";
+
+type UnifiedRow = {
+  id: string;
+  source: UnifiedSource;
+  source_id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  company_name: string | null;
+  lifecycle_stage: string | null;
+  last_seen_at: string | null;
+};
+
 type Contact = {
   id: string;
+  source: UnifiedSource;
+  sourceId: string;
   name: string;
   email: string;
   company: string;
@@ -62,6 +77,25 @@ type Contact = {
 };
 
 const stages = ["All", "Lead", "Opportunity", "Customer"];
+
+const sourceFilters: { key: "all" | UnifiedSource; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "contacts", label: "Contacts" },
+  { key: "voice_contacts", label: "Voice" },
+  { key: "outreach_prospects", label: "Outreach" },
+];
+
+const sourceLabel: Record<UnifiedSource, string> = {
+  contacts: "Contacts",
+  voice_contacts: "Voice",
+  outreach_prospects: "Outreach",
+};
+
+const sourceBadgeColor: Record<UnifiedSource, string> = {
+  contacts: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  voice_contacts: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+  outreach_prospects: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+};
 
 type SortKey = keyof Contact;
 type SortDir = "asc" | "desc";
@@ -76,6 +110,9 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("All");
+  const [sourceFilter, setSourceFilter] = useState<"all" | UnifiedSource>(
+    "all",
+  );
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -241,33 +278,44 @@ export default function ContactsPage() {
   }
 
   useEffect(() => {
-    const supabase = createClient();
     async function fetchContacts() {
       try {
-        const { data, error } = await supabase
-          .from("contacts")
-          .select("*, companies(name)");
+        const resp = await fetch("/api/contacts/unified", {
+          cache: "no-store",
+        });
+        if (!resp.ok) throw new Error(`unified fetch failed: ${resp.status}`);
+        const payload = (await resp.json()) as UnifiedRow[] | { rows?: UnifiedRow[] };
+        const rows: UnifiedRow[] = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.rows)
+            ? payload.rows
+            : [];
 
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-          const mapped: Contact[] = (data as DBContact[]).map((c) => ({
-            id: c.id,
-            name: `${c.first_name} ${c.last_name}`.trim(),
-            email: c.email || "",
-            company: c.companies?.name || "",
-            stage: c.lifecycle_stage || "Lead",
-            lastActivity: c.updated_at ? c.updated_at.split("T")[0] : "",
-            owner: c.owner || "",
-          }));
-          setContacts(mapped);
-          setTotalCount(mapped.length);
-        } else {
-          setContacts([]);
-          setTotalCount(0);
-        }
-      } catch {
-        // Supabase query failed — show empty state
+        const mapped: Contact[] = rows.map((r) => {
+          const stageRaw = r.lifecycle_stage;
+          const stagePretty = stageRaw
+            ? stageRaw.charAt(0).toUpperCase() + stageRaw.slice(1).toLowerCase()
+            : r.source === "contacts"
+              ? "Lead"
+              : "";
+          return {
+            id: `${r.source}:${r.source_id ?? r.id}`,
+            source: r.source,
+            sourceId: r.source_id ?? r.id,
+            name: r.name?.trim() || r.email || r.phone || "(no name)",
+            email: r.email || "",
+            company: r.company_name || "",
+            stage: stagePretty,
+            lastActivity: r.last_seen_at
+              ? r.last_seen_at.split("T")[0]
+              : "",
+            owner: "",
+          };
+        });
+        setContacts(mapped);
+        setTotalCount(mapped.length);
+      } catch (err) {
+        console.error("Failed to load unified contacts:", err);
         setContacts([]);
         setTotalCount(0);
       } finally {
@@ -288,6 +336,9 @@ export default function ContactsPage() {
 
   const filtered = useMemo(() => {
     let list = contacts;
+    if (sourceFilter !== "all") {
+      list = list.filter((c) => c.source === sourceFilter);
+    }
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -301,13 +352,13 @@ export default function ContactsPage() {
       list = list.filter((c) => c.stage === stageFilter);
     }
     list = [...list].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
+      const aVal = a[sortKey] ?? "";
+      const bVal = b[sortKey] ?? "";
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       return sortDir === "asc" ? cmp : -cmp;
     });
     return list;
-  }, [contacts, search, stageFilter, sortKey, sortDir]);
+  }, [contacts, search, stageFilter, sourceFilter, sortKey, sortDir]);
 
   const stageBadgeColor = (stage: string) => {
     switch (stage) {
@@ -364,7 +415,7 @@ export default function ContactsPage() {
         <div className="flex items-center gap-2">
           <ExportButton
             data={contacts as unknown as Record<string, unknown>[]}
-            columns={["first_name", "last_name", "email", "phone", "lifecycle_stage", "lead_score"]}
+            columns={["name", "source", "email", "company", "stage", "lastActivity"]}
             filename="contacts"
           />
           <Button
@@ -375,6 +426,29 @@ export default function ContactsPage() {
             Add contact
           </Button>
         </div>
+      </div>
+
+      {/* Source filter chips */}
+      <div className="flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Filter contacts by source">
+        {sourceFilters.map((f) => {
+          const active = sourceFilter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setSourceFilter(f.key)}
+              className={`px-3 h-7 rounded-full text-[12px] border transition-colors ${
+                active
+                  ? "bg-[var(--surface-inverse)] text-[var(--text-inverse)] border-[var(--surface-inverse)]"
+                  : "bg-[var(--overlay-weak)] text-[var(--text-tertiary)] border-[var(--border)] hover:bg-[var(--overlay-soft)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Filter bar */}
@@ -441,6 +515,9 @@ export default function ContactsPage() {
                   <SortHeader label="Name" sortKeyName="name" />
                 </TableHead>
                 <TableHead className="h-9">
+                  <SortHeader label="Source" sortKeyName="source" />
+                </TableHead>
+                <TableHead className="h-9">
                   <SortHeader label="Email" sortKeyName="email" />
                 </TableHead>
                 <TableHead className="h-9 hidden md:table-cell">
@@ -458,37 +535,70 @@ export default function ContactsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((contact) => (
-                <TableRow
-                  key={contact.id}
-                  onClick={() => router.push(`/contacts/${contact.id}`)}
-                  className="cursor-pointer border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors"
-                >
-                  <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">
-                    {contact.name}
-                  </TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">
-                    {contact.email}
-                  </TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">
-                    {contact.company}
-                  </TableCell>
-                  <TableCell className="py-2.5">
-                    <Badge
-                      variant="outline"
-                      className={`text-[11px] font-normal ${stageBadgeColor(contact.stage)}`}
-                    >
-                      {contact.stage}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
-                    {contact.lastActivity}
-                  </TableCell>
-                  <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
-                    {contact.owner}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filtered.map((contact) => {
+                const navigable = contact.source === "contacts";
+                const rowTitle = navigable
+                  ? undefined
+                  : contact.source === "voice_contacts"
+                    ? "From voice intake. Detail view not yet wired."
+                    : "From outreach list. Detail view not yet wired.";
+                return (
+                  <TableRow
+                    key={contact.id}
+                    title={rowTitle}
+                    onClick={() => {
+                      if (navigable) {
+                        router.push(`/contacts/${contact.sourceId}`);
+                      }
+                    }}
+                    className={`border-[var(--border)] transition-colors ${
+                      navigable
+                        ? "cursor-pointer hover:bg-[var(--overlay-weak)]"
+                        : "cursor-default hover:bg-[var(--overlay-weak)]/40"
+                    }`}
+                  >
+                    <TableCell className="text-[13px] text-[var(--text-primary)] font-medium py-2.5">
+                      {contact.name}
+                    </TableCell>
+                    <TableCell className="py-2.5">
+                      <Badge
+                        variant="outline"
+                        className={`text-[11px] font-normal ${sourceBadgeColor[contact.source]}`}
+                      >
+                        {sourceLabel[contact.source]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5">
+                      {contact.email || (
+                        <span className="text-[var(--text-muted)]">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-[13px] text-[var(--text-tertiary)] py-2.5 hidden md:table-cell">
+                      {contact.company || (
+                        <span className="text-[var(--text-muted)]">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-2.5">
+                      {contact.stage ? (
+                        <Badge
+                          variant="outline"
+                          className={`text-[11px] font-normal ${stageBadgeColor(contact.stage)}`}
+                        >
+                          {contact.stage}
+                        </Badge>
+                      ) : (
+                        <span className="text-[12px] text-[var(--text-muted)]">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
+                      {contact.lastActivity || "—"}
+                    </TableCell>
+                    <TableCell className="text-[13px] text-[var(--text-muted)] py-2.5 hidden lg:table-cell">
+                      {contact.owner || "—"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
