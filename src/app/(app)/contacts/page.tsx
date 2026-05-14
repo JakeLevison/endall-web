@@ -38,8 +38,18 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useTenant } from "@/lib/tenant-hook";
 import { enrichFromEmail } from "@/lib/enrichment";
+import { normalizePhone } from "@/lib/normalize-phone";
 import ExportButton from "@/components/shared/ExportButton";
 import type { Contact as DBContact } from "@/lib/types";
+
+type DuplicateMatch = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  matchedOn: "email" | "phone";
+};
 
 type Contact = {
   id: string;
@@ -81,6 +91,11 @@ export default function ContactsPage() {
   const [newLifecycleStage, setNewLifecycleStage] = useState("");
   const [companiesList, setCompaniesList] = useState<{ id: string; name: string }[]>([]);
   const [enrichHint, setEnrichHint] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  // Duplicate-confirm dialog state
+  const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
+  const [duplicateOpen, setDuplicateOpen] = useState(false);
 
   // Fetch companies for dropdown
   useEffect(() => {
@@ -90,34 +105,139 @@ export default function ContactsPage() {
     });
   }, []);
 
+  function resetCreateForm() {
+    setNewFirstName("");
+    setNewLastName("");
+    setNewEmail("");
+    setNewPhone("");
+    setNewCompanyId("");
+    setNewLifecycleStage("");
+    setEnrichHint("");
+    setCreateError("");
+  }
+
+  function isUniqueViolation(err: unknown): boolean {
+    if (!err || typeof err !== "object") return false;
+    const e = err as { code?: string; message?: string };
+    if (e.code === "23505") return true;
+    return typeof e.message === "string" && /duplicate key|unique constraint/i.test(e.message);
+  }
+
+  async function lookupExistingByEmail(email: string): Promise<DuplicateMatch | null> {
+    if (!tenantId || !email) return null;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("contacts")
+      .select("id, first_name, last_name, email, phone")
+      .eq("tenant_id", tenantId)
+      .eq("email", email)
+      .limit(1)
+      .maybeSingle();
+    return data ? { ...(data as Omit<DuplicateMatch, "matchedOn">), matchedOn: "email" } : null;
+  }
+
+  async function lookupExistingByPhone(normalizedPhone: string): Promise<DuplicateMatch | null> {
+    if (!tenantId || !normalizedPhone) return null;
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("contacts")
+      .select("id, first_name, last_name, email, phone")
+      .eq("tenant_id", tenantId)
+      .eq("phone", normalizedPhone)
+      .limit(1)
+      .maybeSingle();
+    return data ? { ...(data as Omit<DuplicateMatch, "matchedOn">), matchedOn: "phone" } : null;
+  }
+
+  async function insertContact() {
+    if (!tenantId) return;
+    const supabase = createClient();
+    const normalizedPhone = normalizePhone(newPhone);
+    const { error } = await supabase.from("contacts").insert({
+      first_name: newFirstName,
+      last_name: newLastName,
+      email: newEmail || null,
+      phone: normalizedPhone || null,
+      company_id: newCompanyId || null,
+      lifecycle_stage: newLifecycleStage || "lead",
+      tenant_id: tenantId,
+    });
+    if (error) {
+      if (isUniqueViolation(error)) {
+        // Race: another writer beat us to it. Find the matching row and offer
+        // to navigate, rather than show the raw Supabase error.
+        const existing =
+          (newEmail ? await lookupExistingByEmail(newEmail) : null) ||
+          (normalizedPhone ? await lookupExistingByPhone(normalizedPhone) : null);
+        if (existing) {
+          setDuplicateMatch(existing);
+          setDuplicateOpen(true);
+          setCreateError("");
+          return;
+        }
+        setCreateError("A contact with this email or phone already exists.");
+        return;
+      }
+      throw error;
+    }
+    setCreateOpen(false);
+    resetCreateForm();
+    setRefreshKey((k) => k + 1);
+  }
+
   async function handleCreateContact() {
     if (!tenantId) return;
     setCreating(true);
+    setCreateError("");
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("contacts").insert({
-        first_name: newFirstName,
-        last_name: newLastName,
-        email: newEmail || null,
-        phone: newPhone || null,
-        company_id: newCompanyId || null,
-        lifecycle_stage: newLifecycleStage || "lead",
-        tenant_id: tenantId,
-      });
-      if (error) throw error;
-      setCreateOpen(false);
-      setNewFirstName("");
-      setNewLastName("");
-      setNewEmail("");
-      setNewPhone("");
-      setNewCompanyId("");
-      setNewLifecycleStage("");
-      setRefreshKey((k) => k + 1);
+      const normalizedPhone = normalizePhone(newPhone);
+      const [emailMatch, phoneMatch] = await Promise.all([
+        newEmail ? lookupExistingByEmail(newEmail) : Promise.resolve(null),
+        normalizedPhone ? lookupExistingByPhone(normalizedPhone) : Promise.resolve(null),
+      ]);
+      const match = emailMatch || phoneMatch;
+      if (match) {
+        setDuplicateMatch(match);
+        setDuplicateOpen(true);
+        return;
+      }
+      await insertContact();
     } catch (err) {
       console.error("Failed to create contact:", err);
+      setCreateError("Could not create contact. Please try again.");
     } finally {
       setCreating(false);
     }
+  }
+
+  async function handleCreateAnyway() {
+    setDuplicateOpen(false);
+    setDuplicateMatch(null);
+    setCreating(true);
+    setCreateError("");
+    try {
+      await insertContact();
+    } catch (err) {
+      console.error("Failed to create contact:", err);
+      setCreateError("Could not create contact. Please try again.");
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  function handleViewExisting() {
+    if (!duplicateMatch) return;
+    const id = duplicateMatch.id;
+    setDuplicateOpen(false);
+    setDuplicateMatch(null);
+    setCreateOpen(false);
+    resetCreateForm();
+    router.push(`/contacts/${id}`);
+  }
+
+  function handleDuplicateCancel() {
+    setDuplicateOpen(false);
+    setDuplicateMatch(null);
   }
 
   useEffect(() => {
@@ -495,10 +615,18 @@ export default function ContactsPage() {
               </Select>
             </div>
           </div>
+          {createError && (
+            <p className="text-[12px] text-red-400" role="alert">
+              {createError}
+            </p>
+          )}
           <div className="flex justify-end gap-2 pt-2">
             <Button
               variant="outline"
-              onClick={() => setCreateOpen(false)}
+              onClick={() => {
+                setCreateOpen(false);
+                setCreateError("");
+              }}
               className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
             >
               Cancel
@@ -509,6 +637,56 @@ export default function ContactsPage() {
               className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
             >
               {creating ? "Creating..." : "Create contact"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Confirm Dialog */}
+      <Dialog open={duplicateOpen} onOpenChange={(open) => (open ? setDuplicateOpen(true) : handleDuplicateCancel())}>
+        <DialogContent className="bg-[var(--surface)] border-[var(--border)] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] text-[var(--text-primary)]">
+              Possible duplicate found
+            </DialogTitle>
+            <DialogDescription className="text-[13px] text-[var(--text-muted)]">
+              A contact already exists with this {duplicateMatch?.matchedOn === "email" ? "email" : "phone"}.
+            </DialogDescription>
+          </DialogHeader>
+          {duplicateMatch && (
+            <div className="rounded-md border border-[var(--border)] bg-[var(--overlay-weak)] p-3 space-y-1">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium">
+                {`${duplicateMatch.first_name ?? ""} ${duplicateMatch.last_name ?? ""}`.trim() || "(no name)"}
+              </p>
+              {duplicateMatch.email && (
+                <p className="text-[12px] text-[var(--text-tertiary)]">{duplicateMatch.email}</p>
+              )}
+              {duplicateMatch.phone && (
+                <p className="text-[12px] text-[var(--text-tertiary)]">{duplicateMatch.phone}</p>
+              )}
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={handleDuplicateCancel}
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleViewExisting}
+              className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-soft)]"
+            >
+              View existing contact
+            </Button>
+            <Button
+              onClick={handleCreateAnyway}
+              disabled={creating}
+              className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8"
+            >
+              {creating ? "Creating..." : "Create anyway"}
             </Button>
           </div>
         </DialogContent>
