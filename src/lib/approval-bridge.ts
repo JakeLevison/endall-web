@@ -30,6 +30,28 @@ export type PublicApprovalMeta = {
   decided_at?: string | null;
 };
 
+// Voice booking-confirmation resolver payload (migration 087). Same
+// /public/approval/{token} endpoint, discriminated by `kind`.
+export type PublicBookingMeta = {
+  kind: "booking";
+  voice_job_id: string;
+  tenant_slug?: string;
+  tenant_name?: string;
+  tenant_phone?: string;
+  caller_name?: string;
+  job_type?: string;
+  job_address?: string;
+  scheduled_at?: string | null;
+  decision?: "confirmed" | "rescheduled" | null;
+  expires_at?: string;
+};
+
+export function isBookingMeta(
+  meta: PublicApprovalMeta | PublicBookingMeta | null,
+): meta is PublicBookingMeta {
+  return !!meta && (meta as PublicBookingMeta).kind === "booking";
+}
+
 function bridgeBase(): string {
   return process.env.ASK_ENDALL_BRIDGE_URL || DEFAULT_BRIDGE_URL;
 }
@@ -46,6 +68,42 @@ export async function resolveApprovalMetaViaBridge(
     if (!resp.ok) return null;
     const data = (await resp.json()) as Partial<PublicApprovalMeta>;
     if (!data || typeof data.estimate_id !== "string") return null;
+    return data as PublicApprovalMeta;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * One-shot resolver that returns either an estimate meta or a booking
+ * meta from the same /public/approval/{token} endpoint. The shared
+ * /approve page uses this and branches on isBookingMeta(). Estimate-only
+ * callers (approve/reject proxies) keep using resolveApprovalMetaViaBridge
+ * so a booking token can never reach the estimate decision endpoints.
+ */
+export async function resolveApprovalAnyViaBridge(
+  token: string,
+): Promise<PublicApprovalMeta | PublicBookingMeta | null> {
+  if (!token || token.length < 16) return null;
+
+  try {
+    const url = new URL(bridgeBase());
+    url.pathname = `/public/approval/${encodeURIComponent(token)}`;
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as
+      | Partial<PublicApprovalMeta>
+      | Partial<PublicBookingMeta>;
+    if (!data) return null;
+    if ((data as PublicBookingMeta).kind === "booking") {
+      if (typeof (data as PublicBookingMeta).voice_job_id !== "string") {
+        return null;
+      }
+      return data as PublicBookingMeta;
+    }
+    if (typeof (data as PublicApprovalMeta).estimate_id !== "string") {
+      return null;
+    }
     return data as PublicApprovalMeta;
   } catch {
     return null;

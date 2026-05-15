@@ -16,7 +16,12 @@ import {
   CustomerApprovalView,
   type PublicEstimate,
 } from "@/components/estimates/CustomerApprovalView";
-import { resolveApprovalMetaViaBridge } from "@/lib/approval-bridge";
+import { BookingApprovalView } from "@/components/bookings/BookingApprovalView";
+import {
+  isBookingMeta,
+  resolveApprovalAnyViaBridge,
+  resolveApprovalMetaViaBridge,
+} from "@/lib/approval-bridge";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +91,18 @@ export default async function ApprovePage({
 
   const hdrs = await headers();
   const tenantSlug = hdrs.get("x-tenant-slug") || "";
+
+  // One resolver call decides the surface. Booking tokens (migration 087)
+  // render the confirm/reschedule view; everything else stays on the
+  // estimate path, byte-identical to before.
+  const meta = await resolveApprovalAnyViaBridge(token);
+  if (!meta) {
+    notFound();
+  }
+  if (isBookingMeta(meta)) {
+    return <BookingApprovalView token={token} initial={meta} />;
+  }
+
   const initial = await fetchApproval(token);
   if (!initial) {
     notFound();
