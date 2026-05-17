@@ -149,6 +149,14 @@ describe("CustomerApprovalView (pristine token)", () => {
         "Estimate approved.",
       );
     });
+    // Customer already scheduled during the call; the banner must not
+    // promise the contractor "will start scheduling".
+    expect(screen.getByTestId("decision-banner")).toHaveTextContent(
+      "will confirm your appointment",
+    );
+    expect(screen.getByTestId("decision-banner")).not.toHaveTextContent(
+      "will start scheduling",
+    );
 
     const approvalCall = fetchMock.mock.calls.find(([url]) =>
       String(url).endsWith("/approve"),
