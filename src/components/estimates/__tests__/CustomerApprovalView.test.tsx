@@ -149,10 +149,11 @@ describe("CustomerApprovalView (pristine token)", () => {
         "Estimate approved.",
       );
     });
-    // Customer already scheduled during the call; the banner must not
-    // promise the contractor "will start scheduling".
+    // Customer already scheduled during the call; the banner must confirm
+    // the existing appointment, not promise the contractor "will start
+    // scheduling".
     expect(screen.getByTestId("decision-banner")).toHaveTextContent(
-      "will confirm your appointment",
+      "Your appointment is confirmed and your contractor will reach out before then.",
     );
     expect(screen.getByTestId("decision-banner")).not.toHaveTextContent(
       "will start scheduling",
