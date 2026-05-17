@@ -409,8 +409,8 @@ function DecisionBanner({ decision }: { decision: DecisionState }) {
       >
         <p className="font-medium">Estimate approved.</p>
         <p className="mt-1 text-xs">
-          Approved on {formatStamp(decision.at)}. Your contractor has been
-          notified and will confirm your appointment.
+          Approved on {formatStamp(decision.at)}. Your appointment is
+          confirmed and your contractor will reach out before then.
         </p>
       </div>
     );
