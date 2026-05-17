@@ -94,9 +94,13 @@ function TableSkeleton() {
   );
 }
 
+const STATUS_FILTERS = ["all", "draft", "sent", "approved"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
 export default function EstimatesPage() {
   const router = useRouter();
   const [state, setState] = useState<FetchState>({ kind: "loading" });
+  const [filter, setFilter] = useState<StatusFilter>("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -127,10 +131,29 @@ export default function EstimatesPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <h1 className="text-[15px] font-medium text-[var(--text-primary)]">
           Estimates
         </h1>
+        {state.kind === "ready" && state.rows.length > 0 && (
+          <div className="flex items-center gap-1" role="group" aria-label="Filter by status">
+            {STATUS_FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+                className={`text-[12px] capitalize rounded-md px-2.5 py-1 transition-colors ${
+                  filter === f
+                    ? "bg-[var(--overlay-medium)] text-[var(--text-primary)]"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--overlay-weak)]"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {state.kind === "loading" ? (
@@ -175,7 +198,21 @@ export default function EstimatesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {state.rows.map((row) => (
+              {state.rows.filter(
+                (r) => filter === "all" || r.status === filter,
+              ).length === 0 ? (
+                <TableRow className="border-[var(--border)] hover:bg-transparent">
+                  <TableCell
+                    colSpan={4}
+                    className="text-[13px] text-[var(--text-muted)] py-6 text-center"
+                  >
+                    No {filter} estimates.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                state.rows
+                  .filter((r) => filter === "all" || r.status === filter)
+                  .map((row) => (
                 <TableRow
                   key={row.id}
                   onClick={() => router.push(`/estimates/${row.id}`)}
@@ -199,7 +236,8 @@ export default function EstimatesPage() {
                     {formatDate(row.created_at)}
                   </TableCell>
                 </TableRow>
-              ))}
+                  ))
+              )}
             </TableBody>
           </Table>
         </div>

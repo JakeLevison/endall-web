@@ -22,6 +22,7 @@ import UpcomingEvents from "@/components/calendar/UpcomingEvents";
 import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import RecentEstimates from "@/components/dashboard/RecentEstimates";
 import CommandCenter from "@/components/command-center/CommandCenter";
 import { posthog } from "@/lib/posthog";
 
@@ -422,6 +423,9 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* Recent Estimates (post-call "where do I see this" moment) */}
+      <RecentEstimates />
 
       {/* ── Two-column body ───────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">

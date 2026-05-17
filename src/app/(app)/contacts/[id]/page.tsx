@@ -46,6 +46,31 @@ type AssociatedCompany = {
   name: string;
 };
 
+type AssociatedEstimate = {
+  id: string;
+  label: string;
+  description: string;
+  amount: string;
+  status: string;
+  date: string;
+};
+
+const estimateStatusColor = (status: string) => {
+  switch (status) {
+    case "approved":
+      return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+    case "sent":
+    case "ready_for_review":
+      return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+    case "rejected":
+      return "bg-red-500/10 text-red-400 border-red-500/20";
+    case "expired":
+      return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+    default:
+      return "bg-zinc-500/10 text-[var(--text-tertiary)] border-zinc-500/20";
+  }
+};
+
 const activityIcon = (type: Activity["type"]) => {
   switch (type) {
     case "email": return <Mail className="size-3.5" />;
@@ -79,6 +104,7 @@ export default function ContactDetailPage({
   const [activities, setActivities] = useState<Activity[]>([]);
   const [deals, setDeals] = useState<AssociatedDeal[]>([]);
   const [companies, setCompanies] = useState<AssociatedCompany[]>([]);
+  const [estimates, setEstimates] = useState<AssociatedEstimate[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -147,12 +173,49 @@ export default function ContactDetailPage({
         } else {
           setDeals([]);
         }
+
+        // Estimates linked to this contact by email/phone. Isolated so a
+        // missing column or the parallel chief-of-staff PR not yet shipped
+        // can never blank the contact page.
+        try {
+          const orParts: string[] = [];
+          if (c.email) orParts.push(`customer_email.eq.${c.email}`);
+          if (c.phone) orParts.push(`customer_phone.eq.${c.phone}`);
+          if (orParts.length > 0) {
+            const { data: estimateData } = await supabase
+              .from("estimates")
+              .select(
+                "id, estimate_number, project_description, grand_total, status, created_at",
+              )
+              .or(orParts.join(","))
+              .order("created_at", { ascending: false });
+            setEstimates(
+              (estimateData ?? []).map(
+                (e: Record<string, unknown>) => ({
+                  id: e.id as string,
+                  label: (e.estimate_number as string) || "Estimate",
+                  description: (e.project_description as string) || "",
+                  amount:
+                    "$" +
+                    Number(e.grand_total ?? 0).toLocaleString("en-US"),
+                  status: (e.status as string) || "",
+                  date: e.created_at
+                    ? (e.created_at as string).split("T")[0]
+                    : "",
+                }),
+              ),
+            );
+          }
+        } catch {
+          setEstimates([]);
+        }
       } catch {
         // Supabase query failed — show empty state
         setContact(null);
         setActivities([]);
         setDeals([]);
         setCompanies([]);
+        setEstimates([]);
       } finally {
         setLoading(false);
       }
@@ -361,6 +424,44 @@ export default function ContactDetailPage({
                     <span className="text-[11px] text-[var(--text-muted)]">{deal.amount}</span>
                     <span className="text-[11px] text-[var(--text-muted)]">-</span>
                     <span className="text-[11px] text-[var(--text-muted)]">{deal.stage}</span>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-3">Estimates</h3>
+            {estimates.length === 0 ? (
+              <p className="text-[13px] text-[var(--text-muted)]">No estimates yet.</p>
+            ) : (
+              estimates.map((est) => (
+                <Link
+                  key={est.id}
+                  href={`/estimates/${est.id}`}
+                  className="block p-2 rounded-md hover:bg-[var(--overlay-weak)] transition-colors mb-1"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[13px] text-[var(--text-secondary)] truncate">
+                      {est.description?.trim() ? est.description : est.label}
+                    </p>
+                    {est.status && (
+                      <Badge
+                        variant="outline"
+                        className={`shrink-0 text-[11px] font-normal capitalize ${estimateStatusColor(est.status)}`}
+                      >
+                        {est.status.replace(/_/g, " ")}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[11px] text-[var(--text-muted)]">{est.amount}</span>
+                    {est.date && (
+                      <>
+                        <span className="text-[11px] text-[var(--text-muted)]">-</span>
+                        <span className="text-[11px] text-[var(--text-muted)]">{est.date}</span>
+                      </>
+                    )}
                   </div>
                 </Link>
               ))
