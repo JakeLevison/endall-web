@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { Calendar, Clock, MapPin, FileSpreadsheet } from "lucide-react";
 import { posthog } from "@/lib/posthog";
@@ -42,6 +42,11 @@ type DispatchJob = {
 };
 
 const REFRESH_MS = 30_000;
+
+// Stable empty reference. Passing an inline `[]` to useSWR's `fallbackData`
+// would hand back a fresh array every render while the request is pending,
+// which previously drove an unbounded render loop and froze the tab.
+const EMPTY_JOBS: readonly UnifiedJob[] = [];
 
 const KNOWN_STATUSES: ReadonlySet<JobStatus> = new Set([
   "pending",
@@ -132,22 +137,36 @@ function SourceBadge({ source }: { source: UnifiedJobSource }) {
 }
 
 export default function DispatchPage() {
-  const { data, mutate } = useSWR<UnifiedJob[]>(
+  const { data, error, mutate } = useSWR<readonly UnifiedJob[]>(
     "/api/jobs/unified",
     fetcher,
-    { refreshInterval: REFRESH_MS, fallbackData: [] }
+    {
+      refreshInterval: REFRESH_MS,
+      fallbackData: EMPTY_JOBS,
+      keepPreviousData: true,
+    }
   );
 
-  const [jobs, setJobs] = useState<DispatchJob[]>([]);
+  // Optimistic status edits, keyed by job id. Kept separate from SWR data so
+  // jobs can be derived purely (no data->state mirroring effect, which is
+  // what previously caused the render loop).
+  const [statusOverrides, setStatusOverrides] = useState<
+    Record<string, JobStatus>
+  >({});
   const [invoiceJob, setInvoiceJob] = useState<InvoiceJobSummary | null>(null);
 
   useEffect(() => {
     posthog.capture("invoice_review_page_viewed");
   }, []);
 
-  useEffect(() => {
-    if (data) setJobs(data.map(toDispatchJob));
-  }, [data]);
+  const jobs = useMemo<DispatchJob[]>(() => {
+    const rows = data ?? EMPTY_JOBS;
+    return rows.map((row) => {
+      const job = toDispatchJob(row);
+      const override = statusOverrides[job.id];
+      return override ? { ...job, status: override } : job;
+    });
+  }, [data, statusOverrides]);
 
   const today = useMemo(() => jobs.filter((j) => isToday(j.scheduled_at)), [jobs]);
   const week = useMemo(
@@ -155,13 +174,16 @@ export default function DispatchPage() {
     [jobs]
   );
 
-  function updateLocalStatus(jobId: string, next: JobStatus) {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, status: next } : j))
-    );
-    // Revalidate SWR after a short delay so the list reflects server state.
-    setTimeout(() => mutate(), 250);
-  }
+  const loadFailed = Boolean(error) && jobs.length === 0;
+
+  const updateLocalStatus = useCallback(
+    (jobId: string, next: JobStatus) => {
+      setStatusOverrides((prev) => ({ ...prev, [jobId]: next }));
+      // Revalidate SWR after a short delay so the list reflects server state.
+      setTimeout(() => mutate(), 250);
+    },
+    [mutate]
+  );
 
   function renderRow(job: DispatchJob) {
     const completed = job.status === "completed";
@@ -233,6 +255,21 @@ export default function DispatchPage() {
           and the rest of the system follows.
         </p>
       </div>
+
+      {loadFailed ? (
+        <div
+          role="status"
+          className="rounded-lg border p-3 text-[12px]"
+          style={{
+            borderColor: "rgba(239,68,68,0.4)",
+            background: "rgba(239,68,68,0.08)",
+            color: "var(--text-tertiary)",
+          }}
+        >
+          Jobs are temporarily unavailable. The list will refresh automatically
+          once the connection is back.
+        </div>
+      ) : null}
 
       <section
         className="rounded-lg border p-4"
