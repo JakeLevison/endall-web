@@ -33,6 +33,12 @@ type Estimate = {
   valid_until: string | null;
   grand_total: number;
   line_items: LineItem[];
+  // Populated once the chief-of-staff approval→invoice flow ships. Absent
+  // until then; every read is optional-chained so this no-ops gracefully.
+  invoice?: {
+    status?: string | null;
+    quickbooks_synced?: boolean | null;
+  } | null;
 };
 
 type FetchState =
@@ -159,12 +165,28 @@ export default function EstimateDetailPage({
               </p>
             ) : null}
           </div>
-          <span
-            data-testid="estimate-status"
-            className="rounded-md border border-[var(--border)] bg-[var(--overlay-soft)] px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-tertiary)]"
-          >
-            {estimate.status}
-          </span>
+          <div className="flex flex-col items-end gap-1.5">
+            <span
+              data-testid="estimate-status"
+              className="rounded-md border border-[var(--border)] bg-[var(--overlay-soft)] px-2 py-1 text-[11px] uppercase tracking-wide text-[var(--text-tertiary)]"
+            >
+              {estimate.status}
+            </span>
+            {estimate.invoice ? (
+              <span
+                data-testid="invoice-status"
+                className={`rounded-md border px-2 py-1 text-[11px] uppercase tracking-wide ${
+                  estimate.invoice.quickbooks_synced
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                    : "border-blue-500/20 bg-blue-500/10 text-blue-400"
+                }`}
+              >
+                {estimate.invoice.quickbooks_synced
+                  ? "Sent to QuickBooks"
+                  : "Invoice created"}
+              </span>
+            ) : null}
+          </div>
         </header>
 
         <section>
