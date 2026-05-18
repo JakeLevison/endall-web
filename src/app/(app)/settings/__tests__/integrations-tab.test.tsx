@@ -105,6 +105,66 @@ describe("SettingsPage Integrations tab", () => {
     });
   });
 
+  it("shows Gmail connected state with account email and Disconnect", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: unknown) => {
+        if (String(url).includes("/api/oauth/gmail/status")) {
+          return Promise.resolve(
+            jsonResponse({
+              connected: true,
+              account_email: "levison1995@gmail.com",
+              status: "connected",
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse({ connected: false }));
+      }),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    expect(
+      await screen.findByText(/levison1995@gmail.com/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("settings-gmail-disconnect"),
+    ).toBeInTheDocument();
+  });
+
+  it("Gmail Disconnect calls /api/oauth/gmail/disconnect", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: unknown) => {
+      if (String(url).includes("/api/oauth/gmail/status")) {
+        return Promise.resolve(
+          jsonResponse({
+            connected: true,
+            account_email: "levison1995@gmail.com",
+            status: "connected",
+          }),
+        );
+      }
+      return Promise.resolve(jsonResponse({ connected: false }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const disconnectBtn = await screen.findByTestId(
+      "settings-gmail-disconnect",
+    );
+    await userEvent.setup().click(disconnectBtn);
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find((c) =>
+        String(c[0]).includes("/api/oauth/gmail/disconnect"),
+      );
+      expect(call).toBeTruthy();
+      expect((call?.[1] as RequestInit)?.method).toBe("POST");
+    });
+  });
+
   it("non-OAuth integrations still render a disabled Coming soon button", async () => {
     vi.stubGlobal(
       "fetch",

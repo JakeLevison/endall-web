@@ -861,6 +861,150 @@ function GoogleCalendarTile() {
   );
 }
 
+type GmailStatus =
+  | { connected: false }
+  | {
+      connected: true;
+      account_email?: string;
+      status?: "connected" | "reauth_required" | "disconnected";
+    };
+
+// Stateful Gmail tile. Mirrors GoogleCalendarTile (status / authorize /
+// disconnect) using the Gmail OAuth proxy routes. The authed /settings
+// tab is always session-mode, so there is no admin_key bypass branch
+// here. Before this, Gmail rendered as a static "Not connected" tile
+// with no status check, so a connected inbox always read as disconnected.
+function GmailTile() {
+  const [status, setStatus] = useState<GmailStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/oauth/gmail/status", { cache: "no-store" });
+      if (!res.ok) {
+        setError(`status request failed (${res.status})`);
+        setStatus(null);
+      } else {
+        setStatus((await res.json()) as GmailStatus);
+      }
+    } catch (err) {
+      setError((err as Error).message || "status request failed");
+      setStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  const handleConnect = async () => {
+    await startGmailOAuth(setError);
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const res = await fetch("/api/oauth/gmail/disconnect", {
+        method: "POST",
+      });
+      if (!res.ok) {
+        setError(`disconnect failed (${res.status})`);
+      }
+    } catch (err) {
+      setError((err as Error).message || "disconnect failed");
+    }
+    await fetchStatus();
+  };
+
+  const connected = !!status && status.connected;
+  const reauthRequired =
+    !!status && status.connected && status.status === "reauth_required";
+
+  return (
+    <div
+      data-testid="settings-tile-gmail"
+      className="p-4 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-weak)] transition-colors"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="size-9 rounded-lg bg-[var(--overlay-soft)] border border-[var(--border)] flex items-center justify-center">
+          <Mail className="size-4 text-[var(--text-tertiary)]" />
+        </div>
+        <Badge
+          variant="outline"
+          className={
+            connected
+              ? "text-[10px] font-normal bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              : "text-[10px] font-normal bg-zinc-500/10 text-[var(--text-muted)] border-zinc-500/20"
+          }
+        >
+          {loading
+            ? "Checking…"
+            : reauthRequired
+              ? "Reauth required"
+              : connected
+                ? "Connected"
+                : "Not connected"}
+        </Badge>
+      </div>
+      <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">
+        Gmail
+      </p>
+      <p className="text-[11px] text-[var(--text-muted)] mb-3 leading-relaxed">
+        Send estimate approvals from your inbox so customers reply to you.
+      </p>
+
+      {error && (
+        <div className="px-2.5 py-1.5 mb-3 rounded-md border border-red-500/30 bg-red-500/10 text-[11px] text-red-300">
+          {error}
+        </div>
+      )}
+
+      {status && status.connected && status.account_email && (
+        <p className="text-[11px] text-[var(--text-tertiary)] mb-3">
+          Connected as{" "}
+          <span className="text-[var(--text-primary)] font-medium">
+            {status.account_email}
+          </span>
+        </p>
+      )}
+
+      {!connected ? (
+        <Button
+          variant="ghost"
+          data-testid="settings-gmail-connect"
+          onClick={handleConnect}
+          disabled={loading}
+          className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Checking…" : "Connect"}
+        </Button>
+      ) : reauthRequired ? (
+        <Button
+          variant="ghost"
+          data-testid="settings-gmail-reconnect"
+          onClick={handleConnect}
+          className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent"
+        >
+          Reconnect
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          data-testid="settings-gmail-disconnect"
+          onClick={handleDisconnect}
+          className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent"
+        >
+          Disconnect
+        </Button>
+      )}
+    </div>
+  );
+}
+
 async function startGmailOAuth(setError: (msg: string | null) => void) {
   setError(null);
   try {
@@ -911,6 +1055,9 @@ function IntegrationsTab() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {integrations.map((int) => {
+          if (int.slug === "gmail") {
+            return <GmailTile key="gmail" />;
+          }
           if (int.slug === "quickbooks") {
             return <QuickBooksTile key="quickbooks" />;
           }

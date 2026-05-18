@@ -309,6 +309,80 @@ describe("IntegrationsPage", () => {
     });
   });
 
+  it("renders the Google Calendar card with a Connect button when not connected", async () => {
+    setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}`);
+    mockFetchStatus({ connected: false });
+    render(<IntegrationsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("gcal-integration-card")).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("button", { name: /connect google calendar/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("Google Calendar card shows connected account and Disconnect", async () => {
+    setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}`);
+    (globalThis.fetch as unknown) = vi.fn(async (url: string | URL) => {
+      const u = typeof url === "string" ? url : url.toString();
+      if (u.includes("/api/gcal/status")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            connected: true,
+            calendar_id: "primary",
+            account_email: "levison1995@gmail.com",
+            connected_at: "2026-05-18T00:00:00+00:00",
+          }),
+        } as unknown as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ connected: false }),
+      } as unknown as Response;
+    });
+    render(<IntegrationsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("gcal-status-line"),
+      ).toHaveTextContent(/levison1995@gmail.com/);
+    });
+    expect(screen.getByTestId("gcal-disconnect")).toBeInTheDocument();
+  });
+
+  it("Google Calendar Connect calls /api/oauth/gcal/authorize and navigates", async () => {
+    const nav = setLocation(`?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}`);
+    (globalThis.fetch as unknown) = vi.fn(async (url: string | URL) => {
+      const u = typeof url === "string" ? url : url.toString();
+      if (u.includes("/api/oauth/gcal/authorize")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ auth_url: "https://accounts.google.test/o?x=1" }),
+        } as unknown as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ connected: false }),
+      } as unknown as Response;
+    });
+    render(<IntegrationsPage />);
+
+    const btn = await screen.findByRole("button", {
+      name: /connect google calendar/i,
+    });
+    fireEvent.click(btn);
+
+    await waitFor(() => {
+      expect(nav.href).toBe("https://accounts.google.test/o?x=1");
+    });
+  });
+
   it("error banner appears when error in query", async () => {
     setLocation(
       `?tenant_id=${TENANT_ID}&admin_key=${ADMIN_KEY}&error=token_exchange_failed`,
