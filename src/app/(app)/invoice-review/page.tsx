@@ -248,11 +248,11 @@ export default function DispatchPage() {
           className="text-[15px] font-medium"
           style={{ color: "var(--text-primary)" }}
         >
-          Dispatch
+          Invoice Review
         </h1>
         <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
-          Every job Front Desk has booked, in one place. Update status here
-          and the rest of the system follows.
+          Every invoice Front Desk has generated, in one place. Update status
+          here and the rest of the system follows.
         </p>
       </div>
 
