@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const url = new URL(BRIDGE_URL);
-    url.pathname = "/jobs/unified";
+    url.pathname = "/api/jobs/unified";
     const incoming = new URL(request.url);
     for (const [key, value] of incoming.searchParams) {
       url.searchParams.set(key, value);
