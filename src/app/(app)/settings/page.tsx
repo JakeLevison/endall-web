@@ -185,7 +185,7 @@ function CompanyTab() {
         <h2 className="text-[13px] font-medium text-[var(--text-primary)] mb-1">Company</h2>
         <p className="text-[11px] text-[var(--text-muted)]">
           Controls what the voice agent says, which address the briefing ships
-          to, and what Ask Endall calls your business. Saved instantly — takes
+          to, and what Ask Endall calls your business. Saved instantly; takes
           effect on the next call or briefing.
         </p>
       </div>
@@ -498,7 +498,7 @@ type Integration = {
 
 const integrations: Integration[] = [
   { slug: "gmail", name: "Gmail", description: "Send estimate approvals from your inbox so customers reply to you.", icon: Mail, available: true },
-  { slug: "google-calendar", name: "Google Calendar", description: "Sync meetings and schedule events.", icon: Calendar, available: false },
+  { slug: "google-calendar", name: "Google Calendar", description: "Automatically add booked jobs to your calendar.", icon: Calendar, available: true },
   { slug: "slack", name: "Slack", description: "Get notifications and updates in Slack.", icon: MessageSquare, available: false },
   { slug: "quickbooks", name: "QuickBooks", description: "Sync invoices and customers with your QuickBooks account.", icon: Receipt, available: true },
   { slug: "zoho-mail", name: "Zoho Mail", description: "Connect your Zoho Mail account.", icon: Mail, available: false },
@@ -716,6 +716,150 @@ function QuickBooksTile() {
   );
 }
 
+type GcalStatus =
+  | { connected: false }
+  | {
+      connected: true;
+      calendar_id: string;
+      account_email?: string;
+      connected_at?: string;
+    };
+
+// Stateful Google Calendar tile. Mirrors QuickBooksTile (status /
+// authorize / disconnect) without the auto-push row. The authed
+// /settings tab is always session-mode, so there is no admin_key
+// bypass branch here.
+function GoogleCalendarTile() {
+  const [status, setStatus] = useState<GcalStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/gcal/status", { cache: "no-store" });
+      if (!res.ok) {
+        setError(`status request failed (${res.status})`);
+        setStatus(null);
+      } else {
+        setStatus((await res.json()) as GcalStatus);
+      }
+    } catch (err) {
+      setError((err as Error).message || "status request failed");
+      setStatus(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  const handleConnect = async () => {
+    setError(null);
+    try {
+      const res = await fetch("/api/oauth/gcal/authorize", {
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        setError(`Could not start Google Calendar connect (${res.status}).`);
+        return;
+      }
+      const { auth_url } = (await res.json()) as { auth_url?: string };
+      if (typeof auth_url !== "string" || !auth_url) {
+        setError("Could not start Google Calendar connect (no auth URL).");
+        return;
+      }
+      window.location.href = auth_url;
+    } catch (err) {
+      setError(
+        (err as Error).message || "Could not start Google Calendar connect.",
+      );
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const res = await fetch("/api/gcal/disconnect", { method: "POST" });
+      if (!res.ok) {
+        setError(`disconnect failed (${res.status})`);
+      }
+    } catch (err) {
+      setError((err as Error).message || "disconnect failed");
+    }
+    await fetchStatus();
+  };
+
+  const connected = !!status && status.connected;
+
+  return (
+    <div
+      data-testid="settings-tile-google-calendar"
+      className="p-4 rounded-lg border border-[var(--border)] bg-[var(--overlay-weak)] hover:bg-[var(--overlay-weak)] transition-colors"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="size-9 rounded-lg bg-[var(--overlay-soft)] border border-[var(--border)] flex items-center justify-center">
+          <Calendar className="size-4 text-[var(--text-tertiary)]" />
+        </div>
+        <Badge
+          variant="outline"
+          className={
+            connected
+              ? "text-[10px] font-normal bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              : "text-[10px] font-normal bg-zinc-500/10 text-[var(--text-muted)] border-zinc-500/20"
+          }
+        >
+          {loading ? "Checking…" : connected ? "Connected" : "Not connected"}
+        </Badge>
+      </div>
+      <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">
+        Google Calendar
+      </p>
+      <p className="text-[11px] text-[var(--text-muted)] mb-3 leading-relaxed">
+        Automatically add booked jobs to your calendar.
+      </p>
+
+      {error && (
+        <div className="px-2.5 py-1.5 mb-3 rounded-md border border-red-500/30 bg-red-500/10 text-[11px] text-red-300">
+          {error}
+        </div>
+      )}
+
+      {status && status.connected && status.account_email && (
+        <p className="text-[11px] text-[var(--text-tertiary)] mb-3">
+          Connected as{" "}
+          <span className="text-[var(--text-primary)] font-medium">
+            {status.account_email}
+          </span>
+        </p>
+      )}
+
+      {!status || !status.connected ? (
+        <Button
+          variant="ghost"
+          data-testid="settings-google-calendar-connect"
+          onClick={handleConnect}
+          disabled={loading}
+          className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Checking…" : "Connect"}
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          data-testid="settings-google-calendar-disconnect"
+          onClick={handleDisconnect}
+          className="h-7 px-3 text-[12px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--overlay-soft)] bg-transparent"
+        >
+          Disconnect
+        </Button>
+      )}
+    </div>
+  );
+}
+
 async function startGmailOAuth(setError: (msg: string | null) => void) {
   setError(null);
   try {
@@ -768,6 +912,9 @@ function IntegrationsTab() {
         {integrations.map((int) => {
           if (int.slug === "quickbooks") {
             return <QuickBooksTile key="quickbooks" />;
+          }
+          if (int.slug === "google-calendar") {
+            return <GoogleCalendarTile key="google-calendar" />;
           }
           const isConnecting = connecting === int.slug;
           return (
@@ -885,7 +1032,7 @@ function BillingTab() {
         disabled
         className="bg-[var(--overlay-soft)] text-[var(--text-muted)] text-[13px] h-8 px-4 cursor-not-allowed"
       >
-        Upgrade plan — Coming soon
+        Upgrade plan (coming soon)
       </Button>
     </div>
   );
