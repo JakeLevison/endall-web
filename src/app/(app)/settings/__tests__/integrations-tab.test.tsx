@@ -313,5 +313,8 @@ describe("SettingsPage Integrations tab", () => {
       expect((call?.[1] as RequestInit)?.method).toBe("PATCH");
       expect(String((call?.[1] as RequestInit)?.body)).toContain("true");
     });
+    await waitFor(() =>
+      expect(toggle).toHaveAttribute("aria-checked", "true"),
+    );
   });
 });

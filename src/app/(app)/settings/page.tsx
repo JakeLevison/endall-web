@@ -574,11 +574,16 @@ function QuickBooksTile() {
 
   const handleDisconnect = async () => {
     try {
-      await fetch("/api/quickbooks/disconnect", { method: "POST" });
+      const res = await fetch("/api/quickbooks/disconnect", {
+        method: "POST",
+      });
+      if (!res.ok) {
+        setError(`disconnect failed (${res.status})`);
+      }
     } catch (err) {
       setError((err as Error).message || "disconnect failed");
     }
-    fetchStatus();
+    await fetchStatus();
   };
 
   const handleToggleAutoPush = async () => {
