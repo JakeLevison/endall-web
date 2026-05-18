@@ -5,10 +5,12 @@
  * "status request failed (502)". Root cause was raw string interpolation
  * `${bridgeUrl}/integrations/...` — a trailing slash or surrounding
  * whitespace in ASK_ENDALL_BRIDGE_URL became an interior URL malformation
- * (e.g. a double slash) that the bridge 404s / fetch rejects. The working
- * sibling routes (gmail/status, quickbooks/authorize) build the URL with
- * `new URL()` + url.pathname + url.searchParams, which the WHATWG URL
- * parser normalizes. This pins that behavior.
+ * (e.g. a double slash) that the bridge 404s and, in production, real
+ * `fetch` rejects (proxy catch → 502). The working sibling routes
+ * (gmail/status, quickbooks/authorize) build the URL with `new URL()` +
+ * url.pathname + url.searchParams, which the WHATWG URL parser normalizes.
+ * These tests pin the normalized output and that a URL object (not a
+ * hand-built string) reaches fetch — the anti-revert mechanism.
  *
  * Pattern mirrors jobs-unified-route.test.ts.
  */
@@ -55,6 +57,10 @@ describe("GET /api/quickbooks/status", () => {
     expect(res.status).toBe(200);
 
     const calledUrl = fetchSpy.mock.calls[0][0];
+    // A URL object (not a hand-built string) must reach fetch — this is
+    // the mechanism that normalizes the env value and prevents a revert
+    // to raw interpolation.
+    expect(calledUrl).toBeInstanceOf(URL);
     const urlStr =
       typeof calledUrl === "string" ? calledUrl : calledUrl.toString();
     // No double slash before the path segment.
@@ -87,6 +93,14 @@ describe("GET /api/quickbooks/status", () => {
     const { GET } = await import("../quickbooks/status/route");
     const res = await GET();
     expect(res.status).toBe(401);
+  });
+
+  it("returns 500 when the server admin key is not configured", async () => {
+    vi.stubEnv("ASK_ENDALL_BRIDGE_URL", "http://bridge.test");
+    vi.stubEnv("ASK_ENDALL_ADMIN_KEY", "");
+    const { GET } = await import("../quickbooks/status/route");
+    const res = await GET();
+    expect(res.status).toBe(500);
   });
 
   it("returns 502 only on genuine bridge unavailability", async () => {
