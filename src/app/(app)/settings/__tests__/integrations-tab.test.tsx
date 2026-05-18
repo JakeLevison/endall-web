@@ -123,4 +123,195 @@ describe("SettingsPage Integrations tab", () => {
     expect(calendarBtn).toBeDisabled();
     expect(calendarBtn).toHaveTextContent(/coming soon/i);
   });
+
+  it("renders tiles in the founder-specified grid order", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation(() =>
+          Promise.resolve(jsonResponse({ connected: false })),
+        ),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    await screen.findByTestId("settings-tile-quickbooks");
+
+    const order = Array.from(
+      document.querySelectorAll('[data-testid^="settings-tile-"]'),
+    ).map((el) =>
+      el.getAttribute("data-testid")!.replace("settings-tile-", ""),
+    );
+
+    expect(order).toEqual([
+      "gmail",
+      "google-calendar",
+      "slack",
+      "quickbooks",
+      "zoho-mail",
+      "brevo",
+      "linkedin",
+      "webhooks",
+      "telegram",
+    ]);
+  });
+
+  it("renders a QuickBooks Connect button when QB is not connected", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: unknown) => {
+        if (String(url).includes("/api/quickbooks/status")) {
+          return Promise.resolve(jsonResponse({ connected: false }));
+        }
+        return Promise.resolve(jsonResponse({}));
+      }),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const connectBtn = await screen.findByTestId(
+      "settings-quickbooks-connect",
+    );
+    expect(connectBtn).toBeEnabled();
+    expect(connectBtn).toHaveTextContent(/connect/i);
+  });
+
+  it("QuickBooks Connect calls /api/quickbooks/authorize and navigates to auth_url", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: unknown) => {
+      if (String(url).includes("/api/quickbooks/status")) {
+        return Promise.resolve(jsonResponse({ connected: false }));
+      }
+      if (String(url).includes("/api/quickbooks/authorize")) {
+        return Promise.resolve(
+          jsonResponse({ auth_url: "https://appcenter.intuit.test/connect?x=1" }),
+        );
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const connectBtn = await screen.findByTestId(
+      "settings-quickbooks-connect",
+    );
+    await userEvent.setup().click(connectBtn);
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.find((c) =>
+          String(c[0]).includes("/api/quickbooks/authorize"),
+        ),
+      ).toBeTruthy();
+    });
+    await waitFor(() => {
+      expect(window.location.href).toBe(
+        "https://appcenter.intuit.test/connect?x=1",
+      );
+    });
+  });
+
+  it("shows connected state with company name, Disconnect, and auto-push toggle", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: unknown) => {
+        if (String(url).includes("/api/quickbooks/status")) {
+          return Promise.resolve(
+            jsonResponse({
+              connected: true,
+              company_name: "Sandbox Company US 1096",
+              environment: "sandbox",
+              connected_at: "2026-04-14T12:00:00+00:00",
+              auto_push_enabled: true,
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse({}));
+      }),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    expect(
+      await screen.findByText(/Sandbox Company US 1096/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("settings-quickbooks-disconnect"),
+    ).toBeInTheDocument();
+    const toggle = screen.getByTestId("settings-quickbooks-autopush");
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("QuickBooks Disconnect calls /api/quickbooks/disconnect", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: unknown) => {
+      if (String(url).includes("/api/quickbooks/status")) {
+        return Promise.resolve(
+          jsonResponse({
+            connected: true,
+            company_name: "Sandbox Company US 1096",
+            environment: "sandbox",
+            connected_at: "2026-04-14T12:00:00+00:00",
+            auto_push_enabled: false,
+          }),
+        );
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const disconnectBtn = await screen.findByTestId(
+      "settings-quickbooks-disconnect",
+    );
+    await userEvent.setup().click(disconnectBtn);
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find((c) =>
+        String(c[0]).includes("/api/quickbooks/disconnect"),
+      );
+      expect(call).toBeTruthy();
+      expect((call?.[1] as RequestInit)?.method).toBe("POST");
+    });
+  });
+
+  it("QuickBooks auto-push toggle PATCHes /api/quickbooks/auto-push", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: unknown) => {
+      if (String(url).includes("/api/quickbooks/status")) {
+        return Promise.resolve(
+          jsonResponse({
+            connected: true,
+            company_name: "Sandbox Company US 1096",
+            environment: "sandbox",
+            connected_at: "2026-04-14T12:00:00+00:00",
+            auto_push_enabled: false,
+          }),
+        );
+      }
+      return Promise.resolve(jsonResponse({ auto_push_enabled: true }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const toggle = await screen.findByTestId("settings-quickbooks-autopush");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+    await userEvent.setup().click(toggle);
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find((c) =>
+        String(c[0]).includes("/api/quickbooks/auto-push"),
+      );
+      expect(call).toBeTruthy();
+      expect((call?.[1] as RequestInit)?.method).toBe("PATCH");
+      expect(String((call?.[1] as RequestInit)?.body)).toContain("true");
+    });
+  });
 });
