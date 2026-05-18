@@ -18,7 +18,9 @@ export async function POST(request: NextRequest) {
   if (tenantId) headers["X-Tenant-Id"] = tenantId;
 
   try {
-    const resp = await fetch(`${bridgeUrl}/invoices/generate`, {
+    const url = new URL(bridgeUrl);
+    url.pathname = "/invoices/generate";
+    const resp = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),

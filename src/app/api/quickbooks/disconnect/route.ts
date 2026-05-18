@@ -20,9 +20,10 @@ export async function POST() {
   if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   try {
-    const url = `${bridgeUrl}/integrations/quickbooks/disconnect?tenant_id=${encodeURIComponent(
-      resolved.tenant_id
-    )}&admin_key=${encodeURIComponent(adminKey)}`;
+    const url = new URL(bridgeUrl);
+    url.pathname = "/integrations/quickbooks/disconnect";
+    url.searchParams.set("tenant_id", resolved.tenant_id);
+    url.searchParams.set("admin_key", adminKey);
     const resp = await fetch(url, { method: "POST" });
     const text = await resp.text();
     return new NextResponse(text, {

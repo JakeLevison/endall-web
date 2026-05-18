@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
   // Try the Python bridge first (serves from local disk, faster)
   const bridgeUrl = process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
   try {
-    const bridgeResp = await fetch(`${bridgeUrl}/download/${fileId}`);
+    const dlUrl = new URL(bridgeUrl);
+    dlUrl.pathname = `/download/${fileId}`;
+    const bridgeResp = await fetch(dlUrl);
     if (bridgeResp.ok) {
       const blob = await bridgeResp.blob();
       const ext = "." + filename.split(".").pop()?.toLowerCase();

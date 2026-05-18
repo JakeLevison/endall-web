@@ -20,8 +20,10 @@ export async function PATCH(
   if (tenantId) headers["X-Tenant-Id"] = tenantId;
 
   try {
+    const url = new URL(bridgeUrl);
+    url.pathname = `/jobs/${encodeURIComponent(job_id)}/status`;
     const resp = await fetch(
-      `${bridgeUrl}/jobs/${encodeURIComponent(job_id)}/status`,
+      url,
       { method: "PATCH", headers, body: JSON.stringify(body) }
     );
     const text = await resp.text();

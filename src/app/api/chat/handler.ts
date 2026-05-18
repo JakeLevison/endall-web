@@ -198,7 +198,9 @@ export async function handleChat(request: NextRequest, tenantId: string) {
         process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
       const deviceId = request.headers.get("x-device-id") || "";
       try {
-        const bridgeResp = await fetch(`${bridgeUrl}/chat`, {
+        const bridgeChatUrl = new URL(bridgeUrl);
+        bridgeChatUrl.pathname = "/chat";
+        const bridgeResp = await fetch(bridgeChatUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

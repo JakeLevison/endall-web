@@ -40,7 +40,9 @@ export async function POST(
   }
 
   try {
-    const resp = await fetch(`${bridgeUrl}/demo/${preset}`, {
+    const url = new URL(bridgeUrl);
+    url.pathname = `/demo/${preset}`;
+    const resp = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
