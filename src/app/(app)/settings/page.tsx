@@ -506,6 +506,7 @@ const integrations: Integration[] = [
   { slug: "linkedin", name: "LinkedIn", description: "Import contacts and track engagement.", icon: Link, available: false },
   { slug: "webhooks", name: "Webhooks", description: "Send and receive data via HTTP webhooks.", icon: Webhook, available: false },
   { slug: "telegram", name: "Telegram", description: "Receive alerts and control via Telegram.", icon: Send, available: false },
+  { slug: "outlook", name: "Outlook", description: "Microsoft 365 / Outlook send-from-your-inbox.", icon: Mail, available: false },
 ];
 
 type QbStatus =
