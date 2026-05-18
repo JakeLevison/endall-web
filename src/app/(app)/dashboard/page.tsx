@@ -19,11 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import type { Deal, Activity } from "@/lib/types";
 import UpcomingEvents from "@/components/calendar/UpcomingEvents";
-import WelcomeWizard from "@/components/onboarding/WelcomeWizard";
 import TodaysPriorities from "@/components/dashboard/TodaysPriorities";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import RecentEstimates from "@/components/dashboard/RecentEstimates";
-import CommandCenter from "@/components/command-center/CommandCenter";
 import { posthog } from "@/lib/posthog";
 
 // ── helpers ──────────────────────────────────────────────────────────
@@ -366,17 +364,6 @@ export default function DashboardPage() {
           <span className="text-xs">&#8984;</span>K search
         </kbd>
       </div>
-
-      {/* Onboarding wizard — shows until dismissed */}
-      <WelcomeWizard
-        completedSteps={[]}
-        onDismiss={() => {
-          localStorage.setItem("endall-onboarding-dismissed", "1");
-        }}
-      />
-
-      {/* ── Agent Command Center ─────────────────────────────────── */}
-      <CommandCenter />
 
       {/* ── CRM: Stats Row ───────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
