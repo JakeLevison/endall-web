@@ -122,7 +122,9 @@ export async function POST(request: NextRequest) {
         } else {
           console.warn("INTERNAL_WEBHOOK_SECRET not set — bridge request will be unsigned");
         }
-        await fetch(`${bridgeUrl}/triggers/demo-signup`, { method: "POST", headers, body: rawBody });
+        const bridgeReqUrl = new URL(bridgeUrl);
+        bridgeReqUrl.pathname = "/triggers/demo-signup";
+        await fetch(bridgeReqUrl, { method: "POST", headers, body: rawBody });
       } catch (bridgeErr) {
         console.error("Bridge notify error (demo-signup):", bridgeErr);
       }

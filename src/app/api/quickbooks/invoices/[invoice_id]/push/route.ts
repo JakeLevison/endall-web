@@ -25,8 +25,10 @@ export async function POST(
   if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   try {
+    const url = new URL(bridgeUrl);
+    url.pathname = `/integrations/quickbooks/invoices/${encodeURIComponent(invoice_id)}/push`;
     const resp = await fetch(
-      `${bridgeUrl}/integrations/quickbooks/invoices/${encodeURIComponent(invoice_id)}/push`,
+      url,
       {
         method: "POST",
         headers: {

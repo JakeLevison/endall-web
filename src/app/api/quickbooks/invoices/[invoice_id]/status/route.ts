@@ -24,8 +24,10 @@ export async function GET(
   if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
 
   try {
+    const url = new URL(bridgeUrl);
+    url.pathname = `/integrations/quickbooks/invoices/${encodeURIComponent(invoice_id)}/qb-status`;
     const resp = await fetch(
-      `${bridgeUrl}/integrations/quickbooks/invoices/${encodeURIComponent(invoice_id)}/qb-status`,
+      url,
       {
         method: "GET",
         headers: {

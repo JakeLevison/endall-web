@@ -94,7 +94,9 @@ export async function GET(request: NextRequest) {
     let resolvedKey = "";
     let resolvedTenant = "";
     try {
-      const bridgeRes = await fetch(`${bridgeUrl()}/public/oauth/consume-session`, {
+      const consumeUrl = new URL(bridgeUrl());
+      consumeUrl.pathname = "/public/oauth/consume-session";
+      const bridgeRes = await fetch(consumeUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId }),

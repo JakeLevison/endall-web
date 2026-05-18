@@ -15,10 +15,10 @@ export async function GET(request: NextRequest) {
   const companyId =
     request.nextUrl.searchParams.get("company_id") || "default";
   try {
-    const resp = await fetch(
-      `${bridgeUrl()}/settings/company?company_id=${encodeURIComponent(companyId)}`,
-      { cache: "no-store" }
-    );
+    const url = new URL(bridgeUrl());
+    url.pathname = "/settings/company";
+    url.searchParams.set("company_id", companyId);
+    const resp = await fetch(url, { cache: "no-store" });
     const body = await resp.json();
     return NextResponse.json(body, { status: resp.status });
   } catch (err) {
@@ -37,7 +37,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
   try {
-    const resp = await fetch(`${bridgeUrl()}/settings/company`, {
+    const url = new URL(bridgeUrl());
+    url.pathname = "/settings/company";
+    const resp = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

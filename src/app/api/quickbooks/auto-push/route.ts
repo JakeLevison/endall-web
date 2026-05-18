@@ -26,7 +26,9 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const resp = await fetch(`${bridgeUrl}/integrations/quickbooks/auto-push`, {
+    const url = new URL(bridgeUrl);
+    url.pathname = "/integrations/quickbooks/auto-push";
+    const resp = await fetch(url, {
       method: "PATCH",
       headers: {
         "X-Admin-Key": adminKey,

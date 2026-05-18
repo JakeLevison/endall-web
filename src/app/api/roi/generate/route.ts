@@ -15,7 +15,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const resp = await fetch(`${bridgeUrl}/roi/generate`, {
+    const url = new URL(bridgeUrl);
+    url.pathname = "/roi/generate";
+    const resp = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
