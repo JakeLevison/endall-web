@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const url = new URL(BRIDGE_URL);
-    url.pathname = "/contacts/unified";
+    url.pathname = "/api/contacts/unified";
     const source = req.nextUrl.searchParams.get("source");
     if (source) url.searchParams.set("source", source);
 
