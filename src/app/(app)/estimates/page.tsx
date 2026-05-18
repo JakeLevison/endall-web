@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createClient } from "@/lib/supabase/client";
 
 type EstimateRow = {
   id: string;
@@ -104,25 +103,37 @@ export default function EstimatesPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const supabase = createClient();
     (async () => {
-      const { data, error } = await supabase
-        .from("estimates")
-        .select("id, customer_name, grand_total, status, created_at")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (cancelled) return;
-
-      if (error) {
-        setState({
-          kind: "error",
-          message: "Could not load estimates. Try refreshing the page.",
-        });
-        return;
+      try {
+        const res = await fetch("/api/estimates", { cache: "no-store" });
+        if (cancelled) return;
+        if (!res.ok) {
+          setState({
+            kind: "error",
+            message: "Could not load estimates. Try refreshing the page.",
+          });
+          return;
+        }
+        const data: unknown = await res.json();
+        const rows: EstimateRow[] = Array.isArray(data)
+          ? (data as EstimateRow[])
+          : [];
+        const sorted = [...rows]
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .slice(0, 50);
+        setState({ kind: "ready", rows: sorted });
+      } catch {
+        if (!cancelled) {
+          setState({
+            kind: "error",
+            message: "Could not load estimates. Try refreshing the page.",
+          });
+        }
       }
-
-      setState({ kind: "ready", rows: (data ?? []) as EstimateRow[] });
     })();
     return () => {
       cancelled = true;
