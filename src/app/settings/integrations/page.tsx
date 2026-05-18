@@ -7,6 +7,7 @@ import {
   EmailIntegrationCard,
   OutlookComingSoonCard,
 } from "@/components/integrations/EmailIntegrationCard";
+import { GoogleCalendarIntegrationCard } from "@/components/integrations/GoogleCalendarIntegrationCard";
 
 type QbStatus =
   | { connected: false }
@@ -327,6 +328,7 @@ function IntegrationsPageInner() {
         </section>
 
         <EmailIntegrationCard />
+        <GoogleCalendarIntegrationCard />
         <OutlookComingSoonCard />
       </div>
     </main>
