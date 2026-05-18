@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/client";
 
 type EstimateRow = {
   id: string;
@@ -66,16 +65,21 @@ export default function RecentEstimates() {
     let cancelled = false;
     async function fetchEstimates() {
       try {
-        const supabase = createClient();
-        const { data } = await supabase
-          .from("estimates")
-          .select(
-            "id, estimate_number, customer_name, project_description, grand_total, status, created_at",
-          )
-          .order("created_at", { ascending: false })
-          .limit(5);
+        const res = await fetch("/api/estimates", { cache: "no-store" });
+        if (!res.ok) throw new Error(`estimates fetch failed: ${res.status}`);
+        const data: unknown = await res.json();
+        const all: EstimateRow[] = Array.isArray(data)
+          ? (data as EstimateRow[])
+          : [];
         if (cancelled) return;
-        setRows((data ?? []) as EstimateRow[]);
+        const recent = [...all]
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
+          .slice(0, 5);
+        setRows(recent);
       } catch {
         // Estimates unavailable. Render the empty state, never a broken card.
       } finally {
