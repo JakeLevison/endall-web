@@ -287,13 +287,14 @@ describe("SettingsPage Integrations tab", () => {
     expect(order).toEqual([
       "gmail",
       "google-calendar",
-      "slack",
+      "outlook",
       "quickbooks",
+      "linkedin",
+      "slack",
+      "telegram",
+      "webhooks",
       "zoho-mail",
       "brevo",
-      "linkedin",
-      "webhooks",
-      "telegram",
     ]);
   });
 

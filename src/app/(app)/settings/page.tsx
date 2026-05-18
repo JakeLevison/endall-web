@@ -499,14 +499,14 @@ type Integration = {
 const integrations: Integration[] = [
   { slug: "gmail", name: "Gmail", description: "Send estimate approvals from your inbox so customers reply to you.", icon: Mail, available: true },
   { slug: "google-calendar", name: "Google Calendar", description: "Automatically add booked jobs to your calendar.", icon: Calendar, available: true },
-  { slug: "slack", name: "Slack", description: "Get notifications and updates in Slack.", icon: MessageSquare, available: false },
+  { slug: "outlook", name: "Outlook", description: "Microsoft 365 / Outlook send-from-your-inbox.", icon: Mail, available: false },
   { slug: "quickbooks", name: "QuickBooks", description: "Sync invoices and customers with your QuickBooks account.", icon: Receipt, available: true },
+  { slug: "linkedin", name: "LinkedIn", description: "Import contacts and track engagement.", icon: Link, available: false },
+  { slug: "slack", name: "Slack", description: "Get notifications and updates in Slack.", icon: MessageSquare, available: false },
+  { slug: "telegram", name: "Telegram", description: "Receive alerts and control via Telegram.", icon: Send, available: false },
+  { slug: "webhooks", name: "Webhooks", description: "Send and receive data via HTTP webhooks.", icon: Webhook, available: false },
   { slug: "zoho-mail", name: "Zoho Mail", description: "Connect your Zoho Mail account.", icon: Mail, available: false },
   { slug: "brevo", name: "Brevo", description: "Email campaigns and marketing automation.", icon: Mail, available: false },
-  { slug: "linkedin", name: "LinkedIn", description: "Import contacts and track engagement.", icon: Link, available: false },
-  { slug: "webhooks", name: "Webhooks", description: "Send and receive data via HTTP webhooks.", icon: Webhook, available: false },
-  { slug: "telegram", name: "Telegram", description: "Receive alerts and control via Telegram.", icon: Send, available: false },
-  { slug: "outlook", name: "Outlook", description: "Microsoft 365 / Outlook send-from-your-inbox.", icon: Mail, available: false },
 ];
 
 type QbStatus =
