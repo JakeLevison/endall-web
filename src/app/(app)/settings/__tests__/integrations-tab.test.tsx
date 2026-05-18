@@ -105,7 +105,7 @@ describe("SettingsPage Integrations tab", () => {
     });
   });
 
-  it("non-Gmail integrations render a disabled Coming soon button (no broken Connect)", async () => {
+  it("non-OAuth integrations still render a disabled Coming soon button", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({}))),
@@ -114,14 +114,93 @@ describe("SettingsPage Integrations tab", () => {
     render(<SettingsPage />);
     await clickIntegrationsTab();
 
-    // Google Calendar shares the same broken-button bug class but has no
-    // backend OAuth route — surface that honestly instead of rendering a
-    // dead Connect button.
-    const calendarBtn = await screen.findByTestId(
+    // Slack has no backend OAuth route yet: surface that honestly
+    // instead of rendering a dead Connect button.
+    const slackBtn = await screen.findByTestId("settings-slack-connect");
+    expect(slackBtn).toBeDisabled();
+    expect(slackBtn).toHaveTextContent(/coming soon/i);
+  });
+
+  it("renders a Google Calendar Connect button when not connected", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: unknown) => {
+        if (String(url).includes("/api/gcal/status")) {
+          return Promise.resolve(jsonResponse({ connected: false }));
+        }
+        return Promise.resolve(jsonResponse({}));
+      }),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const connectBtn = await screen.findByTestId(
       "settings-google-calendar-connect",
     );
-    expect(calendarBtn).toBeDisabled();
-    expect(calendarBtn).toHaveTextContent(/coming soon/i);
+    expect(connectBtn).toBeEnabled();
+    expect(connectBtn).toHaveTextContent(/connect/i);
+  });
+
+  it("Google Calendar Connect calls /api/oauth/gcal/authorize and navigates to auth_url", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: unknown) => {
+      if (String(url).includes("/api/gcal/status")) {
+        return Promise.resolve(jsonResponse({ connected: false }));
+      }
+      if (String(url).includes("/api/oauth/gcal/authorize")) {
+        return Promise.resolve(
+          jsonResponse({ auth_url: "https://accounts.google.test/o?x=1" }),
+        );
+      }
+      return Promise.resolve(jsonResponse({}));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    const connectBtn = await screen.findByTestId(
+      "settings-google-calendar-connect",
+    );
+    await userEvent.setup().click(connectBtn);
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.find((c) =>
+          String(c[0]).includes("/api/oauth/gcal/authorize"),
+        ),
+      ).toBeTruthy();
+    });
+    await waitFor(() => {
+      expect(window.location.href).toBe("https://accounts.google.test/o?x=1");
+    });
+  });
+
+  it("shows Google Calendar connected state with Disconnect", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: unknown) => {
+        if (String(url).includes("/api/gcal/status")) {
+          return Promise.resolve(
+            jsonResponse({
+              connected: true,
+              calendar_id: "primary",
+              account_email: "owner@example.com",
+              connected_at: "2026-05-18T00:00:00+00:00",
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse({}));
+      }),
+    );
+
+    render(<SettingsPage />);
+    await clickIntegrationsTab();
+
+    expect(await screen.findByText(/owner@example.com/)).toBeInTheDocument();
+    expect(
+      screen.getByTestId("settings-google-calendar-disconnect"),
+    ).toBeInTheDocument();
   });
 
   it("renders tiles in the founder-specified grid order", async () => {
