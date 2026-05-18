@@ -291,12 +291,16 @@ export default function ContactsPage() {
           cache: "no-store",
         });
         if (!resp.ok) throw new Error(`unified fetch failed: ${resp.status}`);
-        const payload = (await resp.json()) as UnifiedRow[] | { rows?: UnifiedRow[] };
+        const payload = (await resp.json()) as
+          | UnifiedRow[]
+          | { rows?: UnifiedRow[]; contacts?: UnifiedRow[] };
         const rows: UnifiedRow[] = Array.isArray(payload)
           ? payload
           : Array.isArray(payload?.rows)
             ? payload.rows
-            : [];
+            : Array.isArray(payload?.contacts)
+              ? payload.contacts
+              : [];
 
         const mapped: Contact[] = rows.map((r) => {
           const stageRaw = r.lifecycle_stage;
