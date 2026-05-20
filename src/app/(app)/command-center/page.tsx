@@ -32,8 +32,8 @@ import { posthog } from "@/lib/posthog";
 import { agentDisplayName, isSuccessStatus } from "@/lib/command-center";
 
 // TODO: wire real auth -- auth wiring is out of scope through P15b.
-// For now, middleware allows unauthenticated access. When auth lands,
-// re-enable the redirect in src/middleware.ts and gate this route there.
+// For now, proxy allows unauthenticated access. When auth lands,
+// re-enable the redirect in src/proxy.ts and gate this route there.
 function usePlaceholderAuth() {
   const router = useRouter();
   useEffect(() => {

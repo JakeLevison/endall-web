@@ -89,7 +89,7 @@ function withTenantCookie(response: NextResponse, tenantId: string) {
   return response;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   // endall.app apex redirects to endall.ai. The .app domain hosts tenant
@@ -111,7 +111,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308);
   }
 
-  // Defense-in-depth: middleware owns x-tenant-slug and x-tenant-id. Strip
+  // Defense-in-depth: proxy owns x-tenant-slug and x-tenant-id. Strip
   // any client-supplied values up front so no downstream handler can ever
   // observe an attacker-controlled tenant header. The tenant-subdomain
   // branch re-sets x-tenant-slug from the validated host; the contractor
@@ -210,7 +210,7 @@ export async function middleware(request: NextRequest) {
     // Cookie path (R2-8d): host-only HttpOnly endall_session is set by
     // /oauth/handshake/route.ts after it consumes a single-use session_id
     // from the bridge. Cookie value is JSON {admin_key, tenant_id}. The
-    // middleware decodes it server-side and rewrites the request URL so
+    // proxy decodes it server-side and rewrites the request URL so
     // the page sees admin_key + tenant_id via useSearchParams() without
     // either ever appearing in the browser URL.
     const sessionRaw = request.cookies.get("endall_session")?.value;

@@ -2,7 +2,7 @@
 
 Customer-facing surfaces live at `{tenant_slug}.endall.app`. The main
 marketing site at `endall.ai` is unaffected. This doc captures the DNS,
-Vercel, and middleware contract so the flow is reproducible.
+Vercel, and proxy contract so the flow is reproducible.
 
 ## Canonical decision
 
@@ -39,9 +39,9 @@ Open the `endall-web` project in Vercel and add these domains:
 
 Vercel will issue wildcard SSL automatically once DNS propagates.
 
-## Middleware behavior
+## Proxy behavior
 
-File: `src/middleware.ts`, helper: `src/lib/subdomain.ts`.
+File: `src/proxy.ts`, helper: `src/lib/subdomain.ts`.
 
 1. Parse the Host header.
 2. Hostname on `endall.ai`, `www.endall.ai`, or `endall.app` (no
@@ -56,9 +56,9 @@ File: `src/middleware.ts`, helper: `src/lib/subdomain.ts`.
    - Otherwise rewrite to `/tenant-not-found` (neutral 404, no Endall
      branding).
 
-No DB query runs in middleware. Route handlers in `(tenant)` perform the
+No DB query runs in the proxy. Route handlers in `(tenant)` perform the
 tenant lookup by slug and render `notFound()` if the slug does not
-resolve. This keeps middleware fast and avoids per-request Supabase hits.
+resolve. This keeps the proxy fast and avoids per-request Supabase hits.
 
 ## Route tree
 
@@ -91,7 +91,7 @@ token-to-entity resolution ships with the consuming slice (E3 for approval).
 - Wildcard SSL: Vercel issues automatically on the first request to a
   new subdomain; first-request latency is typically 1-3 seconds. Confirm
   this is acceptable for the customer approval flow.
-- Tenant-slug lookup cache: middleware currently skips the DB lookup and
+- Tenant-slug lookup cache: the proxy currently skips the DB lookup and
   lets route handlers resolve. If customer traffic grows past the first
   cohort of tenants, a short-TTL in-memory cache in a Vercel Edge Config
   may be warranted. Not in scope for R2-7.

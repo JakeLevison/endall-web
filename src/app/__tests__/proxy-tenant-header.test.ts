@@ -29,7 +29,7 @@ vi.mock("@supabase/ssr", () => ({
   }),
 }));
 
-// Spy on NextResponse.next to capture the request.headers that middleware
+// Spy on NextResponse.next to capture the request.headers that proxy
 // forwards downstream. This is the assertion surface for "what did the
 // downstream handler actually see?".
 vi.mock("next/server", async (importOriginal) => {
@@ -61,8 +61,8 @@ vi.mock("next/server", async (importOriginal) => {
   return { ...actual, NextResponse: PatchedResponse };
 });
 
-// Import after mocks so middleware binds the patched NextResponse.
-import { middleware } from "../../middleware";
+// Import after mocks so proxy binds the patched NextResponse.
+import { proxy } from "../../proxy";
 
 function makeRequest(
   url: string,
@@ -77,7 +77,7 @@ function makeRequest(
   return req;
 }
 
-describe("middleware: x-tenant-slug defense-in-depth strip", () => {
+describe("proxy: x-tenant-slug defense-in-depth strip", () => {
   beforeEach(() => {
     mockUser = null;
     mockMembership = null;
@@ -89,24 +89,24 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
 
   it("bare endall.ai with client-supplied x-tenant-slug: header is stripped downstream", async () => {
     // Public marketing route on the main domain. Attacker sends a spoofed
-    // tenant slug; middleware must not forward it.
+    // tenant slug; proxy must not forward it.
     const req = makeRequest("/contact", {
       host: "endall.ai",
       "x-tenant-slug": "victim-tenant",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBeNull();
   });
 
   it("bare endall.ai with client-supplied x-tenant-id: header is stripped downstream", async () => {
-    // Defense-in-depth: x-tenant-id is likewise owned by middleware only.
+    // Defense-in-depth: x-tenant-id is likewise owned by proxy only.
     const req = makeRequest("/contact", {
       host: "endall.ai",
       "x-tenant-id": "victim-tenant-uuid",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-id")).toBeNull();
@@ -117,7 +117,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
       host: "acme.endall.app",
       "x-tenant-slug": "victim-tenant",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBe("acme");
@@ -127,7 +127,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
     const req = makeRequest("/approve/sixteencharstoken00", {
       host: "acme.endall.app",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBe("acme");
@@ -140,7 +140,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
       host: "endall.ai",
       "x-tenant-slug": "victim-tenant",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBeNull();
@@ -154,7 +154,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
       host: "www.endall.app",
       "x-tenant-slug": "victim-tenant",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBeNull();
@@ -162,13 +162,13 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
 
   it("tenant-not-found rewrite on subdomain does not preserve client-supplied header", async () => {
     // Request to a tenant subdomain but non-tenant path rewrites to
-    // /tenant-not-found. The slug header is still set by the middleware
+    // /tenant-not-found. The slug header is still set by the proxy
     // from the host, not from the client.
     const req = makeRequest("/random-path", {
       host: "acme.endall.app",
       "x-tenant-slug": "victim-tenant",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-slug")).toBe("acme");
@@ -189,7 +189,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
     const req = makeRequest("/api/public/approval/9IFBgrS2d7rMowG9", {
       host: "cornerstone-mep.endall.app",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(rewriteSpy).not.toHaveBeenCalled();
     expect(downstreamHeaders).not.toBeNull();
@@ -205,7 +205,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
       "x-tenant-id": "victim-tenant-uuid",
       "x-tenant-slug": "victim-slug",
     });
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-id")).toBe("legit-tenant-uuid");
@@ -216,14 +216,14 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
     // Threat model finding 3: apex must not fall through to the contractor
     // auth pipeline. Subdomains of endall.app remain on tenant routing.
     const req = makeRequest("/", { host: "endall.app" });
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(308);
     expect(res.headers.get("location")).toBe("https://endall.ai/");
   });
 
   it("endall.app/contact: 308-redirects preserving path", async () => {
     const req = makeRequest("/contact", { host: "endall.app" });
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(308);
     expect(res.headers.get("location")).toBe("https://endall.ai/contact");
   });
@@ -231,10 +231,10 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
   it("endall.app with path-injected authority (//evil.com): redirects on-domain, not off-domain", async () => {
     // Open-redirect regression: a relative-URL constructor would resolve
     // "//evil.com" against the base as the authority and produce
-    // https://evil.com/. The middleware uses the URL setter form so the
+    // https://evil.com/. The proxy uses the URL setter form so the
     // host is locked to endall.ai regardless of what pathname contains.
     const req = makeRequest("//evil.com", { host: "endall.app" });
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(308);
     const location = res.headers.get("location") ?? "";
     expect(new URL(location).host).toBe("endall.ai");
@@ -242,7 +242,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
 
   it("endall.app/?utm=test&ref=foo: 308-redirects preserving query string", async () => {
     const req = makeRequest("/?utm=test&ref=foo", { host: "endall.app" });
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(308);
     expect(res.headers.get("location")).toBe(
       "https://endall.ai/?utm=test&ref=foo",
@@ -261,7 +261,7 @@ describe("middleware: x-tenant-slug defense-in-depth strip", () => {
         "x-tenant-slug": "victim-slug",
       },
     );
-    await middleware(req);
+    await proxy(req);
 
     expect(downstreamHeaders).not.toBeNull();
     expect(downstreamHeaders!.get("x-tenant-id")).toBe("bypass-tenant");

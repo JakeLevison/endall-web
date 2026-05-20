@@ -18,7 +18,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * directly to the bridge host (Railway). A Set-Cookie returned by the
  * bridge can only scope to the bridge host (RFC 6265 sec 5.3) and so
  * cannot reach endall.ai. This route runs on endall.ai, so its
- * Set-Cookie is endall.ai-scoped and the middleware can read it on
+ * Set-Cookie is endall.ai-scoped and the proxy can read it on
  * subsequent requests to /settings/integrations.
  *
  * The session_id leaks in the URL briefly (browser history, server
@@ -55,7 +55,7 @@ function setSessionCookie(
 ) {
   // HttpOnly + Secure + SameSite=Lax + host-only (no Domain attr) so the
   // cookie scopes to whatever endall.ai surface served this response.
-  // Value is JSON so the middleware can pull both fields in one read.
+  // Value is JSON so the proxy can pull both fields in one read.
   response.cookies.set(
     COOKIE_NAME,
     JSON.stringify({ admin_key, tenant_id }),

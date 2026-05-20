@@ -26,7 +26,7 @@ vi.mock("@supabase/ssr", () => ({
 }));
 
 // Import after mocks
-import { middleware } from "../../middleware";
+import { proxy } from "../../proxy";
 
 function makeRequest(url: string, cookies: Record<string, string> = {}) {
   const req = new NextRequest(new URL(url, "https://endall.ai"));
@@ -36,7 +36,7 @@ function makeRequest(url: string, cookies: Record<string, string> = {}) {
   return req;
 }
 
-describe("middleware", () => {
+describe("proxy", () => {
   beforeEach(() => {
     mockUser = null;
     mockMembership = null;
@@ -50,7 +50,7 @@ describe("middleware", () => {
     const req = makeRequest(
       "/invoice-review?admin_key=secret-admin-key&tenant_id=abc-123"
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(200);
     const cookie = res.cookies.get("tenant_id");
@@ -68,7 +68,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(200);
     // Browser address bar URL stays clean (no admin_key); the rewrite
@@ -95,7 +95,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
@@ -122,7 +122,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(200);
   });
 
@@ -138,7 +138,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(307);
     expect(res.headers.get("location") || "").toContain("/login");
   });
@@ -156,7 +156,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(307);
     expect(res.headers.get("location") || "").toContain("/login");
   });
@@ -166,7 +166,7 @@ describe("middleware", () => {
       "/settings/integrations?admin_key=secret-admin-key&tenant_id=abc-123",
       { endall_session: "not-json{{{" },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     // URL params are valid, so URL-param path takes over.
     expect(res.status).toBe(200);
@@ -184,7 +184,7 @@ describe("middleware", () => {
         }),
       },
     );
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(200);
     // tenant_id cookie set on response is the cookie-derived one.
@@ -195,7 +195,7 @@ describe("middleware", () => {
   it("bypass on: no cookie, no URL params, redirects to login", async () => {
     mockUser = null;
     const req = makeRequest("/settings/integrations");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
@@ -208,7 +208,7 @@ describe("middleware", () => {
     mockMembership = { tenant_id: "tenant-xyz" };
 
     const req = makeRequest("/invoice-review");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(200);
     const cookie = res.cookies.get("tenant_id");
@@ -220,7 +220,7 @@ describe("middleware", () => {
     mockUser = null;
 
     const req = makeRequest("/invoice-review");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
@@ -234,7 +234,7 @@ describe("middleware", () => {
     mockMembership = null;
 
     const req = makeRequest("/settings/integrations");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
@@ -266,7 +266,7 @@ describe("middleware", () => {
       mockMembership = null;
 
       const req = makeRequest(path);
-      const res = await middleware(req);
+      const res = await proxy(req);
 
       expect(res.status).toBe(200);
     },
@@ -278,7 +278,7 @@ describe("middleware", () => {
     mockMembership = null;
 
     const req = makeRequest("/contact");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(200);
     expect(res.headers.get("location")).toBeNull();
@@ -289,10 +289,10 @@ describe("middleware", () => {
     mockUser = null;
     mockMembership = null;
 
-    const handshake = await middleware(makeRequest("/oauth/handshake"));
+    const handshake = await proxy(makeRequest("/oauth/handshake"));
     expect(handshake.status).toBe(200);
 
-    const sibling = await middleware(makeRequest("/oauth/anything-else"));
+    const sibling = await proxy(makeRequest("/oauth/anything-else"));
     expect(sibling.status).toBe(307);
     expect(sibling.headers.get("location") || "").toContain("/login");
   });
@@ -302,7 +302,7 @@ describe("middleware", () => {
     mockUser = null;
 
     const req = makeRequest("/settings/integrations");
-    const res = await middleware(req);
+    const res = await proxy(req);
 
     expect(res.status).toBe(307);
     const location = res.headers.get("location") || "";
@@ -314,7 +314,7 @@ describe("middleware", () => {
 // must throw at import. Tests use vi.resetModules + dynamic import so each
 // case re-evaluates the module against freshly-stubbed env vars. See
 // claude-handoff/2026-05-05/environment-isolation-audit.md Finding V2.
-describe("middleware module-load guard (Finding V2)", () => {
+describe("proxy module-load guard (Finding V2)", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
@@ -324,7 +324,7 @@ describe("middleware module-load guard (Finding V2)", () => {
     vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "true");
     vi.stubEnv("NODE_ENV", "production");
 
-    await expect(import("../../middleware")).rejects.toThrow(
+    await expect(import("../../proxy")).rejects.toThrow(
       /ADMIN_KEY_BYPASS_ENABLED/,
     );
   });
@@ -333,8 +333,8 @@ describe("middleware module-load guard (Finding V2)", () => {
     vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "true");
     vi.stubEnv("NODE_ENV", "development");
 
-    await expect(import("../../middleware")).resolves.toHaveProperty(
-      "middleware",
+    await expect(import("../../proxy")).resolves.toHaveProperty(
+      "proxy",
     );
   });
 
@@ -342,16 +342,16 @@ describe("middleware module-load guard (Finding V2)", () => {
     vi.stubEnv("ADMIN_KEY_BYPASS_ENABLED", "false");
     vi.stubEnv("NODE_ENV", "production");
 
-    await expect(import("../../middleware")).resolves.toHaveProperty(
-      "middleware",
+    await expect(import("../../proxy")).resolves.toHaveProperty(
+      "proxy",
     );
   });
 
   it("bypass undefined + NODE_ENV=production does not throw", async () => {
     vi.stubEnv("NODE_ENV", "production");
 
-    await expect(import("../../middleware")).resolves.toHaveProperty(
-      "middleware",
+    await expect(import("../../proxy")).resolves.toHaveProperty(
+      "proxy",
     );
   });
 });
