@@ -6,10 +6,10 @@
  * tree. `endall.app` without a subdomain falls through to marketing too.
  *
  * Design intent (2026-04-23, R2-7):
- * - Middleware parses the subdomain from the Host header and, when valid,
+ * - The proxy parses the subdomain from the Host header and, when valid,
  *   rewrites the request to the (tenant) route group by setting a header
  *   that downstream handlers consume.
- * - Middleware does NOT hit the database; it only does pattern validation.
+ * - The proxy does NOT hit the database; it only does pattern validation.
  *   Route handlers perform the DB lookup and render a 404 if the slug
  *   does not resolve to a real tenant.
  */

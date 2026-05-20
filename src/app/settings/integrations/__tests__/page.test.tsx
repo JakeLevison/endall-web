@@ -33,7 +33,7 @@ function setLocation(search: string) {
   // Set both window.location (for the connected-banner cleanup useEffect
   // which still operates on the browser URL) and useSearchParams's
   // mocked return value (which the page reads for admin_key/tenant_id
-  // since R2-8d, since the middleware rewrites those server-side).
+  // since R2-8d, since the proxy rewrites those server-side).
   const url = `https://endall.ai/settings/integrations${search}`;
   const u = new URL(url);
   mockSearchParams = new URLSearchParams(u.search);

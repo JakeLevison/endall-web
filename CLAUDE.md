@@ -70,7 +70,7 @@ Safe to ship without pausing (still show the diff):
 
 Confirmation required before acting when touching:
 - `tenant_id` values, `NEXT_PUBLIC_TENANT_ID`, or multi-tenant routing.
-- Supabase Auth flows: `src/middleware.ts`, `createServerClient`, login/signup pages.
+- Supabase Auth flows: `src/proxy.ts`, `createServerClient`, login/signup pages.
 - Supabase RLS policies or migration files under `migrations/`.
 - ElevenLabs Publish state.
 - The `.husky/pre-commit` banned-phrase list itself.

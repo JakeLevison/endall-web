@@ -66,7 +66,7 @@ const BRIDGE_URL =
 // failing silently in production (silent catch -> notFound -> bogus
 // 404 to the customer) for deployment-specific reasons even though the
 // /api/ route worked when hit externally. Same Node runtime, same
-// bridge call as the route handler — no HTTPS loop, no middleware
+// bridge call as the route handler — no HTTPS loop, no proxy
 // rerouting, errors are logged instead of swallowed.
 async function fetchApproval(token: string): Promise<PublicEstimate | null> {
   const meta = await resolveApprovalMetaViaBridge(token);

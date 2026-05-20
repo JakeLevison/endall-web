@@ -34,7 +34,7 @@ export default function IntegrationsPage() {
 function IntegrationsPageInner() {
   const router = useRouter();
   // useSearchParams reflects the routing-layer URL, which is what the
-  // middleware rewrites server-side after consuming endall_session
+  // proxy rewrites server-side after consuming endall_session
   // cookie. The browser address bar stays clean (no admin_key); the
   // page reads admin_key + tenant_id from the rewritten URL only.
   const params = useSearchParams();
