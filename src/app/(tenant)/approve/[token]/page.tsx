@@ -46,9 +46,15 @@ export async function generateMetadata({
     return { title: "Approval", ...APPROVAL_ROBOTS };
   }
   const meta = await resolveApprovalAnyViaBridge(token);
-  const title = isBookingMeta(meta)
-    ? "Appointment confirmation"
-    : "Estimate approval";
+  let title: string;
+  if (isBookingMeta(meta)) {
+    title =
+      (meta.status || "").toLowerCase() === "cancelled"
+        ? "Appointment cancelled"
+        : "Appointment confirmation";
+  } else {
+    title = "Estimate approval";
+  }
   return { title, ...APPROVAL_ROBOTS };
 }
 
