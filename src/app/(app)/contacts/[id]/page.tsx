@@ -2,7 +2,17 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { ChevronRight, Mail, Phone, Building2, MoreHorizontal } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  FileText,
+  Mail,
+  MoreHorizontal,
+  Phone,
+  StickyNote,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +24,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
-import type { Contact as DBContact, Activity as DBActivity, Deal as DBDeal } from "@/lib/types";
+import type {
+  Contact as DBContact,
+  Activity as DBActivity,
+  ActivityType,
+  Deal as DBDeal,
+} from "@/lib/types";
 
 type ContactDetail = {
   name: string;
@@ -26,13 +41,16 @@ type ContactDetail = {
   title: string;
 };
 
-type Activity = {
+type TimelineActivity = {
   id: string;
-  type: "email" | "call" | "meeting" | "note";
-  title: string;
-  description: string;
-  date: string;
+  type: ActivityType;
+  subject: string;
+  body: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
 };
+
+const ACTIVITY_PAGE_SIZE = 10;
 
 type AssociatedDeal = {
   id: string;
@@ -71,27 +89,195 @@ const estimateStatusColor = (status: string) => {
   }
 };
 
-const activityIcon = (type: Activity["type"]) => {
+const activityIcon = (type: ActivityType) => {
   switch (type) {
-    case "email": return <Mail className="size-3.5" />;
-    case "call": return <Phone className="size-3.5" />;
-    case "meeting": return <Building2 className="size-3.5" />;
-    case "note": return <div className="size-3.5 text-center leading-[14px] text-[10px]">N</div>;
+    case "voice_call_summary":
+    case "call":
+      return <Phone className="size-3.5" />;
+    case "email_sent":
+    case "email":
+      return <Mail className="size-3.5" />;
+    case "estimate_created":
+      return <FileText className="size-3.5" />;
+    case "estimate_approved":
+      return <CheckCircle2 className="size-3.5" />;
+    case "stage_change":
+      return <ArrowRight className="size-3.5" />;
+    case "meeting":
+      return <Building2 className="size-3.5" />;
+    case "task":
+      return <CheckCircle2 className="size-3.5" />;
+    case "note":
+    default:
+      return <StickyNote className="size-3.5" />;
   }
 };
 
-const activityColor = (type: Activity["type"]) => {
+const activityColor = (type: ActivityType) => {
   switch (type) {
-    case "email": return "bg-blue-500/10 text-blue-400";
-    case "call": return "bg-emerald-500/10 text-emerald-400";
-    case "meeting": return "bg-purple-500/10 text-purple-400";
-    case "note": return "bg-zinc-500/10 text-[var(--text-tertiary)]";
+    case "voice_call_summary":
+    case "call":
+      return "bg-emerald-500/10 text-emerald-400";
+    case "email_sent":
+    case "email":
+      return "bg-blue-500/10 text-blue-400";
+    case "estimate_created":
+      return "bg-purple-500/10 text-purple-400";
+    case "estimate_approved":
+      return "bg-emerald-500/10 text-emerald-400";
+    case "stage_change":
+      return "bg-amber-500/10 text-amber-400";
+    case "meeting":
+      return "bg-purple-500/10 text-purple-400";
+    case "task":
+      return "bg-sky-500/10 text-sky-400";
+    case "note":
+    default:
+      return "bg-zinc-500/10 text-[var(--text-tertiary)]";
   }
 };
 
-function mapActivityType(type: string): Activity["type"] {
-  if (["email", "call", "meeting", "note"].includes(type)) return type as Activity["type"];
-  return "note";
+const formatActivityDate = (iso: string) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.split("T")[0] ?? "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
+const asString = (value: unknown): string =>
+  typeof value === "string" ? value : value == null ? "" : String(value);
+
+const asStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.map(asString).filter(Boolean) : [];
+
+const formatMoney = (value: unknown): string => {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return "";
+  return "$" + n.toLocaleString("en-US");
+};
+
+function activityTitle(a: TimelineActivity): string {
+  const m = a.metadata ?? {};
+  switch (a.type) {
+    case "voice_call_summary":
+      return a.subject || "Call summary";
+    case "email_sent":
+      return asString(m.subject) || a.subject || "Email sent";
+    case "estimate_created": {
+      const num = asString(m.estimate_number);
+      return num ? `Estimate ${num} created` : "Estimate created";
+    }
+    case "estimate_approved": {
+      const num = asString(m.estimate_number);
+      return num ? `Estimate ${num} approved` : "Estimate approved";
+    }
+    case "stage_change":
+      return "Stage changed";
+    case "note":
+      return a.subject || "Note";
+    default:
+      return a.subject || a.type.replace(/_/g, " ");
+  }
+}
+
+function ActivityBody({ activity }: { activity: TimelineActivity }) {
+  const m = activity.metadata ?? {};
+
+  switch (activity.type) {
+    case "voice_call_summary": {
+      const summary = asString(m.summary) || activity.body;
+      const actionItems = asStringArray(m.action_items);
+      return (
+        <>
+          {summary && (
+            <p className="text-[13px] text-[var(--text-muted)] whitespace-pre-line">
+              {summary}
+            </p>
+          )}
+          {actionItems.length > 0 && (
+            <div className="mt-2">
+              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+                Action items
+              </p>
+              <ul className="space-y-0.5">
+                {actionItems.map((item, i) => (
+                  <li
+                    key={i}
+                    className="text-[13px] text-[var(--text-secondary)] flex gap-2"
+                  >
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    case "email_sent": {
+      const snippet = asString(m.snippet) || activity.body;
+      if (!snippet) return null;
+      return (
+        <p className="text-[13px] text-[var(--text-muted)] line-clamp-3">
+          {snippet}
+        </p>
+      );
+    }
+
+    case "estimate_created": {
+      const total = formatMoney(m.total ?? m.grand_total);
+      const description = asString(m.description) || activity.body;
+      return (
+        <div className="space-y-0.5">
+          {total && (
+            <p className="text-[13px] text-[var(--text-secondary)]">
+              Total {total}
+            </p>
+          )}
+          {description && (
+            <p className="text-[13px] text-[var(--text-muted)]">{description}</p>
+          )}
+        </div>
+      );
+    }
+
+    case "estimate_approved": {
+      const approvedBy = asString(m.approved_by);
+      const total = formatMoney(m.total ?? m.grand_total);
+      const parts = [
+        approvedBy && `Approved by ${approvedBy}`,
+        total && `Total ${total}`,
+      ].filter(Boolean);
+      const body = parts.join(" · ") || activity.body;
+      if (!body) return null;
+      return <p className="text-[13px] text-[var(--text-muted)]">{body}</p>;
+    }
+
+    case "stage_change": {
+      const from = asString(m.from_stage);
+      const to = asString(m.to_stage);
+      if (!from && !to) return null;
+      return (
+        <p className="text-[13px] text-[var(--text-secondary)] flex items-center gap-1.5">
+          <span>{from || "—"}</span>
+          <ArrowRight className="size-3 text-[var(--text-muted)]" />
+          <span>{to || "—"}</span>
+        </p>
+      );
+    }
+
+    case "note":
+    default: {
+      if (!activity.body) return null;
+      return (
+        <p className="text-[13px] text-[var(--text-muted)] whitespace-pre-line">
+          {activity.body}
+        </p>
+      );
+    }
+  }
 }
 
 export default function ContactDetailPage({
@@ -101,7 +287,9 @@ export default function ContactDetailPage({
 }) {
   const { id } = use(params);
   const [contact, setContact] = useState<ContactDetail | null>(null);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<TimelineActivity[]>([]);
+  const [visibleActivityCount, setVisibleActivityCount] =
+    useState<number>(ACTIVITY_PAGE_SIZE);
   const [deals, setDeals] = useState<AssociatedDeal[]>([]);
   const [companies, setCompanies] = useState<AssociatedCompany[]>([]);
   const [estimates, setEstimates] = useState<AssociatedEstimate[]>([]);
@@ -146,16 +334,20 @@ export default function ContactDetailPage({
           .order("created_at", { ascending: false });
 
         if (activityData && activityData.length > 0) {
-          setActivities((activityData as DBActivity[]).map((a) => ({
-            id: a.id,
-            type: mapActivityType(a.type),
-            title: a.subject || "",
-            description: a.body || "",
-            date: a.created_at ? a.created_at.split("T")[0] : "",
-          })));
+          setActivities(
+            (activityData as DBActivity[]).map((a) => ({
+              id: a.id,
+              type: a.type,
+              subject: a.subject || "",
+              body: a.body || "",
+              metadata: a.metadata ?? {},
+              created_at: a.created_at,
+            })),
+          );
         } else {
           setActivities([]);
         }
+        setVisibleActivityCount(ACTIVITY_PAGE_SIZE);
 
         // Fetch deals for this contact
         const { data: dealData } = await supabase
@@ -363,26 +555,69 @@ export default function ContactDetailPage({
         <div className="flex-1 overflow-y-auto p-5 min-w-0">
           <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">Activity</h3>
           {activities.length === 0 ? (
-            <p className="text-[13px] text-[var(--text-muted)]">No activities yet.</p>
+            <div className="border border-dashed border-[var(--border)] rounded-lg p-8 text-center">
+              <p className="text-[13px] text-[var(--text-primary)] font-medium mb-1">
+                No activity yet
+              </p>
+              <p className="text-[12px] text-[var(--text-muted)] mb-4">
+                Start with a call to capture context and next steps.
+              </p>
+              {contact.phone ? (
+                <a href={`tel:${contact.phone}`}>
+                  <Button className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3">
+                    <Phone className="size-3.5 mr-1.5" />
+                    Make a call
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  disabled
+                  className="bg-[var(--surface-inverse)] text-[var(--text-inverse)] hover:opacity-90 text-[13px] h-8 px-3"
+                >
+                  <Phone className="size-3.5 mr-1.5" />
+                  Make a call
+                </Button>
+              )}
+            </div>
           ) : (
             <div className="space-y-3">
-              {activities.map((activity) => (
+              {activities.slice(0, visibleActivityCount).map((activity) => (
                 <div
                   key={activity.id}
                   className="flex gap-3 p-3 rounded-lg border border-[var(--border)] hover:bg-[var(--overlay-weak)] transition-colors"
                 >
-                  <div className={`size-7 rounded-md flex items-center justify-center shrink-0 ${activityColor(activity.type)}`}>
+                  <div
+                    className={`size-7 rounded-md flex items-center justify-center shrink-0 ${activityColor(activity.type)}`}
+                  >
                     {activityIcon(activity.type)}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-[13px] text-[var(--text-primary)]">{activity.title}</p>
-                      <span className="text-[11px] text-[var(--text-muted)]">{activity.date}</span>
+                      <p className="text-[13px] text-[var(--text-primary)] truncate">
+                        {activityTitle(activity)}
+                      </p>
+                      <span className="text-[11px] text-[var(--text-muted)] shrink-0">
+                        {formatActivityDate(activity.created_at)}
+                      </span>
                     </div>
-                    <p className="text-[13px] text-[var(--text-muted)]">{activity.description}</p>
+                    <ActivityBody activity={activity} />
                   </div>
                 </div>
               ))}
+              {visibleActivityCount < activities.length && (
+                <div className="pt-1">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setVisibleActivityCount((n) => n + ACTIVITY_PAGE_SIZE)
+                    }
+                    className="h-8 text-[13px] text-[var(--text-tertiary)] border-[var(--border)] bg-[var(--overlay-weak)]"
+                  >
+                    Show more (
+                    {activities.length - visibleActivityCount} remaining)
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
