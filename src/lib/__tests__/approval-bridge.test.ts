@@ -6,7 +6,11 @@
  * `GET /public/approval/{token}` endpoint (R2-8c).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { resolveApprovalMetaViaBridge } from "../approval-bridge";
+import {
+  isBookingMeta,
+  resolveApprovalAnyViaBridge,
+  resolveApprovalMetaViaBridge,
+} from "../approval-bridge";
 
 beforeEach(() => {
   vi.unstubAllEnvs();
@@ -108,5 +112,60 @@ describe("resolveApprovalMetaViaBridge", () => {
     expect(calledWith.toString()).toContain(
       `/public/approval/${encodeURIComponent(dirty)}`,
     );
+  });
+});
+
+describe("resolveApprovalAnyViaBridge", () => {
+  it("returns a booking-shaped meta with status and estimate_id when present", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            kind: "booking",
+            voice_job_id: "vj-1",
+            tenant_slug: "cornerstone",
+            tenant_name: "Cornerstone MEP",
+            tenant_phone: "+15715550999",
+            caller_name: "Dana",
+            job_type: "Panel upgrade",
+            job_address: "200 Oak Ave",
+            scheduled_at: "2026-05-22T14:00:00+00:00",
+            status: "cancelled",
+            estimate_id: null,
+            decision: null,
+            expires_at: "2026-06-05T00:00:00+00:00",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      ),
+    );
+    const result = await resolveApprovalAnyViaBridge("a".repeat(40));
+    expect(result).not.toBeNull();
+    expect(isBookingMeta(result)).toBe(true);
+    if (!isBookingMeta(result)) throw new Error("expected booking meta");
+    expect(result.status).toBe("cancelled");
+    expect(result.estimate_id).toBeNull();
+  });
+
+  it("returns a booking meta with estimate_id when the resolver surfaces it", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            kind: "booking",
+            voice_job_id: "vj-1",
+            status: "pending",
+            estimate_id: "est-abc",
+            decision: null,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      ),
+    );
+    const result = await resolveApprovalAnyViaBridge("a".repeat(40));
+    if (!isBookingMeta(result)) throw new Error("expected booking meta");
+    expect(result.estimate_id).toBe("est-abc");
   });
 });

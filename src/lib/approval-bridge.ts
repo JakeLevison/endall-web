@@ -32,6 +32,18 @@ export type PublicApprovalMeta = {
 
 // Voice booking-confirmation resolver payload (migration 087). Same
 // /public/approval/{token} endpoint, discriminated by `kind`.
+//
+// `status` is the raw voice_jobs.status ("pending" | "confirmed" |
+// "rescheduled" | "cancelled" | ...). Surfaced so the customer page can
+// render a cancelled message — `decision` collapses cancelled and
+// pending both to null.
+//
+// `estimate_id` is set once the call-complete pipeline drafts an
+// estimate for this booking. The companion bridge_booking_token_to_
+// estimate path mints a customer_approvals row with the same token hash,
+// so the resolver itself auto-upgrades booking → estimate. The field is
+// surfaced for client-side detection during the brief window before that
+// bridge row exists.
 export type PublicBookingMeta = {
   kind: "booking";
   voice_job_id: string;
@@ -42,6 +54,8 @@ export type PublicBookingMeta = {
   job_type?: string;
   job_address?: string;
   scheduled_at?: string | null;
+  status?: string;
+  estimate_id?: string | null;
   decision?: "confirmed" | "rescheduled" | null;
   expires_at?: string;
 };

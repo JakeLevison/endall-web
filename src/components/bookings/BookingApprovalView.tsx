@@ -5,21 +5,40 @@
  * feat/email-pipeline). Rendered by the shared /approve/{token} page when
  * the bridge resolver returns kind === "booking".
  *
- * Two actions, no new dependencies (plain React + Tailwind, mirroring
- * CustomerApprovalView):
+ * Three render branches:
+ *   - cancelled  -> terminal message, no confirm/reschedule affordance.
+ *   - confirmed/rescheduled (or decided in this session)
+ *                -> success banner with the scheduled time.
+ *   - pending    -> Confirm + Reschedule actions.
+ *
+ * Polling: the customer email fires at book_job time, before the call-
+ * complete pipeline drafts an estimate. While the booking is pending and
+ * no estimate has been linked yet, we re-poll the resolver every 15s for
+ * up to ~5 minutes. If the resolver upgrades booking -> estimate, or the
+ * booking flips to cancelled, or an estimate_id appears, we reload the
+ * page so SSR can render the right surface.
+ *
+ * Actions:
  *   - Confirm  -> POST /api/public/booking/{token}/confirm
  *   - Reschedule -> weekday picker (next 14 days, weekends skipped) ->
  *                   POST /api/public/booking/{token}/reschedule
  */
 
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicBookingMeta } from "@/lib/approval-bridge";
 
 type Props = {
   token: string;
   initial: PublicBookingMeta;
 };
+
+type ResolverPayload =
+  | (PublicBookingMeta & { kind: "booking" })
+  | { kind?: undefined; [k: string]: unknown }; // estimate-shape (no kind)
+
+const POLL_INTERVAL_MS = 15_000;
+const POLL_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
 function formatWhen(iso: string | null | undefined): string {
   if (!iso) return "the requested time";
@@ -64,7 +83,12 @@ function nextWeekdays(): string[] {
   return out;
 }
 
+function isCancelled(status: string | undefined): boolean {
+  return (status || "").trim().toLowerCase() === "cancelled";
+}
+
 export function BookingApprovalView({ token, initial }: Props) {
+  const cancelled = isCancelled(initial.status);
   const decided = initial.decision;
   const [status, setStatus] = useState<
     "idle" | "confirmed" | "rescheduled"
@@ -78,7 +102,59 @@ export function BookingApprovalView({ token, initial }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const tenantName = initial.tenant_name || "Your contractor";
+  const tenantPhone = initial.tenant_phone || "";
   const weekdays = useMemo(() => nextWeekdays(), []);
+
+  // Poll the resolver while the booking is pending/active and no estimate
+  // has appeared yet. If the response shape changes (estimate path, or
+  // status flips to cancelled, or an estimate_id surfaces), reload so SSR
+  // can render the right surface.
+  const shouldPoll =
+    !cancelled &&
+    !initial.estimate_id &&
+    decided !== "confirmed" &&
+    decided !== "rescheduled";
+  const startedAt = useRef<number>(0);
+  useEffect(() => {
+    if (!shouldPoll) return;
+    startedAt.current = Date.now();
+    let cancelledLocal = false;
+    const intervalId = window.setInterval(async () => {
+      if (cancelledLocal) return;
+      if (Date.now() - startedAt.current > POLL_DURATION_MS) {
+        window.clearInterval(intervalId);
+        return;
+      }
+      try {
+        const resp = await fetch(
+          `/api/public/approval/${encodeURIComponent(token)}`,
+          { cache: "no-store" },
+        );
+        if (!resp.ok) return;
+        const data = (await resp.json()) as ResolverPayload;
+        const isStillBooking =
+          (data as PublicBookingMeta).kind === "booking";
+        if (!isStillBooking) {
+          // Resolver upgraded to estimate — reload so SSR renders the
+          // CustomerApprovalView path.
+          window.location.reload();
+          return;
+        }
+        const next = data as PublicBookingMeta;
+        if (next.estimate_id || isCancelled(next.status)) {
+          window.location.reload();
+          return;
+        }
+        // Booking still pending; keep polling.
+      } catch {
+        // Network blips are non-fatal; keep polling.
+      }
+    }, POLL_INTERVAL_MS);
+    return () => {
+      cancelledLocal = true;
+      window.clearInterval(intervalId);
+    };
+  }, [shouldPoll, token]);
 
   async function doConfirm() {
     setBusy(true);
@@ -134,6 +210,50 @@ export function BookingApprovalView({ token, initial }: Props) {
     }
   }
 
+  if (cancelled) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-10">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <p className="text-sm font-medium uppercase tracking-wide text-blue-600">
+            {tenantName}
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold text-gray-900">
+            This appointment was cancelled
+          </h1>
+
+          <dl className="mt-6 space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-gray-500">Service</dt>
+              <dd className="font-medium text-gray-900">
+                {initial.job_type || "Service visit"}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-gray-500">Was scheduled for</dt>
+              <dd className="font-medium text-gray-900">
+                {formatWhen(scheduledAt)}
+              </dd>
+            </div>
+            {initial.job_address ? (
+              <div className="flex justify-between gap-4">
+                <dt className="text-gray-500">Where</dt>
+                <dd className="font-medium text-gray-900">
+                  {initial.job_address}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+
+          <p className="mt-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {tenantPhone
+              ? `If you need to reschedule, please call us at ${tenantPhone}.`
+              : "If you need to reschedule, please call us back."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -167,12 +287,10 @@ export function BookingApprovalView({ token, initial }: Props) {
               {initial.job_address || "The address on file"}
             </dd>
           </div>
-          {initial.tenant_phone ? (
+          {tenantPhone ? (
             <div className="flex justify-between gap-4">
               <dt className="text-gray-500">Questions?</dt>
-              <dd className="font-medium text-gray-900">
-                {initial.tenant_phone}
-              </dd>
+              <dd className="font-medium text-gray-900">{tenantPhone}</dd>
             </div>
           ) : null}
         </dl>
