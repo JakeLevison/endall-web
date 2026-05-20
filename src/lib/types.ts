@@ -49,9 +49,21 @@ export type Deal = {
   contacts?: { first_name: string; last_name: string } | null;
 };
 
+export type ActivityType =
+  | "email"
+  | "call"
+  | "meeting"
+  | "note"
+  | "task"
+  | "voice_call_summary"
+  | "email_sent"
+  | "estimate_created"
+  | "estimate_approved"
+  | "stage_change";
+
 export type Activity = {
   id: string;
-  type: "email" | "call" | "meeting" | "note" | "task";
+  type: ActivityType;
   subject: string;
   body: string;
   contact_id: string | null;
@@ -59,6 +71,7 @@ export type Activity = {
   deal_id: string | null;
   owner: string;
   created_at: string;
+  metadata: Record<string, unknown>;
 };
 
 export type Task = {
