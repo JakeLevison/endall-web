@@ -53,7 +53,7 @@ const PUBLIC_ROUTES = [
 // Paths served by the (tenant) route group. Requests on a valid tenant
 // subdomain receive x-tenant-slug; requests on the main marketing domain
 // never reach these paths because they do not exist outside (tenant).
-const TENANT_PATH_PREFIXES = ["/approve", "/invoice", "/tech"];
+const TENANT_PATH_PREFIXES = ["/approve", "/booking", "/invoice", "/tech"];
 const PUBLIC_PREFIXES = [
   "/contact",
   "/demo",
