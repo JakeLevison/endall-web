@@ -13,9 +13,9 @@ const STAGES: Stage[] = [
     title: "Win the work",
     tagline: "Every lead captured, every bid out the door fast.",
     bullets: [
-      "Front desk answers every call, qualifies the lead, books the site visit",
+      "Every call answered, every lead qualified and added to your CRM, every appointment booked to your calendar",
       "Outbound agent prospects target accounts, follows up, surfaces warm replies",
-      "Estimates and proposals drafted in hours, not days",
+      "Estimates and proposals drafted in minutes, not days",
     ],
   },
   {
@@ -56,6 +56,7 @@ const STAGES: Stage[] = [
       "Pipeline visibility from first call to signed contract",
       "Margin tracking and job costing by customer, crew, and job type",
       "Capacity planning so the next bid reflects what the business can actually deliver",
+      "Weekly competitive and market intelligence: who you're up against, material pricing shifts, and new bid opportunities in your area",
     ],
   },
 ];
@@ -162,7 +163,7 @@ function StageCard({ stage }: { stage: Stage }) {
           fontSize: "56px",
           fontWeight: 400,
           lineHeight: 1,
-          color: "var(--surface-hover)",
+          color: "#f97316",
           textAlign: "center",
           letterSpacing: "-0.02em",
         }}
