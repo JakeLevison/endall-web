@@ -38,7 +38,7 @@ export default function ValuePropSection() {
             {[
               {
                 title: "Your bookkeeper",
-                desc: "Track revenue, job costs, and crew utilization from a single dashboard. Morning briefings land before your first coffee.",
+                desc: "A daily ops briefing hits your inbox every morning with overnight leads, today's schedule, and what needs follow-up. Revenue, pipeline, and job status all in one dashboard.",
               },
               {
                 title: "Your office manager",

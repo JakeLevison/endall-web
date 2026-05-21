@@ -10,14 +10,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Endall: AI Ops Team for MEP Contractors",
   description:
-    "Financial models, proposals, project estimates, competitive analysis, call answering, and morning briefings. One AI ops team for MEP contractors.",
+    "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
     title: "Endall: AI Ops Team for MEP Contractors",
     description:
-      "Financial models, proposals, project estimates, and competitive analysis. One AI ops team for MEP contractors.",
+      "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
     url: "https://endall.ai",
     siteName: "Endall",
     type: "website",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Endall",
     description:
-      "Financial models, proposals, project estimates, and competitive analysis. One AI ops team for MEP contractors.",
+      "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
   },
 };
 
