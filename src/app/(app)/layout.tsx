@@ -29,6 +29,7 @@ import {
   FileCheck,
   FileSpreadsheet,
   Target,
+  Globe2,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -49,6 +50,7 @@ const primaryNav = [
   { href: "/dispatch", label: "Dispatch", icon: Calendar },
   { href: "/permitting", label: "Permitting", icon: FileCheck },
   { href: "/dashboard/competitive-intel", label: "Competitive intel", icon: Target },
+  { href: "/dashboard/market-intel", label: "Market intel", icon: Globe2 },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
