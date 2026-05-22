@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { SendEstimateButton } from "@/components/estimates/EmailDraftReviewModal";
+import { DownloadEstimatePdfButton } from "@/components/estimates/DownloadEstimatePdfButton";
 
 type LineItem = {
   id: string;
@@ -255,7 +256,11 @@ export default function EstimateDetailPage({
           </div>
         </section>
 
-        <div className="flex justify-end">
+        <div className="flex flex-wrap justify-end gap-2">
+          <DownloadEstimatePdfButton
+            estimateId={estimate.id}
+            fallbackFilename={`estimate-${estimate.estimate_number}.pdf`}
+          />
           <SendEstimateButton estimateId={estimate.id} />
         </div>
       </div>
