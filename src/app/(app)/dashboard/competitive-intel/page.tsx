@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import useSWR from "swr";
 import {
   RefreshCw,
@@ -238,7 +238,7 @@ function CompetitorCard({ row }: { row: IntelRow & { data: CompetitorData } }) {
       </div>
 
       {/* Reviews / rating */}
-      {(rating || reviewCount) && (
+      {(rating != null || reviewCount != null) && (
         <div className="flex items-center gap-3 text-[12px]">
           {rating !== undefined && rating !== null && (
             <div className="flex items-center gap-1 text-[var(--text-secondary)]">
@@ -557,10 +557,12 @@ export default function CompetitiveIntelPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(msg);
-    setTimeout(() => setToast(null), 4000);
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
   };
 
   const onRefresh = async () => {
@@ -680,7 +682,7 @@ export default function CompetitiveIntelPage() {
             No competitive intel yet.
           </p>
           <p className="text-[12px] text-[var(--text-muted)]">
-            Click &quot;Refresh intel&quot; to kick off the first run.
+            Click Refresh intel to kick off the first run.
           </p>
         </div>
       )}
