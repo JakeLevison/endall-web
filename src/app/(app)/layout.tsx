@@ -31,6 +31,7 @@ import {
   Target,
   Globe2,
   PhoneOutgoing,
+  LineChart,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -53,6 +54,7 @@ const primaryNav = [
   { href: "/dashboard/sdr", label: "SDR activity", icon: PhoneOutgoing },
   { href: "/dashboard/competitive-intel", label: "Competitive intel", icon: Target },
   { href: "/dashboard/market-intel", label: "Market intel", icon: Globe2 },
+  { href: "/dashboard/roi", label: "ROI & performance", icon: LineChart },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];
 
