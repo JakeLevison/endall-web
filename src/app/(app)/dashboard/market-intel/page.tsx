@@ -102,10 +102,14 @@ function formatRelative(iso: string | undefined): string {
 }
 
 function isIntelItemArray(v: unknown): v is IntelItem[] {
+  if (!Array.isArray(v)) return false;
+  if (v.length === 0) return true;
+  const first = v[0];
   return (
-    Array.isArray(v) &&
-    (v.length === 0 ||
-      (typeof v[0] === "object" && v[0] !== null && "summary" in v[0]))
+    typeof first === "object" &&
+    first !== null &&
+    typeof (first as IntelItem).title === "string" &&
+    typeof (first as IntelItem).summary === "string"
   );
 }
 
