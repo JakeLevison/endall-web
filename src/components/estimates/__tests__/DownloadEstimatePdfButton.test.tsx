@@ -120,4 +120,57 @@ describe("DownloadEstimatePdfButton", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("revokes the object URL shortly after triggering the download", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(pdfResponse("ok.pdf"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<DownloadEstimatePdfButton estimateId="est-1" />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /download pdf/i }));
+
+    await waitFor(() => {
+      expect(URL.createObjectURL).toHaveBeenCalled();
+    });
+    // The component schedules the revoke for ~1s after the click;
+    // wait until it actually fires rather than racing fake timers
+    // with the userEvent click pipeline.
+    await waitFor(
+      () => {
+        expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+      },
+      { timeout: 2000 },
+    );
+  });
+
+  it("does not throw or warn when unmounted while an error timer is pending", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new Error("network")),
+    );
+    const warn = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { unmount } = render(<DownloadEstimatePdfButton estimateId="est-1" />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /download pdf/i }));
+
+    // Error state is set; the auto-clear timer is armed. Unmounting
+    // before it fires must not log a setState-on-unmounted warning.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /could not download/i }),
+      ).toBeInTheDocument();
+    });
+    unmount();
+
+    // Give the (no-op) auto-clear a moment to flush.
+    await new Promise((r) => setTimeout(r, 10));
+    expect(
+      warn.mock.calls.some((c) =>
+        String(c[0] ?? "").includes("unmounted"),
+      ),
+    ).toBe(false);
+  });
 });

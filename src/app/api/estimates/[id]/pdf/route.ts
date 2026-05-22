@@ -10,12 +10,11 @@ const BRIDGE_URL =
 // GET /api/estimates/[id]/pdf
 //
 // Proxies to bridge GET /estimates/{estimate_id}/pdf. Tenant is resolved
-// from the SSR session and passed as X-Tenant-Id (same pattern as the
-// existing /api/estimates/[id] and /xlsx routes -- bridge embeds tenant
-// in the header, not the path). Response body is streamed through so a
-// PDF binary survives intact, and Content-Type / Content-Disposition
-// are surfaced from the bridge so the browser performs the download
-// correctly.
+// from the SSR session and passed as X-Tenant-Id, same as the existing
+// GET /api/estimates/[id] proxy (bridge embeds tenant in the header,
+// not the path). Response body is streamed through so the PDF binary
+// survives intact, and Content-Type / Content-Disposition are surfaced
+// from the bridge so the browser performs the download correctly.
 export async function GET(
   _req: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -33,8 +32,10 @@ export async function GET(
       cache: "no-store",
     });
     if (!resp.ok) {
-      const text = await resp.text();
-      return new NextResponse(text, {
+      // arrayBuffer preserves any non-2xx body (text JSON or rare binary
+      // error page) without forcing a lossy UTF-8 round-trip.
+      const buf = await resp.arrayBuffer();
+      return new NextResponse(buf, {
         status: resp.status,
         headers: {
           "Content-Type":

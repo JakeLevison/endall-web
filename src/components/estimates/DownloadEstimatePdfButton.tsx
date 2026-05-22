@@ -10,10 +10,11 @@ type Props = {
 };
 
 // Pulls a filename out of a Content-Disposition header. Returns null if the
-// header is missing or unparseable so the caller can fall back.
+// header is missing or unparseable so the caller can fall back. RFC 5987 form
+// (filename*=UTF-8''...) is tried first; the plain form regex is anchored to
+// a ;-or-start boundary so it does not greedily eat the `filename*=` token.
 function parseContentDispositionFilename(header: string | null): string | null {
   if (!header) return null;
-  // RFC 5987 encoded form: filename*=UTF-8''...
   const star = /filename\*\s*=\s*([^']*)'([^']*)'([^;]+)/i.exec(header);
   if (star) {
     try {
@@ -22,7 +23,7 @@ function parseContentDispositionFilename(header: string | null): string | null {
       // fall through to plain
     }
   }
-  const plain = /filename\s*=\s*"?([^"\\;]+)"?/i.exec(header);
+  const plain = /(?:^|;)\s*filename\s*=\s*"?([^"\\;]+)"?/i.exec(header);
   if (plain) return plain[1].trim();
   return null;
 }
@@ -34,10 +35,17 @@ export function DownloadEstimatePdfButton({
   const [state, setState] = useState<"idle" | "downloading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revokeTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
+    const timers = revokeTimers.current;
     return () => {
+      mounted.current = false;
       if (errorTimer.current) clearTimeout(errorTimer.current);
+      for (const t of timers) clearTimeout(t);
+      timers.clear();
     };
   }, []);
 
@@ -46,6 +54,7 @@ export function DownloadEstimatePdfButton({
     setState("error");
     setErrorMsg(msg);
     errorTimer.current = setTimeout(() => {
+      if (!mounted.current) return;
       setState("idle");
       setErrorMsg(null);
     }, 4000);
@@ -82,8 +91,12 @@ export function DownloadEstimatePdfButton({
       link.click();
       document.body.removeChild(link);
       // Give Safari a tick before revoking so the download actually starts.
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setState("idle");
+      const t = setTimeout(() => {
+        URL.revokeObjectURL(url);
+        revokeTimers.current.delete(t);
+      }, 1000);
+      revokeTimers.current.add(t);
+      if (mounted.current) setState("idle");
     } catch {
       flashError("Could not download PDF. Try again.");
     }

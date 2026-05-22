@@ -113,6 +113,35 @@ describe("GET /api/estimates/[id]/pdf", () => {
     expect(res.status).toBe(502);
   });
 
+  it("streams binary bytes through unchanged", async () => {
+    // The proxy's load-bearing job is to not corrupt the PDF binary.
+    // Build a body with bytes that are NOT valid UTF-8 (e.g. 0xFF) and
+    // verify they survive the proxy round trip byte-for-byte.
+    const bytes = new Uint8Array([
+      0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37, // %PDF-1.7
+      0xff, 0xfe, 0xfd, 0x00, 0x01, 0x02,
+    ]);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(
+        new Response(bytes, {
+          status: 200,
+          headers: { "Content-Type": "application/pdf" },
+        }),
+      ),
+    );
+
+    const { GET } = await import("../estimates/[id]/pdf/route");
+    const res = await GET(
+      makeReq("http://app.test/api/estimates/est-1/pdf") as never,
+      { params: Promise.resolve({ id: "est-1" }) },
+    );
+
+    expect(res.status).toBe(200);
+    const out = new Uint8Array(await res.arrayBuffer());
+    expect(Array.from(out)).toEqual(Array.from(bytes));
+  });
+
   it("uri-encodes the estimate id segment", async () => {
     const fetchMock = vi
       .fn()
