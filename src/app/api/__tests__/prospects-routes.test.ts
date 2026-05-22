@@ -143,6 +143,43 @@ describe("POST /api/prospects", () => {
     expect(init.method).toBe("POST");
     expect(init.body).toBe(JSON.stringify(body));
   });
+
+  it("returns 502 when the bridge is unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new Error("ECONNREFUSED")),
+    );
+    const { POST } = await import("../prospects/route");
+    const res = await POST(
+      makeReq("http://app.test/api/prospects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_name: "A", contact_name: "B" }),
+      }) as never,
+    );
+    expect(res.status).toBe(502);
+  });
+
+  it("ignores a client-supplied tenant_id and uses the session tenant", async () => {
+    // Defense-in-depth: even if a caller tries to spoof tenant_id via query
+    // string or body, the proxy must embed only the session-resolved tenant
+    // in the bridge URL.
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { GET } = await import("../prospects/route");
+    await GET(
+      makeReq(
+        "http://app.test/api/prospects?tenant_id=evil-tenant",
+      ) as never,
+    );
+
+    const calledUrl = fetchMock.mock.calls[0][0] as URL;
+    expect(calledUrl.pathname).toBe("/prospects/ten-abc");
+    expect(calledUrl.searchParams.get("tenant_id")).toBeNull();
+  });
 });
 
 describe("POST /api/prospects/import", () => {

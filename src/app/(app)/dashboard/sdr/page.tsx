@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import {
   Plus,
@@ -339,6 +339,12 @@ export default function SdrPage() {
     setToast(msg);
     toastTimer.current = setTimeout(() => setToast(null), 4000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   const sortedRows = useMemo(() => {
     const r = [...rows];
