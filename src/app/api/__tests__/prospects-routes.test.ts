@@ -251,6 +251,22 @@ describe("POST /api/prospects/import", () => {
     const init = fetchMock.mock.calls[0][1] as RequestInit;
     expect(init.body).toBe(JSON.stringify(body));
   });
+
+  it("returns 502 when the bridge is unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new Error("ECONNREFUSED")),
+    );
+    const { POST } = await import("../prospects/import/route");
+    const res = await POST(
+      makeReq("http://app.test/api/prospects/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csv: "a,b\n1,2" }),
+      }) as never,
+    );
+    expect(res.status).toBe(502);
+  });
 });
 
 describe("POST /api/prospects/[id]/enrich", () => {
