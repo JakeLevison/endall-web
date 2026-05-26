@@ -40,10 +40,23 @@ import { posthog } from "@/lib/posthog";
 
 // ── types ────────────────────────────────────────────────────────────
 
+// The bridge may return numeric metrics as a plain number or as an object
+// with a numeric value plus a pre-formatted display string. Be permissive.
+type NumericLike =
+  | number
+  | null
+  | undefined
+  | {
+      value?: number | null;
+      hours?: number | null;
+      amount?: number | null;
+      formatted?: string | null;
+    };
+
 type RoiResponse = {
-  labor_hours_saved?: number | null;
-  cost_saved?: number | null;
-  revenue_influenced?: number | null;
+  labor_hours_saved?: NumericLike;
+  cost_saved?: NumericLike;
+  revenue_influenced?: NumericLike;
   period?: string | null;
   period_start?: string | null;
   period_end?: string | null;
@@ -120,16 +133,31 @@ const fetcher = async <T,>(url: string): Promise<T> => {
   return res.json();
 };
 
-function formatNumber(n: number | null | undefined, fractionDigits = 0): string {
-  if (n == null || Number.isNaN(n)) return "–";
+// Coerce bridge-returned values (number, null, or object envelope) to a number.
+function toNumber(v: NumericLike): number | null {
+  if (v == null) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "object") {
+    const candidate = v.value ?? v.hours ?? v.amount;
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function formatNumber(v: NumericLike, fractionDigits = 0): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   return n.toLocaleString("en-US", {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   });
 }
 
-function formatCurrency(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "–";
+function formatCurrency(v: NumericLike): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   if (Math.abs(n) >= 1_000_000) {
     return `$${(n / 1_000_000).toLocaleString("en-US", {
       maximumFractionDigits: 1,
@@ -144,8 +172,9 @@ function formatCurrency(n: number | null | undefined): string {
 }
 
 // Rates from the bridge are fractions in [0, 1]. Multiply to percent.
-function formatPercent(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "–";
+function formatPercent(v: NumericLike): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   return `${(n * 100).toFixed(0)}%`;
 }
 
