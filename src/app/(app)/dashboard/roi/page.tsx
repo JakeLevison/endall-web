@@ -40,10 +40,27 @@ import { posthog } from "@/lib/posthog";
 
 // ── types ────────────────────────────────────────────────────────────
 
+// The bridge returns labor_hours_saved and fte_cost_saved as object
+// envelopes ({admin_*, estimator_*, total_*}) rather than bare numbers.
+// NumericLike accepts either shape so callers don't have to special-case.
+type NumericLike =
+  | number
+  | null
+  | undefined
+  | {
+      value?: number | null;
+      total?: number | null;
+      total_hours?: number | null;
+      total_cost?: number | null;
+      hours?: number | null;
+      amount?: number | null;
+    };
+
 type RoiResponse = {
-  labor_hours_saved?: number | null;
-  cost_saved?: number | null;
+  labor_hours_saved?: NumericLike;
+  fte_cost_saved?: NumericLike;
   revenue_influenced?: number | null;
+  pipeline_pending?: number | null;
   period?: string | null;
   period_start?: string | null;
   period_end?: string | null;
@@ -120,16 +137,38 @@ const fetcher = async <T,>(url: string): Promise<T> => {
   return res.json();
 };
 
-function formatNumber(n: number | null | undefined, fractionDigits = 0): string {
-  if (n == null || Number.isNaN(n)) return "–";
+// Coerce bridge-returned values (number, null, or object envelope) to a number.
+// Object envelopes are searched for a total/value field in priority order.
+function toNumber(v: NumericLike): number | null {
+  if (v == null) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "object") {
+    const candidate =
+      v.value ??
+      v.total ??
+      v.total_hours ??
+      v.total_cost ??
+      v.hours ??
+      v.amount;
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function formatNumber(v: NumericLike, fractionDigits = 0): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   return n.toLocaleString("en-US", {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   });
 }
 
-function formatCurrency(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "–";
+function formatCurrency(v: NumericLike): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   if (Math.abs(n) >= 1_000_000) {
     return `$${(n / 1_000_000).toLocaleString("en-US", {
       maximumFractionDigits: 1,
@@ -144,8 +183,9 @@ function formatCurrency(n: number | null | undefined): string {
 }
 
 // Rates from the bridge are fractions in [0, 1]. Multiply to percent.
-function formatPercent(n: number | null | undefined): string {
-  if (n == null || Number.isNaN(n)) return "–";
+function formatPercent(v: NumericLike): string {
+  const n = toNumber(v);
+  if (n == null) return "–";
   return `${(n * 100).toFixed(0)}%`;
 }
 
@@ -565,7 +605,7 @@ export default function RoiPage() {
           />
           <HeroCard
             label="Equivalent cost saved"
-            value={formatCurrency(roi?.cost_saved)}
+            value={formatCurrency(roi?.fte_cost_saved)}
             subtitle={heroSubtitle}
             icon={DollarSign}
             loading={roiLoading}
