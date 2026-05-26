@@ -40,15 +40,22 @@ type ResolverPayload =
 const POLL_INTERVAL_MS = 15_000;
 const POLL_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
-function formatWhen(iso: string | null | undefined): string {
+const DEFAULT_BOOKING_TIMEZONE = "America/New_York";
+
+function formatWhen(
+  iso: string | null | undefined,
+  timeZone: string = DEFAULT_BOOKING_TIMEZONE,
+): string {
   if (!iso) return "the requested time";
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return new Date(iso).toLocaleString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
+      timeZone,
+      timeZoneName: "short",
     });
   } catch {
     return iso;
@@ -231,7 +238,7 @@ export function BookingApprovalView({ token, initial }: Props) {
             <div className="flex justify-between gap-4">
               <dt className="text-gray-500">Was scheduled for</dt>
               <dd className="font-medium text-gray-900">
-                {formatWhen(scheduledAt)}
+                {formatWhen(scheduledAt, initial.tenant_timezone)}
               </dd>
             </div>
             {initial.job_address ? (
@@ -278,7 +285,7 @@ export function BookingApprovalView({ token, initial }: Props) {
           <div className="flex justify-between gap-4">
             <dt className="text-gray-500">When</dt>
             <dd className="font-medium text-gray-900">
-              {formatWhen(scheduledAt)}
+              {formatWhen(scheduledAt, initial.tenant_timezone)}
             </dd>
           </div>
           <div className="flex justify-between gap-4">
@@ -303,11 +310,11 @@ export function BookingApprovalView({ token, initial }: Props) {
 
         {status === "confirmed" ? (
           <p className="mt-6 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800">
-            Confirmed. We&apos;ll see you on {formatWhen(scheduledAt)}.
+            Confirmed. We&apos;ll see you on {formatWhen(scheduledAt, initial.tenant_timezone)}.
           </p>
         ) : status === "rescheduled" ? (
           <p className="mt-6 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800">
-            Updated. Your appointment is now {formatWhen(scheduledAt)}.
+            Updated. Your appointment is now {formatWhen(scheduledAt, initial.tenant_timezone)}.
           </p>
         ) : mode === "summary" ? (
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">

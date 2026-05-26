@@ -49,15 +49,22 @@ export async function generateMetadata({
   return { title, ...BOOKING_ROBOTS };
 }
 
-function formatWhen(iso: string | null | undefined): string {
+const DEFAULT_BOOKING_TIMEZONE = "America/New_York";
+
+function formatWhen(
+  iso: string | null | undefined,
+  timeZone: string = DEFAULT_BOOKING_TIMEZONE,
+): string {
   if (!iso) return "the requested time";
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return new Date(iso).toLocaleString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
+      timeZone,
+      timeZoneName: "short",
     });
   } catch {
     return iso;
@@ -96,12 +103,23 @@ export default async function BookingPage({
   const tenantSlug = hdrs.get("x-tenant-slug") || meta.tenant_slug || "";
   const tenantName = meta.tenant_name || tenantLabelFromSlug(tenantSlug);
   const tenantPhone = meta.tenant_phone || "";
+  const tenantTimezone = meta.tenant_timezone || DEFAULT_BOOKING_TIMEZONE;
   const cancelled = isCancelled(meta.status);
 
   return cancelled ? (
-    <CancelledView meta={meta} tenantName={tenantName} tenantPhone={tenantPhone} />
+    <CancelledView
+      meta={meta}
+      tenantName={tenantName}
+      tenantPhone={tenantPhone}
+      tenantTimezone={tenantTimezone}
+    />
   ) : (
-    <ConfirmedView meta={meta} tenantName={tenantName} tenantPhone={tenantPhone} />
+    <ConfirmedView
+      meta={meta}
+      tenantName={tenantName}
+      tenantPhone={tenantPhone}
+      tenantTimezone={tenantTimezone}
+    />
   );
 }
 
@@ -109,10 +127,12 @@ function ConfirmedView({
   meta,
   tenantName,
   tenantPhone,
+  tenantTimezone,
 }: {
   meta: PublicBookingMeta;
   tenantName: string;
   tenantPhone: string;
+  tenantTimezone: string;
 }) {
   const rescheduleHref = tenantPhone ? `tel:${tenantPhone.replace(/\s+/g, "")}` : null;
   return (
@@ -145,7 +165,7 @@ function ConfirmedView({
           <div className="flex justify-between gap-4">
             <dt className="text-neutral-500">When</dt>
             <dd className="font-medium text-neutral-900 dark:text-neutral-100">
-              {formatWhen(meta.scheduled_at)}
+              {formatWhen(meta.scheduled_at, tenantTimezone)}
             </dd>
           </div>
           <div className="flex justify-between gap-4">
@@ -188,10 +208,12 @@ function CancelledView({
   meta,
   tenantName,
   tenantPhone,
+  tenantTimezone,
 }: {
   meta: PublicBookingMeta;
   tenantName: string;
   tenantPhone: string;
+  tenantTimezone: string;
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -215,7 +237,7 @@ function CancelledView({
           <div className="flex justify-between gap-4">
             <dt className="text-neutral-500">Was scheduled for</dt>
             <dd className="font-medium text-neutral-900 dark:text-neutral-100">
-              {formatWhen(meta.scheduled_at)}
+              {formatWhen(meta.scheduled_at, tenantTimezone)}
             </dd>
           </div>
           {meta.job_address ? (
