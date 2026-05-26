@@ -40,23 +40,27 @@ import { posthog } from "@/lib/posthog";
 
 // ── types ────────────────────────────────────────────────────────────
 
-// The bridge may return numeric metrics as a plain number or as an object
-// with a numeric value plus a pre-formatted display string. Be permissive.
+// The bridge returns labor_hours_saved and fte_cost_saved as object
+// envelopes ({admin_*, estimator_*, total_*}) rather than bare numbers.
+// NumericLike accepts either shape so callers don't have to special-case.
 type NumericLike =
   | number
   | null
   | undefined
   | {
       value?: number | null;
+      total?: number | null;
+      total_hours?: number | null;
+      total_cost?: number | null;
       hours?: number | null;
       amount?: number | null;
-      formatted?: string | null;
     };
 
 type RoiResponse = {
   labor_hours_saved?: NumericLike;
-  cost_saved?: NumericLike;
-  revenue_influenced?: NumericLike;
+  fte_cost_saved?: NumericLike;
+  revenue_influenced?: number | null;
+  pipeline_pending?: number | null;
   period?: string | null;
   period_start?: string | null;
   period_end?: string | null;
@@ -134,11 +138,18 @@ const fetcher = async <T,>(url: string): Promise<T> => {
 };
 
 // Coerce bridge-returned values (number, null, or object envelope) to a number.
+// Object envelopes are searched for a total/value field in priority order.
 function toNumber(v: NumericLike): number | null {
   if (v == null) return null;
   if (typeof v === "number") return Number.isFinite(v) ? v : null;
   if (typeof v === "object") {
-    const candidate = v.value ?? v.hours ?? v.amount;
+    const candidate =
+      v.value ??
+      v.total ??
+      v.total_hours ??
+      v.total_cost ??
+      v.hours ??
+      v.amount;
     if (typeof candidate === "number" && Number.isFinite(candidate)) {
       return candidate;
     }
@@ -594,7 +605,7 @@ export default function RoiPage() {
           />
           <HeroCard
             label="Equivalent cost saved"
-            value={formatCurrency(roi?.cost_saved)}
+            value={formatCurrency(roi?.fte_cost_saved)}
             subtitle={heroSubtitle}
             icon={DollarSign}
             loading={roiLoading}
