@@ -50,6 +50,11 @@ export type PublicBookingMeta = {
   tenant_slug?: string;
   tenant_name?: string;
   tenant_phone?: string;
+  // IANA zone name (e.g. "America/New_York"). Supplied by the bridge from
+  // tenants.timezone so customer pages can render scheduled_at in the
+  // contractor's local zone. May be absent on older bridge deploys; the
+  // FE defaults to America/New_York when missing.
+  tenant_timezone?: string;
   caller_name?: string;
   job_type?: string;
   job_address?: string;
