@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
+
 type Stage = {
   number: string;
   title: string;
@@ -142,64 +145,130 @@ export default function HowItWorksLifecycle() {
 }
 
 function StageCard({ stage }: { stage: Stage }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const contentRef = useRef<HTMLUListElement>(null);
+  const panelId = `hiw-panel-${stage.number}`;
+
+  // Measure the bullets so the open height fits exactly (no clipping on
+  // narrow screens, no blank space) and stays correct as text re-wraps.
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const update = () => setContentHeight(el.scrollHeight);
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
       className="hiw-stage-card"
       style={{
         border: "1px solid var(--overlay-medium)",
+        borderColor: isOpen ? "var(--brand-accent-light)" : "var(--overlay-medium)",
         borderRadius: "12px",
-        background: "var(--overlay-soft)",
-        padding: "24px",
-        display: "grid",
-        gridTemplateColumns: "88px 1fr",
-        gap: "20px",
-        alignItems: "start",
+        background: isOpen ? "var(--overlay-weak)" : "var(--overlay-soft)",
+        overflow: "hidden",
+        transition: "background 200ms ease, border-color 200ms ease, box-shadow 240ms ease",
+        boxShadow: isOpen ? "var(--shadow-card)" : "none",
       }}
     >
-      {/* Stage number */}
-      <div
+      {/* Header: clickable toggle (number + title + tagline + chevron) */}
+      <button
+        type="button"
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className="hiw-stage-header"
         style={{
-          fontFamily: "var(--font-sans), sans-serif",
-          fontSize: "56px",
-          fontWeight: 400,
-          lineHeight: 1,
-          color: "#f97316",
-          textAlign: "center",
-          letterSpacing: "-0.02em",
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "72px 1fr auto",
+          gap: "16px",
+          alignItems: "center",
+          padding: "20px 24px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+          color: "inherit",
+          fontFamily: "inherit",
         }}
       >
-        {stage.number}
-      </div>
+        {/* Stage number */}
+        <span
+          className="hiw-stage-number"
+          style={{
+            fontFamily: "var(--font-sans), sans-serif",
+            fontSize: "48px",
+            fontWeight: 400,
+            lineHeight: 1,
+            color: "#f97316",
+            textAlign: "center",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {stage.number}
+        </span>
 
-      {/* Content */}
-      <div>
-        <h3
+        {/* Title + tagline */}
+        <span style={{ display: "block", minWidth: 0 }}>
+          <span
+            style={{
+              display: "block",
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "20px",
+              fontWeight: 600,
+              letterSpacing: "-0.01em",
+              color: "var(--text-primary)",
+              marginBottom: "4px",
+            }}
+          >
+            {stage.title}
+          </span>
+          <span
+            style={{
+              display: "block",
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "15px",
+              color: "var(--text-tertiary)",
+              lineHeight: 1.55,
+            }}
+          >
+            {stage.tagline}
+          </span>
+        </span>
+
+        <ChevronDown
+          size={20}
           style={{
-            fontFamily: "var(--font-sans), sans-serif",
-            fontSize: "20px",
-            fontWeight: 600,
-            letterSpacing: "-0.01em",
-            color: "var(--text-primary)",
-            marginBottom: "4px",
+            color: "var(--text-muted)",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+            flexShrink: 0,
           }}
-        >
-          {stage.title}
-        </h3>
-        <p
-          style={{
-            fontFamily: "var(--font-sans), sans-serif",
-            fontSize: "15px",
-            color: "var(--text-tertiary)",
-            lineHeight: 1.55,
-            marginBottom: "14px",
-          }}
-        >
-          {stage.tagline}
-        </p>
+        />
+      </button>
+
+      {/* Collapsible bullets. max-height transition avoids the grid
+          sub-pixel rendering bug noted in CapabilityAccordion. */}
+      <div
+        id={panelId}
+        style={{
+          maxHeight: isOpen ? `${contentHeight}px` : "0",
+          overflow: "hidden",
+          transition: "max-height 320ms cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
         <ul
+          ref={contentRef}
+          className="hiw-stage-bullets"
           style={{
             listStyle: "none",
-            padding: 0,
+            padding: "4px 24px 22px 112px",
             margin: 0,
             display: "flex",
             flexDirection: "column",
@@ -238,13 +307,17 @@ function StageCard({ stage }: { stage: Stage }) {
 
       <style jsx>{`
         @media (max-width: 560px) {
-          .hiw-stage-card {
-            grid-template-columns: 1fr !important;
-            gap: 8px !important;
+          .hiw-stage-header {
+            grid-template-columns: 48px 1fr auto !important;
+            gap: 12px !important;
+            padding: 16px 18px !important;
           }
-          .hiw-stage-card > div:first-child {
-            text-align: left !important;
-            font-size: 40px !important;
+          .hiw-stage-number {
+            font-size: 34px !important;
+          }
+          .hiw-stage-bullets {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
           }
         }
       `}</style>

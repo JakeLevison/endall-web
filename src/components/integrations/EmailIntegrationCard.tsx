@@ -171,12 +171,12 @@ export function EmailIntegrationCard() {
   return (
     <section
       data-testid="email-integration-card"
-      className="rounded-lg border border-white/10 bg-white/5 p-6"
+      className="rounded-lg border border-[var(--border)] bg-[var(--overlay-soft)] p-6"
     >
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-medium text-white">Email integration</h2>
-          <p className="mt-1 text-sm text-white/60">
+          <h2 className="text-base font-medium text-[var(--text-primary)]">Email integration</h2>
+          <p className="mt-1 text-sm text-[var(--text-tertiary)]">
             Endall sends estimate approval requests from your inbox. Customers
             see your name and reply to you, not to Endall.
           </p>
@@ -184,7 +184,7 @@ export function EmailIntegrationCard() {
         {status && status.connected ? (
           <span
             data-testid="gmail-status-pill"
-            className="rounded-md border border-white/15 px-2 py-1 text-xs uppercase tracking-wide text-white/70"
+            className="rounded-md border border-[var(--border)] px-2 py-1 text-xs uppercase tracking-wide text-[var(--text-tertiary)]"
           >
             {reauthRequired ? "Reauth required" : "Connected"}
           </span>
@@ -192,7 +192,7 @@ export function EmailIntegrationCard() {
       </header>
 
       <div className="mt-5 flex items-center justify-between gap-4">
-        <div className="text-sm text-white/80" data-testid="gmail-status-line">
+        <div className="text-sm text-[var(--text-secondary)]" data-testid="gmail-status-line">
           {loading && "Checking connection…"}
           {!loading && loadError && `Error: ${loadError}`}
           {!loading && !loadError && status && !status.connected && "Not connected"}
@@ -206,7 +206,7 @@ export function EmailIntegrationCard() {
               </span>
             )}
           {!loading && !loadError && reauthRequired && (
-            <span className="text-amber-300">
+            <span className="text-[var(--brand-accent)]">
               Your Gmail authorization expired. Reconnect to continue sending
               estimates.
             </span>
@@ -219,7 +219,7 @@ export function EmailIntegrationCard() {
               type="button"
               data-testid="gmail-connect"
               onClick={handleConnect}
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-black hover:bg-white/90"
+              className="rounded-md bg-[var(--surface-inverse)] px-4 py-2 text-sm font-medium text-[var(--text-inverse)] hover:opacity-90"
             >
               Connect Gmail
             </button>
@@ -242,7 +242,7 @@ export function EmailIntegrationCard() {
               data-testid="gmail-disconnect"
               onClick={handleDisconnect}
               disabled={busy}
-              className="rounded-md border border-white/20 px-4 py-2 text-sm font-medium text-white hover:bg-white/5 disabled:opacity-50"
+              className="rounded-md border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--overlay-weak)] disabled:opacity-50"
             >
               {busy ? "…" : "Disconnect"}
             </button>
@@ -258,16 +258,16 @@ export function OutlookComingSoonCard() {
     <section
       data-testid="outlook-coming-soon"
       aria-disabled="true"
-      className="rounded-lg border border-white/10 bg-white/5 p-6 opacity-60"
+      className="rounded-lg border border-[var(--border)] bg-[var(--overlay-soft)] p-6 opacity-60"
     >
       <header className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-medium text-white">Outlook</h2>
-          <p className="mt-1 text-sm text-white/60">
+          <h2 className="text-base font-medium text-[var(--text-primary)]">Outlook</h2>
+          <p className="mt-1 text-sm text-[var(--text-tertiary)]">
             Microsoft 365 / Outlook send-from-your-inbox is coming soon.
           </p>
         </div>
-        <span className="rounded-md border border-white/15 px-2 py-1 text-xs uppercase tracking-wide text-white/70">
+        <span className="rounded-md border border-[var(--border)] px-2 py-1 text-xs uppercase tracking-wide text-[var(--text-tertiary)]">
           Coming soon
         </span>
       </header>

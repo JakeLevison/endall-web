@@ -256,10 +256,10 @@ export default function CompanyDetailPage({
         </DropdownMenu>
       </div>
 
-      {/* 3-column layout */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* 3-column layout (stacks vertically on mobile, side-by-side at lg+) */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden min-h-0">
         {/* Left column — Company info */}
-        <div className="w-80 shrink-0 border-r border-[var(--border)] overflow-y-auto p-5">
+        <div className="w-full lg:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-[var(--border)] lg:overflow-y-auto p-5">
           <div className="flex items-center gap-3 mb-5">
             <Avatar className="size-10">
               <AvatarFallback className="bg-[var(--overlay-medium)] text-[13px] text-[var(--text-tertiary)]">
@@ -299,7 +299,7 @@ export default function CompanyDetailPage({
         </div>
 
         {/* Center column — Activity timeline */}
-        <div className="flex-1 overflow-y-auto p-5 min-w-0">
+        <div className="flex-1 lg:overflow-y-auto p-5 min-w-0">
           <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-4">Activity</h3>
           {activities.length === 0 ? (
             <p className="text-[13px] text-[var(--text-muted)]">No activities yet.</p>
@@ -326,8 +326,8 @@ export default function CompanyDetailPage({
           )}
         </div>
 
-        {/* Right column — Associated records */}
-        <div className="w-72 shrink-0 border-l border-[var(--border)] overflow-y-auto p-5 hidden lg:block">
+        {/* Right column (Associated records) - stacks below Activity on mobile, side column at lg+ */}
+        <div className="w-full lg:w-72 shrink-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] lg:overflow-y-auto p-5">
           <div className="mb-6">
             <h3 className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] mb-3">Contacts</h3>
             {contacts.length === 0 ? (

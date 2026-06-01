@@ -20,7 +20,7 @@ export default function TasksMock() {
   ];
 
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", gap: 8 }}>
         {columns.map((col) => (
           <div key={col.title} style={{ flex: 1, minWidth: 0 }}>
@@ -33,7 +33,7 @@ export default function TasksMock() {
                   key={card.text}
                   style={{
                     background: "var(--bg)",
-                    border: "1px solid #222",
+                    border: "1px solid var(--border)",
                     borderRadius: 6,
                     padding: "6px 8px",
                     display: "flex",

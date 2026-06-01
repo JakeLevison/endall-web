@@ -193,8 +193,11 @@
   --border: #222222;
   --border-hover: #333333;
   --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --text-tertiary: #888888;
+  /* Body + secondary bumped to the dark-mode contrast minimums in
+     docs/ENDALL_OPERATING_STANDARDS.md (#E5E7EB body, #9CA3AF secondary),
+     kept pure-neutral to preserve the monochrome palette. */
+  --text-secondary: #e5e5e5;
+  --text-tertiary: #a3a3a3;
   --text-muted: #666666;
   --text-faint: #444444;
   --text-inverse: #0a0a0a;
@@ -272,6 +275,20 @@
   html {
     @apply font-sans;
     overflow-x: hidden;
+  }
+}
+
+/* Respect prefers-reduced-motion (ENDALL_OPERATING_STANDARDS.md): collapse
+   transitions/animations to near-instant for users who opt out of motion.
+   Covers the lifecycle accordion, capability accordion, ticker, and shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
