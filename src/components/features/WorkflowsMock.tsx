@@ -8,7 +8,7 @@ export default function WorkflowsMock() {
   ];
 
   return (
-    <div style={{ background: "var(--bg)", border: "1px solid #1a1a1a", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
+    <div style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, padding: 16, fontFamily: "var(--font-sans), sans-serif" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
         {nodes.map((node, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, flex: 1 }}>
@@ -16,7 +16,7 @@ export default function WorkflowsMock() {
             <div
               style={{
                 background: "var(--bg)",
-                border: "1px solid #333",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
                 padding: "8px 10px",
                 display: "flex",
@@ -41,7 +41,7 @@ export default function WorkflowsMock() {
                     height: 0,
                     borderTop: "3px solid transparent",
                     borderBottom: "3px solid transparent",
-                    borderLeft: "4px solid #555",
+                    borderLeft: "4px solid var(--text-muted)",
                   }}
                 />
               </div>

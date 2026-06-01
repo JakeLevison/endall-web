@@ -33,7 +33,7 @@ export default function SequencesMock() {
                 height: 8,
                 borderRadius: "50%",
                 background: step.dotColor,
-                border: "2px solid #111",
+                border: "2px solid var(--bg)",
                 zIndex: 1,
               }}
             />

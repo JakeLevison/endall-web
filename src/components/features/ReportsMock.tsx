@@ -39,7 +39,7 @@ export default function ReportsMock() {
                 width: "100%",
                 maxWidth: 24,
                 height: `${(bar.height / 100) * 80}px`,
-                background: "linear-gradient(to top, #333, #555)",
+                background: "linear-gradient(to top, var(--text-muted), var(--text-tertiary))",
                 borderRadius: 3,
               }}
             />
