@@ -11,7 +11,7 @@ import type {
   AgentPerformance,
   AgentStatusResponse,
 } from "@/lib/ops-api";
-import { AGENTS } from "@/lib/ops-api";
+import { AGENTS, normalizeAgentId } from "@/lib/ops-api";
 import type { ElementType } from "react";
 
 // ── Agent icon map ──────────────────────────────────────────────────
@@ -83,8 +83,10 @@ interface AgentCardProps {
   logs: AgentLog[];
 }
 
-function AgentCard({ name, color, perf, status, logs }: AgentCardProps) {
-  const Icon = ICON_MAP[logs[0]?.agent_id ?? ""] ?? Phone;
+function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps) {
+  // Derive the icon from the card's own agent, not the log's raw id —
+  // logs carry dash-form ids (fr-001) that aren't in ICON_MAP.
+  const Icon = ICON_MAP[agentId] ?? Phone;
   const derived = deriveStatus(status, logs);
 
   const leads = (perf?.qualified_count ?? 0) + (perf?.warm_count ?? 0);
@@ -93,6 +95,7 @@ function AgentCard({ name, color, perf, status, logs }: AgentCardProps) {
 
   return (
     <div
+      data-testid={`agent-card-${agentId}`}
       style={{
         background: "var(--overlay-weak)",
         border: `1px solid ${color}22`,
@@ -285,7 +288,7 @@ export default function AgentCardsGrid({
     >
       {AGENTS.map((agent) => {
         const agentLogs = logs
-          .filter((l) => l.agent_id === agent.id)
+          .filter((l) => normalizeAgentId(l.agent_id) === agent.id)
           .sort(
             (a, b) =>
               new Date(b.created_at).getTime() -

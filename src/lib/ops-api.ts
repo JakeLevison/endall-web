@@ -22,6 +22,23 @@ export const AGENTS = [
 
 export type AgentId = (typeof AGENTS)[number]["id"];
 
+// The bridge's /api/agent-logs returns agent_id in dash form (fr-001),
+// but AGENTS / agent-status / agent-performance use the underscore
+// canonical id (front_desk). Map dash → canonical so per-agent log
+// filtering matches. Identity for ids already in canonical form.
+const AGENT_ID_ALIASES: Record<string, AgentId> = {
+  "fr-001": "front_desk",
+  "sdr-001": "sdr",
+  "research-001": "research",
+  "email-001": "email",
+};
+
+export function normalizeAgentId(agentId: string | null | undefined): string {
+  if (!agentId) return "";
+  const id = agentId.trim();
+  return AGENT_ID_ALIASES[id] ?? AGENT_ID_ALIASES[id.toLowerCase()] ?? id;
+}
+
 // ── Types ───────────────────────────────────────────────────────────
 
 export interface AgentLog {
