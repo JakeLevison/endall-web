@@ -5,22 +5,34 @@ import {
   Users,
   Search,
   Mail,
+  FileText,
+  Swords,
+  Globe,
 } from "lucide-react";
 import type {
   AgentLog,
   AgentPerformance,
   AgentStatusResponse,
 } from "@/lib/ops-api";
-import { AGENTS, normalizeAgentId } from "@/lib/ops-api";
-import type { ElementType } from "react";
+import { normalizeAgentId } from "@/lib/ops-api";
+import type { ElementType, ReactNode } from "react";
+import {
+  COMMAND_CENTER_AGENTS,
+  type AgentDescriptor,
+  type MetricCardData,
+  type FreshnessCardData,
+} from "./roster";
 
-// ── Agent icon map ──────────────────────────────────────────────────
+// ── Agent icon map (keyed by descriptor id) ─────────────────────────
 
 const ICON_MAP: Record<string, ElementType> = {
   front_desk: Phone,
   sdr: Users,
   research: Search,
   email: Mail,
+  estimator: FileText,
+  competitive_intel: Swords,
+  market_intel: Globe,
 };
 
 // ── Status derivation ───────────────────────────────────────────────
@@ -99,6 +111,17 @@ function fmtTime(iso: string): string {
   }
 }
 
+function relTime(iso: string, now: number = Date.now()): string {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  const mins = Math.floor((now - t) / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 // ── Outcome-language action description ─────────────────────────────
 
 function describeAction(log: AgentLog): string {
@@ -120,7 +143,157 @@ function describeAction(log: AgentLog): string {
   return parts.join(" — ") || "action logged";
 }
 
-// ── Agent Card ──────────────────────────────────────────────────────
+// ── Shared card primitives ──────────────────────────────────────────
+
+function CardShell({
+  testId,
+  stripeColor,
+  children,
+}: {
+  testId: string;
+  stripeColor: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      data-testid={testId}
+      style={{
+        background: "var(--overlay-weak)",
+        border: "1px solid var(--overlay-soft)",
+        borderRadius: 12,
+        padding: 0,
+        overflow: "hidden",
+        transition: "box-shadow 0.2s, transform 0.2s",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.18)";
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      {/* Top stripe — status color (health cards) or agent identity color
+          (metrics/freshness cards), so the grid is glanceable. */}
+      <div style={{ height: 3, background: stripeColor }} />
+      {children}
+    </div>
+  );
+}
+
+function CardHeader({
+  Icon,
+  color,
+  name,
+  badgeLabel,
+  badgeColor,
+}: {
+  Icon: ElementType;
+  color: string;
+  name: string;
+  badgeLabel: string;
+  badgeColor: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "14px 16px 0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: `${color}18`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon size={16} style={{ color }} />
+        </div>
+        <span
+          style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}
+        >
+          {name}
+        </span>
+      </div>
+      <span
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: badgeColor,
+          background: `${badgeColor}15`,
+          padding: "3px 8px",
+          borderRadius: 6,
+        }}
+      >
+        {badgeLabel}
+      </span>
+    </div>
+  );
+}
+
+function StatGrid({
+  stats,
+}: {
+  stats: { label: string; value: string | number }[];
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+        gap: 0,
+        padding: "14px 16px",
+      }}
+    >
+      {stats.map((s) => (
+        <div key={s.label} style={{ textAlign: "center" }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              lineHeight: 1,
+            }}
+          >
+            {s.value}
+          </div>
+          <div
+            style={{
+              fontSize: 10,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--text-muted)",
+              marginTop: 4,
+            }}
+          >
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div
+      style={{ height: 1, background: "var(--overlay-soft)", margin: "0 16px" }}
+    />
+  );
+}
+
+// ── Health card (live status-driven) ────────────────────────────────
 
 interface AgentCardProps {
   agentId: string;
@@ -142,135 +315,26 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
   const actions = perf?.total_actions ?? 0;
 
   return (
-    <div
-      data-testid={`agent-card-${agentId}`}
-      style={{
-        background: "var(--overlay-weak)",
-        border: `1px solid ${color}22`,
-        borderRadius: 12,
-        padding: 0,
-        overflow: "hidden",
-        transition: "box-shadow 0.2s, transform 0.2s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = `0 4px 20px ${color}15`;
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
-      {/* Top accent stripe — status color so health is glanceable across
-          the grid; agent identity stays in the icon color + name. */}
-      <div style={{ height: 3, background: derived.color }} />
+    <CardShell testId={`agent-card-${agentId}`} stripeColor={derived.color}>
+      <CardHeader
+        Icon={Icon}
+        color={color}
+        name={name}
+        badgeLabel={derived.label}
+        badgeColor={derived.color}
+      />
 
-      {/* Header */}
-      <div
-        style={{
-          padding: "14px 16px 0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: `${color}18`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon size={16} style={{ color }} />
-          </div>
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 600,
-              color: "var(--text-primary)",
-            }}
-          >
-            {name}
-          </span>
-        </div>
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: derived.color,
-            background: `${derived.color}15`,
-            padding: "3px 8px",
-            borderRadius: 6,
-          }}
-        >
-          {derived.label}
-        </span>
-      </div>
-
-      {/* Stats row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 0,
-          padding: "14px 16px",
-        }}
-      >
-        {[
+      <StatGrid
+        stats={[
           { label: "Leads", value: leads },
           { label: "Closed", value: pipeline },
           { label: "Actions", value: actions },
-        ].map((s) => (
-          <div key={s.label} style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                lineHeight: 1,
-              }}
-            >
-              {s.value}
-            </div>
-            <div
-              style={{
-                fontSize: 10,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                color: "var(--text-muted)",
-                marginTop: 4,
-              }}
-            >
-              {s.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Divider */}
-      <div
-        style={{
-          height: 1,
-          background: "var(--overlay-soft)",
-          margin: "0 16px",
-        }}
+        ]}
       />
 
-      {/* Activity log */}
-      <div
-        style={{
-          padding: "12px 16px 14px",
-          maxHeight: 160,
-          overflowY: "auto",
-        }}
-      >
+      <Divider />
+
+      <div style={{ padding: "12px 16px 14px", maxHeight: 160, overflowY: "auto" }}>
         {logs.length === 0 ? (
           <p
             style={{
@@ -310,7 +374,113 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
           </div>
         )}
       </div>
-    </div>
+    </CardShell>
+  );
+}
+
+// ── Metrics-only card (output metrics, NO live health signal) ────────
+
+function MetricsCard({
+  descriptor,
+  data,
+}: {
+  descriptor: AgentDescriptor;
+  data: MetricCardData | null;
+}) {
+  const Icon = ICON_MAP[descriptor.id] ?? FileText;
+  const hasData = !!data && data.kpis.length > 0;
+  return (
+    <CardShell
+      testId={`agent-card-${descriptor.id}`}
+      stripeColor={descriptor.color}
+    >
+      {/* Neutral "METRICS" badge — never a green health badge, because this
+          agent exposes no live status signal. */}
+      <CardHeader
+        Icon={Icon}
+        color={descriptor.color}
+        name={descriptor.label}
+        badgeLabel="METRICS"
+        badgeColor="#6b7280"
+      />
+      {hasData ? (
+        <StatGrid stats={data!.kpis} />
+      ) : (
+        <div style={{ padding: "14px 16px" }}>
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              fontStyle: "italic",
+            }}
+          >
+            No data yet.
+          </p>
+        </div>
+      )}
+      <Divider />
+      <div style={{ padding: "10px 16px 14px" }}>
+        <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+          Output metrics only — no live health signal.
+        </p>
+      </div>
+    </CardShell>
+  );
+}
+
+// ── Freshness card (no status; timestamped output rows) ──────────────
+
+function FreshnessCard({
+  descriptor,
+  data,
+}: {
+  descriptor: AgentDescriptor;
+  data: FreshnessCardData | null;
+}) {
+  const Icon = ICON_MAP[descriptor.id] ?? Globe;
+  const synced = !!data && !!data.lastUpdated;
+  return (
+    <CardShell
+      testId={`agent-card-${descriptor.id}`}
+      stripeColor={descriptor.color}
+    >
+      <CardHeader
+        Icon={Icon}
+        color={descriptor.color}
+        name={descriptor.label}
+        badgeLabel={synced ? "SYNCED" : "NO DATA"}
+        badgeColor={synced ? "#22c55e" : "#6b7280"}
+      />
+      <div style={{ padding: "14px 16px 16px" }}>
+        {synced ? (
+          <>
+            <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+              Last synced {relTime(data!.lastUpdated!)}
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                marginTop: 6,
+              }}
+            >
+              {data!.count} {data!.countLabel}
+            </div>
+          </>
+        ) : (
+          <p
+            style={{
+              fontSize: 12,
+              color: "var(--text-muted)",
+              fontStyle: "italic",
+            }}
+          >
+            No synced rows yet.
+          </p>
+        )}
+      </div>
+    </CardShell>
   );
 }
 
@@ -320,12 +490,16 @@ interface Props {
   logs: AgentLog[];
   performance: Record<string, AgentPerformance | null>;
   statuses: Record<string, AgentStatusResponse | null>;
+  metrics?: Record<string, MetricCardData | null>;
+  freshness?: Record<string, FreshnessCardData | null>;
 }
 
 export default function AgentCardsGrid({
   logs,
   performance,
   statuses,
+  metrics = {},
+  freshness = {},
 }: Props) {
   return (
     <div
@@ -335,7 +509,25 @@ export default function AgentCardsGrid({
         gap: 12,
       }}
     >
-      {AGENTS.map((agent) => {
+      {COMMAND_CENTER_AGENTS.map((agent) => {
+        if (agent.tier === "metrics") {
+          return (
+            <MetricsCard
+              key={agent.id}
+              descriptor={agent}
+              data={metrics[agent.id] ?? null}
+            />
+          );
+        }
+        if (agent.tier === "freshness") {
+          return (
+            <FreshnessCard
+              key={agent.id}
+              descriptor={agent}
+              data={freshness[agent.id] ?? null}
+            />
+          );
+        }
         const agentLogs = logs
           .filter((l) => normalizeAgentId(l.agent_id) === agent.id)
           .sort(
@@ -347,7 +539,7 @@ export default function AgentCardsGrid({
           <AgentCard
             key={agent.id}
             agentId={agent.id}
-            name={agent.name}
+            name={agent.label}
             color={agent.color}
             perf={performance[agent.id] ?? null}
             status={statuses[agent.id] ?? null}
