@@ -25,16 +25,64 @@ const ICON_MAP: Record<string, ElementType> = {
 
 // ── Status derivation ───────────────────────────────────────────────
 
-function deriveStatus(
+// All hex (no CSS vars) so callers can append an alpha suffix — e.g.
+// `${color}15` — for badge/stripe backgrounds without producing invalid
+// CSS like "var(--text-muted)15".
+const STATUS_COLORS = {
+  ACTIVE: "#22c55e", // green — healthy, recent activity
+  PROCESSING: "#eab308", // yellow — healthy, work in flight
+  STALE: "#f59e0b", // amber — healthy but nothing recent
+  ERROR: "#ef4444", // red — bridge reported a non-healthy state
+  IDLE: "#6b7280", // gray — healthy, never any activity
+  OFFLINE: "#6b7280", // gray — no health signal at all
+} as const;
+
+export type AgentStatusLabel = keyof typeof STATUS_COLORS;
+
+// Activity within this window counts as ACTIVE; older counts as STALE.
+const ACTIVE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+// Bridge status strings we treat as healthy. Anything else that is present
+// is surfaced as ERROR rather than silently shown green.
+const HEALTHY_STATES = new Set([
+  "healthy",
+  "ok",
+  "active",
+  "idle",
+  "ready",
+  "running",
+]);
+
+export function deriveStatus(
   status: AgentStatusResponse | null,
   logs: AgentLog[],
-): { label: string; color: string } {
-  if (!status && logs.length === 0)
-    return { label: "IDLE", color: "var(--text-muted)" };
-  if (status?.pending_messages && status.pending_messages > 0)
-    return { label: "PROCESSING", color: "#eab308" };
-  if (logs.length > 0) return { label: "ACTIVE", color: "#22c55e" };
-  return { label: "IDLE", color: "var(--text-muted)" };
+  now: number = Date.now(),
+): { label: AgentStatusLabel; color: string } {
+  // No health response at all — we cannot confirm the agent is up. Never
+  // claim healthy on missing data.
+  if (!status) return { label: "OFFLINE", color: STATUS_COLORS.OFFLINE };
+
+  // The bridge reported a non-healthy state — surface it, don't mask it.
+  const raw = (status.status ?? "").trim().toLowerCase();
+  if (raw && !HEALTHY_STATES.has(raw))
+    return { label: "ERROR", color: STATUS_COLORS.ERROR };
+
+  // Healthy from here on.
+  if (status.pending_messages > 0)
+    return { label: "PROCESSING", color: STATUS_COLORS.PROCESSING };
+
+  if (logs.length > 0) {
+    const latest = logs.reduce((max, l) => {
+      const t = new Date(l.created_at).getTime();
+      return Number.isFinite(t) && t > max ? t : max;
+    }, 0);
+    const fresh = latest > 0 && now - latest <= ACTIVE_WINDOW_MS;
+    return fresh
+      ? { label: "ACTIVE", color: STATUS_COLORS.ACTIVE }
+      : { label: "STALE", color: STATUS_COLORS.STALE };
+  }
+
+  return { label: "IDLE", color: STATUS_COLORS.IDLE };
 }
 
 // ── Format time ─────────────────────────────────────────────────────
@@ -113,8 +161,9 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
-      {/* Top accent stripe */}
-      <div style={{ height: 3, background: color }} />
+      {/* Top accent stripe — status color so health is glanceable across
+          the grid; agent identity stays in the icon color + name. */}
+      <div style={{ height: 3, background: derived.color }} />
 
       {/* Header */}
       <div
