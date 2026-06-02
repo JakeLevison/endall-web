@@ -15,7 +15,8 @@ import type {
   AgentStatusResponse,
 } from "@/lib/ops-api";
 import { normalizeAgentId } from "@/lib/ops-api";
-import type { ElementType, ReactNode } from "react";
+import Link from "next/link";
+import type { ElementType, ReactNode, MouseEvent } from "react";
 import {
   COMMAND_CENTER_AGENTS,
   type AgentDescriptor,
@@ -124,22 +125,23 @@ function relTime(iso: string, now: number = Date.now()): string {
 
 // ── Outcome-language action description ─────────────────────────────
 
+function describeResult(result: string): string {
+  const r = result.toLowerCase();
+  if (r === "qualified") return "qualified for proposal";
+  if (r === "warm") return "warm prospect, interested";
+  if (r === "hot") return "hot lead, ready to close";
+  if (r === "callback") return "callback scheduled";
+  if (r === "sent") return "sent";
+  if (r === "enriched") return "profile enriched";
+  if (r === "researched") return "research complete";
+  return r.replace(/_/g, " ");
+}
+
 function describeAction(log: AgentLog): string {
   const parts: string[] = [];
   if (log.company_name) parts.push(log.company_name);
-  if (log.result) {
-    const r = log.result.toLowerCase();
-    if (r === "qualified") parts.push("qualified for proposal");
-    else if (r === "warm") parts.push("warm prospect, interested");
-    else if (r === "hot") parts.push("hot lead, ready to close");
-    else if (r === "callback") parts.push("callback scheduled");
-    else if (r === "sent") parts.push("sent");
-    else if (r === "enriched") parts.push("profile enriched");
-    else if (r === "researched") parts.push("research complete");
-    else parts.push(r.replace(/_/g, " "));
-  } else if (log.action) {
-    parts.push(log.action.replace(/_/g, " "));
-  }
+  if (log.result) parts.push(describeResult(log.result));
+  else if (log.action) parts.push(log.action.replace(/_/g, " "));
   return parts.join(" — ") || "action logged";
 }
 
@@ -148,36 +150,61 @@ function describeAction(log: AgentLog): string {
 function CardShell({
   testId,
   stripeColor,
+  href,
   children,
 }: {
   testId: string;
   stripeColor: string;
+  href?: string;
   children: ReactNode;
 }) {
-  return (
-    <div
-      data-testid={testId}
-      style={{
-        background: "var(--overlay-weak)",
-        border: "1px solid var(--overlay-soft)",
-        borderRadius: 12,
-        padding: 0,
-        overflow: "hidden",
-        transition: "box-shadow 0.2s, transform 0.2s",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.18)";
-        e.currentTarget.style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.transform = "translateY(0)";
-      }}
-    >
+  const style = {
+    background: "var(--overlay-weak)",
+    border: "1px solid var(--overlay-soft)",
+    borderRadius: 12,
+    padding: 0,
+    overflow: "hidden",
+    display: "block",
+    transition: "box-shadow 0.2s, transform 0.2s",
+  } as const;
+  const onEnter = (e: MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.18)";
+    e.currentTarget.style.transform = "translateY(-1px)";
+  };
+  const onLeave = (e: MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.boxShadow = "none";
+    e.currentTarget.style.transform = "translateY(0)";
+  };
+  const inner = (
+    <>
       {/* Top stripe — status color (health cards) or agent identity color
           (metrics/freshness cards), so the grid is glanceable. */}
       <div style={{ height: 3, background: stripeColor }} />
       {children}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        data-testid={testId}
+        style={{ ...style, textDecoration: "none", color: "inherit" }}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <div
+      data-testid={testId}
+      style={style}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      {inner}
     </div>
   );
 }
@@ -299,12 +326,21 @@ interface AgentCardProps {
   agentId: string;
   name: string;
   color: string;
+  href: string;
   perf: AgentPerformance | null;
   status: AgentStatusResponse | null;
   logs: AgentLog[];
 }
 
-function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps) {
+function AgentCard({
+  agentId,
+  name,
+  color,
+  href,
+  perf,
+  status,
+  logs,
+}: AgentCardProps) {
   // Derive the icon from the card's own agent, not the log's raw id —
   // logs carry dash-form ids (fr-001) that aren't in ICON_MAP.
   const Icon = ICON_MAP[agentId] ?? Phone;
@@ -314,8 +350,16 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
   const pipeline = perf?.closed_count ?? 0;
   const actions = perf?.total_actions ?? 0;
 
+  // Logs arrive newest-first (sorted in the grid), so logs[0] is the most
+  // recent activity.
+  const latest = logs[0];
+
   return (
-    <CardShell testId={`agent-card-${agentId}`} stripeColor={derived.color}>
+    <CardShell
+      testId={`agent-card-${agentId}`}
+      stripeColor={derived.color}
+      href={href}
+    >
       <CardHeader
         Icon={Icon}
         color={color}
@@ -331,6 +375,19 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
           { label: "Actions", value: actions },
         ]}
       />
+
+      {latest && (
+        <div
+          style={{
+            padding: "0 16px 10px",
+            fontSize: 11,
+            color: "var(--text-muted)",
+          }}
+        >
+          Last activity · {relTime(latest.created_at)}
+          {latest.result ? ` · ${describeResult(latest.result)}` : ""}
+        </div>
+      )}
 
       <Divider />
 
@@ -383,9 +440,11 @@ function AgentCard({ agentId, name, color, perf, status, logs }: AgentCardProps)
 function MetricsCard({
   descriptor,
   data,
+  href,
 }: {
   descriptor: AgentDescriptor;
   data: MetricCardData | null;
+  href: string;
 }) {
   const Icon = ICON_MAP[descriptor.id] ?? FileText;
   const hasData = !!data && data.kpis.length > 0;
@@ -393,6 +452,7 @@ function MetricsCard({
     <CardShell
       testId={`agent-card-${descriptor.id}`}
       stripeColor={descriptor.color}
+      href={href}
     >
       {/* Neutral "METRICS" badge — never a green health badge, because this
           agent exposes no live status signal. */}
@@ -433,9 +493,11 @@ function MetricsCard({
 function FreshnessCard({
   descriptor,
   data,
+  href,
 }: {
   descriptor: AgentDescriptor;
   data: FreshnessCardData | null;
+  href: string;
 }) {
   const Icon = ICON_MAP[descriptor.id] ?? Globe;
   const synced = !!data && !!data.lastUpdated;
@@ -443,6 +505,7 @@ function FreshnessCard({
     <CardShell
       testId={`agent-card-${descriptor.id}`}
       stripeColor={descriptor.color}
+      href={href}
     >
       <CardHeader
         Icon={Icon}
@@ -510,12 +573,14 @@ export default function AgentCardsGrid({
       }}
     >
       {COMMAND_CENTER_AGENTS.map((agent) => {
+        const href = `/command-center/agents/${agent.id}`;
         if (agent.tier === "metrics") {
           return (
             <MetricsCard
               key={agent.id}
               descriptor={agent}
               data={metrics[agent.id] ?? null}
+              href={href}
             />
           );
         }
@@ -525,6 +590,7 @@ export default function AgentCardsGrid({
               key={agent.id}
               descriptor={agent}
               data={freshness[agent.id] ?? null}
+              href={href}
             />
           );
         }
@@ -541,6 +607,7 @@ export default function AgentCardsGrid({
             agentId={agent.id}
             name={agent.label}
             color={agent.color}
+            href={href}
             perf={performance[agent.id] ?? null}
             status={statuses[agent.id] ?? null}
             logs={agentLogs}

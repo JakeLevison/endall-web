@@ -52,10 +52,11 @@ describe("AgentCardsGrid agent_id reconciliation", () => {
     );
 
     const card = screen.getByTestId("agent-card-front_desk");
-    // The fr-001 log's outcome language should render on the Front Desk card.
+    // The fr-001 log's outcome language should render on the Front Desk card
+    // (appears in both the last-activity summary and the activity log).
     expect(
-      within(card).getByText(/qualified for proposal/i),
-    ).toBeInTheDocument();
+      within(card).getAllByText(/qualified for proposal/i).length,
+    ).toBeGreaterThan(0);
     // ...and an agent WITHOUT logs should still show the idle placeholder.
     const sdrCard = screen.getByTestId("agent-card-sdr");
     expect(within(sdrCard).getByText(/standing by/i)).toBeInTheDocument();
