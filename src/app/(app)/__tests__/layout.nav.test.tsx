@@ -18,6 +18,13 @@ describe("App layout navigation", () => {
     expect(source).toMatch(/label:\s*"Invoice review"/);
   });
 
+  it("uses the grid's customer vocabulary for intel nav labels (Title Case)", () => {
+    // The agent grid labels these "Competitive Intel" / "Market Intel"; the
+    // nav must match so the vocabulary is consistent.
+    expect(source).toMatch(/label:\s*"Competitive Intel"/);
+    expect(source).toMatch(/label:\s*"Market Intel"/);
+  });
+
   it("includes an enabled Dispatch nav link pointing to /dispatch", () => {
     expect(source).toMatch(/href:\s*"\/dispatch"/);
     expect(source).toMatch(/label:\s*"Dispatch"/);

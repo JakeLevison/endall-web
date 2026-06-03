@@ -52,8 +52,8 @@ const primaryNav = [
   { href: "/dispatch", label: "Dispatch", icon: Calendar },
   { href: "/permitting", label: "Permitting", icon: FileCheck },
   { href: "/dashboard/sdr", label: "SDR activity", icon: PhoneOutgoing },
-  { href: "/dashboard/competitive-intel", label: "Competitive intel", icon: Target },
-  { href: "/dashboard/market-intel", label: "Market intel", icon: Globe2 },
+  { href: "/dashboard/competitive-intel", label: "Competitive Intel", icon: Target },
+  { href: "/dashboard/market-intel", label: "Market Intel", icon: Globe2 },
   { href: "/dashboard/roi", label: "ROI & performance", icon: LineChart },
   { href: "/dashboard/ask-endall", label: "Ask Endall", icon: Sparkles },
 ];

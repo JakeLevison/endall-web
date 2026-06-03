@@ -21,19 +21,29 @@ import {
   Wrench,
   FileEdit,
   Search,
+  LayoutGrid,
 } from "lucide-react";
 import {
   useAllLogs,
+  useAllStatuses,
+  useAllPerformance,
   useCommandCenterStats,
+  normalizeAgentId,
   type AgentLog,
 } from "@/lib/ops-api";
+import AgentCardsGrid from "@/components/command-center/AgentCardsGrid";
+import { COMMAND_CENTER_AGENTS } from "@/components/command-center/roster";
+import { deriveStatus } from "@/lib/agent-status";
+import {
+  useEstimatorMetrics,
+  useRoiStrip,
+  useIntelFreshness,
+  deriveNeedsAttention,
+  type AttentionItem,
+} from "@/lib/command-center-data";
 import { QUICK_ACTIONS, type SavedFile } from "@/hooks/useChat";
 import { posthog } from "@/lib/posthog";
-import {
-  agentDisplayName,
-  isSuccessStatus,
-  logTargetLabel,
-} from "@/lib/command-center";
+import { agentDisplayName, isSuccessStatus } from "@/lib/command-center";
 
 // TODO: wire real auth -- auth wiring is out of scope through P15b.
 // For now, proxy allows unauthenticated access. When auth lands,
@@ -70,6 +80,39 @@ function relTime(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+}
+
+// Inbound calls the bridge couldn't attribute store company_name "Unknown"
+// but carry the caller in input_data.contact. Fall back to caller name/phone
+// so the feed never shows a bare "— Unknown".
+const PLACEHOLDER_COMPANIES = new Set(["", "unknown", "n/a", "none", "null"]);
+
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  const ten =
+    digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (ten.length === 10)
+    return `+1 ${ten.slice(0, 3)}-${ten.slice(3, 6)}-${ten.slice(6)}`;
+  return raw.trim();
+}
+
+function feedTarget(log: AgentLog): string | null {
+  const company = (log.company_name ?? "").trim();
+  if (company && !PLACEHOLDER_COMPANIES.has(company.toLowerCase()))
+    return company;
+  const contact =
+    (
+      log as {
+        input_data?: {
+          contact?: { name?: string | null; phone?: string | null } | null;
+        } | null;
+      }
+    ).input_data?.contact ?? null;
+  const name = (contact?.name ?? "").trim();
+  if (name) return name;
+  const phone = (contact?.phone ?? "").trim();
+  if (phone) return formatPhone(phone);
+  return null;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -155,7 +198,80 @@ function Section({
   );
 }
 
-// ── Activity Feed ─────────────────────────────────────────────────────
+// ── System Health strip ───────────────────────────────────────────────
+
+function StatusDot({ color }: { color: string }) {
+  return (
+    <span
+      className="inline-block shrink-0"
+      style={{ width: 8, height: 8, borderRadius: 999, background: color }}
+    />
+  );
+}
+
+function SystemHealthStrip({
+  statuses,
+  logs,
+  onVisible,
+}: {
+  statuses: Record<string, import("@/lib/ops-api").AgentStatusResponse | null>;
+  logs: AgentLog[];
+  onVisible: (s: string) => void;
+}) {
+  const healthAgents = COMMAND_CENTER_AGENTS.filter((a) => a.tier === "health");
+  const derived = healthAgents.map((a) => {
+    const agentLogs = logs.filter((l) => normalizeAgentId(l.agent_id) === a.id);
+    return { agent: a, ...deriveStatus(statuses[a.id] ?? null, agentLogs) };
+  });
+  const healthy = derived.filter(
+    (d) => d.label === "ACTIVE" || d.label === "IDLE"
+  ).length;
+  const pending = healthAgents.reduce(
+    (sum, a) => sum + (statuses[a.id]?.pending_messages ?? 0),
+    0
+  );
+
+  return (
+    <Section
+      id="system_health"
+      title="System Health"
+      icon={Activity}
+      onVisible={onVisible}
+      action={
+        <span className="text-[11px] text-[var(--text-muted)]">
+          {healthy} of {healthAgents.length} healthy
+          {pending > 0 ? ` · ${pending} pending` : ""}
+        </span>
+      }
+    >
+      <div className="flex flex-wrap gap-2">
+        {derived.map(({ agent, label, color }) => (
+          <div
+            key={agent.id}
+            className="flex items-center gap-2 rounded-md border px-3 py-2"
+            style={{
+              borderColor: "var(--border)",
+              background: "var(--overlay-soft)",
+            }}
+          >
+            <StatusDot color={color} />
+            <span className="text-[12px] font-medium text-[var(--text-primary)]">
+              {agent.label}
+            </span>
+            <span
+              className="text-[10px] uppercase tracking-wide"
+              style={{ color }}
+            >
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ── Activity Feed (collapsed to 5) ────────────────────────────────────
 
 function ActivityFeedSection({
   logs,
@@ -216,7 +332,7 @@ function ActivityFeedSection({
         <>
           <ul className="space-y-1">
             {items.map((log, idx) => {
-              const target = logTargetLabel(log);
+              const target = feedTarget(log);
               return (
                 <li
                   key={`${log.agent_id}-${log.created_at}-${idx}`}
@@ -307,7 +423,7 @@ function PipelineSummarySection({
         {cards.map((c) => {
           const display =
             c.value === null || c.value === undefined
-              ? "\u2013\u2013"
+              ? "––"
               : c.value.toLocaleString();
           return (
             <Link
@@ -335,6 +451,121 @@ function PipelineSummarySection({
           );
         })}
       </div>
+    </Section>
+  );
+}
+
+// ── Value Delivered (ROI strip) ───────────────────────────────────────
+
+const ROI_LABELS = [
+  "Hours saved",
+  "Cost saved",
+  "Revenue influenced",
+  "Pipeline pending",
+];
+
+function RoiStripSection({
+  items,
+  onVisible,
+}: {
+  items: { label: string; value: string }[] | null;
+  onVisible: (s: string) => void;
+}) {
+  const boxes =
+    items ?? ROI_LABELS.map((label) => ({ label, value: "––" }));
+  return (
+    <Section
+      id="roi_strip"
+      title="Value Delivered"
+      icon={TrendingUp}
+      onVisible={onVisible}
+      action={
+        <Link
+          href="/dashboard/roi"
+          className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+        >
+          Full ROI
+        </Link>
+      }
+    >
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {boxes.map((b) => (
+          <div
+            key={b.label}
+            className="rounded-lg border p-4"
+            style={{
+              borderColor: "var(--border)",
+              background: "var(--overlay-soft)",
+            }}
+          >
+            <span className="text-[11px] text-[var(--text-muted)] uppercase tracking-wide">
+              {b.label}
+            </span>
+            <p
+              className="text-[22px] font-medium leading-none mt-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {b.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ── Needs Attention ───────────────────────────────────────────────────
+
+function NeedsAttentionSection({
+  items,
+  onVisible,
+}: {
+  items: AttentionItem[];
+  onVisible: (s: string) => void;
+}) {
+  return (
+    <Section
+      id="needs_attention"
+      title="Needs Attention"
+      icon={AlertTriangle}
+      onVisible={onVisible}
+      action={
+        items.length > 0 ? (
+          <span className="text-[11px] text-[var(--text-muted)]">
+            {items.length} item{items.length === 1 ? "" : "s"}
+          </span>
+        ) : undefined
+      }
+    >
+      {items.length === 0 ? (
+        <p className="text-[13px] text-[var(--text-muted)]">
+          Nothing needs attention. Every monitored agent is healthy.
+        </p>
+      ) : (
+        <ul className="space-y-1">
+          {items.map((it) => (
+            <li
+              key={it.agentId}
+              className="flex items-center gap-3 py-2 border-b last:border-0"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <StatusDot color={it.color} />
+              <span className="text-[13px] text-[var(--text-primary)] font-medium shrink-0 w-28 truncate">
+                {it.label}
+              </span>
+              <span className="text-[13px] text-[var(--text-tertiary)] flex-1 min-w-0 truncate">
+                {it.detail}
+              </span>
+              <span
+                className="text-[10px] uppercase tracking-wide shrink-0"
+                style={{ color: it.color }}
+              >
+                {it.status}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Section>
   );
 }
@@ -501,8 +732,14 @@ export default function CommandCenterPage() {
     isValidating,
     mutate,
   } = useAllLogs(50);
-
+  const { data: statuses = {} } = useAllStatuses();
+  const { data: performance = {} } = useAllPerformance();
   const { data: rawStats, error: statsError } = useCommandCenterStats();
+
+  const estimatorMetrics = useEstimatorMetrics();
+  const roiItems = useRoiStrip();
+  const intelFreshness = useIntelFreshness();
+
   const [files, setFiles] = useState<SavedFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
 
@@ -530,6 +767,16 @@ export default function CommandCenterPage() {
       callsHandled: rawStats.calls_handled_this_week ?? null,
     };
   }, [rawStats, statsError]);
+
+  const needsAttention = useMemo(
+    () => deriveNeedsAttention(statuses, logs),
+    [statuses, logs]
+  );
+
+  const metrics = useMemo(
+    () => ({ estimator: estimatorMetrics }),
+    [estimatorMetrics]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -570,13 +817,41 @@ export default function CommandCenterPage() {
         </span>
       </div>
 
+      <SystemHealthStrip
+        statuses={statuses}
+        logs={logs}
+        onVisible={onSectionVisible}
+      />
+
+      <Section
+        id="agents"
+        title="Agents"
+        icon={LayoutGrid}
+        onVisible={onSectionVisible}
+      >
+        <AgentCardsGrid
+          logs={logs}
+          performance={performance}
+          statuses={statuses}
+          metrics={metrics}
+          freshness={intelFreshness}
+        />
+      </Section>
+
       <PipelineSummarySection stats={stats} onVisible={onSectionVisible} />
+
+      <RoiStripSection items={roiItems} onVisible={onSectionVisible} />
 
       <ActivityFeedSection
         logs={logs}
         isLoading={logsLoading}
         isValidating={isValidating}
         mutate={() => mutate()}
+        onVisible={onSectionVisible}
+      />
+
+      <NeedsAttentionSection
+        items={needsAttention}
         onVisible={onSectionVisible}
       />
 
