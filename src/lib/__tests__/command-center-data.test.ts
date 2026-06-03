@@ -117,6 +117,7 @@ describe("deriveNeedsAttention", () => {
     company_name: "",
     result: "",
     status: "completed",
+    input_data: null,
     output_data: null,
     created_at: iso,
   });

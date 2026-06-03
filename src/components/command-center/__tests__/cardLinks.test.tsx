@@ -10,6 +10,7 @@ function log(partial: Partial<AgentLog>): AgentLog {
     company_name: "Acme",
     result: "qualified",
     status: "completed",
+    input_data: null,
     output_data: null,
     created_at: new Date().toISOString(),
     ...partial,
