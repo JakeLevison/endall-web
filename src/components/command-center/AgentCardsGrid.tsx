@@ -75,9 +75,15 @@ function describeResult(result: string): string {
   return r.replace(/_/g, " ");
 }
 
+// Inbound calls the bridge couldn't attribute store company_name "Unknown" —
+// omit it rather than render a low-trust "Unknown — ...".
+const PLACEHOLDER_COMPANIES = new Set(["", "unknown", "n/a", "none", "null"]);
+
 function describeAction(log: AgentLog): string {
   const parts: string[] = [];
-  if (log.company_name) parts.push(log.company_name);
+  const company = (log.company_name ?? "").trim();
+  if (company && !PLACEHOLDER_COMPANIES.has(company.toLowerCase()))
+    parts.push(company);
   if (log.result) parts.push(describeResult(log.result));
   else if (log.action) parts.push(log.action.replace(/_/g, " "));
   return parts.join(" — ") || "action logged";

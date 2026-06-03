@@ -5,10 +5,6 @@ import { useTenant } from "@/lib/tenant-hook";
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_OPS_API_URL ||
-  "https://ask-endall-bridge-production.up.railway.app";
-
 const REFRESH_MS = 30_000; // 30-second polling
 
 // ── Agent definitions ───────────────────────────────────────────────
@@ -78,78 +74,66 @@ export interface CommandCenterStats {
 
 // ── Fetcher ─────────────────────────────────────────────────────────
 
+// Same-origin proxy fetcher. The bridge sends no CORS header, so the
+// browser can't call it directly — these hit /api/* proxy routes that
+// resolve tenant from the SSR session. The client never sends tenant_id.
 async function fetchApi<T>(
   path: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  const url = new URL(path, API_BASE);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  const res = await fetch(url.toString());
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(qs ? `${path}?${qs}` : path, { cache: "no-store" });
   if (!res.ok) throw new Error(`Ops API ${res.status}`);
   return res.json();
 }
 
-// ── API functions (server utilities: explicit tenant_id) ───────────
+// ── API functions (same-origin proxies; tenant resolved server-side) ─
 
 export function getAgentLogs(
-  tenantId: string,
   agentId?: string,
   limit = 20,
 ): Promise<AgentLog[]> {
-  const params: Record<string, string> = {
-    tenant_id: tenantId,
-    limit: String(limit),
-  };
+  const params: Record<string, string> = { limit: String(limit) };
   if (agentId) params.agent_id = agentId;
   return fetchApi<AgentLog[]>("/api/agent-logs", params);
 }
 
 export function getAgentPerformance(
-  tenantId: string,
   agentId: string,
   period = "today",
 ): Promise<AgentPerformance> {
   return fetchApi<AgentPerformance>("/api/agent-performance", {
     agent_id: agentId,
-    tenant_id: tenantId,
     period,
   });
 }
 
-export function getAgentStatus(
-  tenantId: string,
-  agentId: string,
-): Promise<AgentStatusResponse> {
+export function getAgentStatus(agentId: string): Promise<AgentStatusResponse> {
   return fetchApi<AgentStatusResponse>("/api/agent-status", {
     agent_id: agentId,
-    tenant_id: tenantId,
   });
 }
 
-export function getCommandCenterStats(
-  tenantId: string,
-): Promise<CommandCenterStats> {
-  return fetchApi<CommandCenterStats>("/command-center/stats", {
-    tenant_id: tenantId,
-  });
+export function getCommandCenterStats(): Promise<CommandCenterStats> {
+  return fetchApi<CommandCenterStats>("/api/command-center/stats");
 }
 
 // ── Aggregate fetchers (for SWR) ───────────────────────────────────
 
-async function fetchAllPerformance(
-  tenantId: string,
-): Promise<Record<string, AgentPerformance | null>> {
+async function fetchAllPerformance(): Promise<
+  Record<string, AgentPerformance | null>
+> {
   const results = await Promise.all(
-    AGENTS.map((a) => getAgentPerformance(tenantId, a.id).catch(() => null)),
+    AGENTS.map((a) => getAgentPerformance(a.id).catch(() => null)),
   );
   return Object.fromEntries(AGENTS.map((a, i) => [a.id, results[i]]));
 }
 
-async function fetchAllStatuses(
-  tenantId: string,
-): Promise<Record<string, AgentStatusResponse | null>> {
+async function fetchAllStatuses(): Promise<
+  Record<string, AgentStatusResponse | null>
+> {
   const results = await Promise.all(
-    AGENTS.map((a) => getAgentStatus(tenantId, a.id).catch(() => null)),
+    AGENTS.map((a) => getAgentStatus(a.id).catch(() => null)),
   );
   return Object.fromEntries(AGENTS.map((a, i) => [a.id, results[i]]));
 }
@@ -160,7 +144,7 @@ export function useAllLogs(limit = 50) {
   const { tenant_id: tenantId } = useTenant();
   return useSWR(
     tenantId ? ["ops:all-logs", tenantId, limit] : null,
-    () => getAgentLogs(tenantId as string, undefined, limit),
+    () => getAgentLogs(undefined, limit),
     {
       refreshInterval: REFRESH_MS,
       fallbackData: [],
@@ -172,7 +156,7 @@ export function useAllPerformance() {
   const { tenant_id: tenantId } = useTenant();
   return useSWR(
     tenantId ? ["ops:all-performance", tenantId] : null,
-    () => fetchAllPerformance(tenantId as string),
+    () => fetchAllPerformance(),
     {
       refreshInterval: REFRESH_MS,
       fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
@@ -184,7 +168,7 @@ export function useAllStatuses() {
   const { tenant_id: tenantId } = useTenant();
   return useSWR(
     tenantId ? ["ops:all-statuses", tenantId] : null,
-    () => fetchAllStatuses(tenantId as string),
+    () => fetchAllStatuses(),
     {
       refreshInterval: REFRESH_MS,
       fallbackData: Object.fromEntries(AGENTS.map((a) => [a.id, null])),
@@ -196,7 +180,7 @@ export function useCommandCenterStats() {
   const { tenant_id: tenantId } = useTenant();
   return useSWR<CommandCenterStats | null>(
     tenantId ? ["ops:command-center-stats", tenantId] : null,
-    () => getCommandCenterStats(tenantId as string),
+    () => getCommandCenterStats(),
     {
       refreshInterval: REFRESH_MS,
       fallbackData: null,
