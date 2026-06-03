@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveStatus } from "../AgentCardsGrid";
+import { deriveStatus } from "@/lib/agent-status";
 import type { AgentLog, AgentStatusResponse } from "@/lib/ops-api";
 
 const NOW = new Date("2026-06-02T12:00:00Z").getTime();

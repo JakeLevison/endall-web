@@ -15,8 +15,8 @@ import type {
   AgentStatusResponse,
 } from "@/lib/ops-api";
 import { normalizeAgentId } from "@/lib/ops-api";
-import Link from "next/link";
-import type { ElementType, ReactNode, MouseEvent } from "react";
+import { deriveStatus } from "@/lib/agent-status";
+import type { ElementType, ReactNode } from "react";
 import {
   COMMAND_CENTER_AGENTS,
   type AgentDescriptor,
@@ -35,68 +35,6 @@ const ICON_MAP: Record<string, ElementType> = {
   competitive_intel: Swords,
   market_intel: Globe,
 };
-
-// ── Status derivation ───────────────────────────────────────────────
-
-// All hex (no CSS vars) so callers can append an alpha suffix — e.g.
-// `${color}15` — for badge/stripe backgrounds without producing invalid
-// CSS like "var(--text-muted)15".
-const STATUS_COLORS = {
-  ACTIVE: "#22c55e", // green — healthy, recent activity
-  PROCESSING: "#eab308", // yellow — healthy, work in flight
-  STALE: "#f59e0b", // amber — healthy but nothing recent
-  ERROR: "#ef4444", // red — bridge reported a non-healthy state
-  IDLE: "#6b7280", // gray — healthy, never any activity
-  OFFLINE: "#6b7280", // gray — no health signal at all
-} as const;
-
-export type AgentStatusLabel = keyof typeof STATUS_COLORS;
-
-// Activity within this window counts as ACTIVE; older counts as STALE.
-const ACTIVE_WINDOW_MS = 24 * 60 * 60 * 1000;
-
-// Bridge status strings we treat as healthy. Anything else that is present
-// is surfaced as ERROR rather than silently shown green.
-const HEALTHY_STATES = new Set([
-  "healthy",
-  "ok",
-  "active",
-  "idle",
-  "ready",
-  "running",
-]);
-
-export function deriveStatus(
-  status: AgentStatusResponse | null,
-  logs: AgentLog[],
-  now: number = Date.now(),
-): { label: AgentStatusLabel; color: string } {
-  // No health response at all — we cannot confirm the agent is up. Never
-  // claim healthy on missing data.
-  if (!status) return { label: "OFFLINE", color: STATUS_COLORS.OFFLINE };
-
-  // The bridge reported a non-healthy state — surface it, don't mask it.
-  const raw = (status.status ?? "").trim().toLowerCase();
-  if (raw && !HEALTHY_STATES.has(raw))
-    return { label: "ERROR", color: STATUS_COLORS.ERROR };
-
-  // Healthy from here on.
-  if (status.pending_messages > 0)
-    return { label: "PROCESSING", color: STATUS_COLORS.PROCESSING };
-
-  if (logs.length > 0) {
-    const latest = logs.reduce((max, l) => {
-      const t = new Date(l.created_at).getTime();
-      return Number.isFinite(t) && t > max ? t : max;
-    }, 0);
-    const fresh = latest > 0 && now - latest <= ACTIVE_WINDOW_MS;
-    return fresh
-      ? { label: "ACTIVE", color: STATUS_COLORS.ACTIVE }
-      : { label: "STALE", color: STATUS_COLORS.STALE };
-  }
-
-  return { label: "IDLE", color: STATUS_COLORS.IDLE };
-}
 
 // ── Format time ─────────────────────────────────────────────────────
 
@@ -147,64 +85,33 @@ function describeAction(log: AgentLog): string {
 
 // ── Shared card primitives ──────────────────────────────────────────
 
+// Non-interactive for now — the per-agent detail route is still a stub, so
+// cards do not link (no pointer cursor / hover-lift). Re-add a link wrapper
+// when the detail view is real.
 function CardShell({
   testId,
   stripeColor,
-  href,
   children,
 }: {
   testId: string;
   stripeColor: string;
-  href?: string;
   children: ReactNode;
 }) {
-  const style = {
-    background: "var(--overlay-weak)",
-    border: "1px solid var(--overlay-soft)",
-    borderRadius: 12,
-    padding: 0,
-    overflow: "hidden",
-    display: "block",
-    transition: "box-shadow 0.2s, transform 0.2s",
-  } as const;
-  const onEnter = (e: MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.18)";
-    e.currentTarget.style.transform = "translateY(-1px)";
-  };
-  const onLeave = (e: MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.boxShadow = "none";
-    e.currentTarget.style.transform = "translateY(0)";
-  };
-  const inner = (
-    <>
+  return (
+    <div
+      data-testid={testId}
+      style={{
+        background: "var(--overlay-weak)",
+        border: "1px solid var(--overlay-soft)",
+        borderRadius: 12,
+        padding: 0,
+        overflow: "hidden",
+      }}
+    >
       {/* Top stripe — status color (health cards) or agent identity color
           (metrics/freshness cards), so the grid is glanceable. */}
       <div style={{ height: 3, background: stripeColor }} />
       {children}
-    </>
-  );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        data-testid={testId}
-        style={{ ...style, textDecoration: "none", color: "inherit" }}
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-      >
-        {inner}
-      </Link>
-    );
-  }
-  return (
-    <div
-      data-testid={testId}
-      style={style}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-    >
-      {inner}
     </div>
   );
 }
@@ -326,7 +233,6 @@ interface AgentCardProps {
   agentId: string;
   name: string;
   color: string;
-  href: string;
   perf: AgentPerformance | null;
   status: AgentStatusResponse | null;
   logs: AgentLog[];
@@ -336,7 +242,6 @@ function AgentCard({
   agentId,
   name,
   color,
-  href,
   perf,
   status,
   logs,
@@ -355,11 +260,7 @@ function AgentCard({
   const latest = logs[0];
 
   return (
-    <CardShell
-      testId={`agent-card-${agentId}`}
-      stripeColor={derived.color}
-      href={href}
-    >
+    <CardShell testId={`agent-card-${agentId}`} stripeColor={derived.color}>
       <CardHeader
         Icon={Icon}
         color={color}
@@ -440,11 +341,9 @@ function AgentCard({
 function MetricsCard({
   descriptor,
   data,
-  href,
 }: {
   descriptor: AgentDescriptor;
   data: MetricCardData | null;
-  href: string;
 }) {
   const Icon = ICON_MAP[descriptor.id] ?? FileText;
   const hasData = !!data && data.kpis.length > 0;
@@ -452,7 +351,6 @@ function MetricsCard({
     <CardShell
       testId={`agent-card-${descriptor.id}`}
       stripeColor={descriptor.color}
-      href={href}
     >
       {/* Neutral "METRICS" badge — never a green health badge, because this
           agent exposes no live status signal. */}
@@ -493,11 +391,9 @@ function MetricsCard({
 function FreshnessCard({
   descriptor,
   data,
-  href,
 }: {
   descriptor: AgentDescriptor;
   data: FreshnessCardData | null;
-  href: string;
 }) {
   const Icon = ICON_MAP[descriptor.id] ?? Globe;
   const synced = !!data && !!data.lastUpdated;
@@ -505,7 +401,6 @@ function FreshnessCard({
     <CardShell
       testId={`agent-card-${descriptor.id}`}
       stripeColor={descriptor.color}
-      href={href}
     >
       <CardHeader
         Icon={Icon}
@@ -565,22 +460,16 @@ export default function AgentCardsGrid({
   freshness = {},
 }: Props) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: 12,
-      }}
-    >
+    // Responsive columns capped at 4 so the 7 cards spread 4-3 on wide
+    // screens instead of auto-fitting to a lonely 3-3-1.
+    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {COMMAND_CENTER_AGENTS.map((agent) => {
-        const href = `/command-center/agents/${agent.id}`;
         if (agent.tier === "metrics") {
           return (
             <MetricsCard
               key={agent.id}
               descriptor={agent}
               data={metrics[agent.id] ?? null}
-              href={href}
             />
           );
         }
@@ -590,7 +479,6 @@ export default function AgentCardsGrid({
               key={agent.id}
               descriptor={agent}
               data={freshness[agent.id] ?? null}
-              href={href}
             />
           );
         }
@@ -607,7 +495,6 @@ export default function AgentCardsGrid({
             agentId={agent.id}
             name={agent.label}
             color={agent.color}
-            href={href}
             perf={performance[agent.id] ?? null}
             status={statuses[agent.id] ?? null}
             logs={agentLogs}

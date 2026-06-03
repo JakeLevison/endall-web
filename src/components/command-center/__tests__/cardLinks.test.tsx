@@ -16,20 +16,14 @@ function log(partial: Partial<AgentLog>): AgentLog {
   };
 }
 
-describe("AgentCardsGrid card links + last activity", () => {
-  it("links each card to its detail route", () => {
+describe("AgentCardsGrid cards + last activity", () => {
+  it("renders cards as non-clickable (no link) while the detail route is a stub", () => {
     render(<AgentCardsGrid logs={[]} performance={{}} statuses={{}} />);
-    expect(screen.getByTestId("agent-card-front_desk")).toHaveAttribute(
-      "href",
-      "/command-center/agents/front_desk",
-    );
-    expect(screen.getByTestId("agent-card-estimator")).toHaveAttribute(
-      "href",
-      "/command-center/agents/estimator",
-    );
-    expect(
-      screen.getByTestId("agent-card-competitive_intel"),
-    ).toHaveAttribute("href", "/command-center/agents/competitive_intel");
+    for (const id of ["front_desk", "estimator", "competitive_intel"]) {
+      const card = screen.getByTestId(`agent-card-${id}`);
+      expect(card.tagName).toBe("DIV");
+      expect(card).not.toHaveAttribute("href");
+    }
   });
 
   it("surfaces last activity time + last result on a health card", () => {
