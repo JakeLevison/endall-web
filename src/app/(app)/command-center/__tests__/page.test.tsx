@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("next/navigation", () => ({
@@ -13,6 +14,7 @@ const mockLogs = [
     company_name: "Acme HVAC",
     result: "qualified",
     status: "success",
+    input_data: null,
     output_data: null,
     created_at: new Date().toISOString(),
   },
@@ -22,10 +24,38 @@ const mockLogs = [
     company_name: "Beta Mechanical",
     result: "delivered",
     status: "success",
+    input_data: null,
     output_data: null,
     created_at: new Date().toISOString(),
   },
 ];
+
+// Inbound calls the bridge couldn't attribute to a company: company_name is
+// the literal "Unknown", but the caller phone/name lives in input_data.
+const unknownCompanyLog = {
+  agent_id: "fr-001",
+  action: "inbound_call",
+  company_name: "Unknown",
+  result: "qualified",
+  status: "completed",
+  input_data: { contact: { name: "", phone: "+12036109399" } },
+  output_data: null,
+  created_at: new Date().toISOString(),
+};
+
+const manyLogs = Array.from({ length: 9 }, (_, i) => ({
+  agent_id: "fr-001",
+  action: `inbound_call ${i}`,
+  company_name: `Company ${i}`,
+  result: "qualified",
+  status: "success",
+  input_data: null,
+  output_data: null,
+  created_at: new Date(Date.now() - i * 60_000).toISOString(),
+}));
+
+// Mutable so individual tests can swap the log set the page receives.
+let activeLogs: unknown[] = mockLogs;
 
 vi.mock("@/lib/ops-api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/ops-api")>(
@@ -34,7 +64,7 @@ vi.mock("@/lib/ops-api", async () => {
   return {
     ...actual,
     useAllLogs: () => ({
-      data: mockLogs,
+      data: activeLogs,
       isValidating: false,
       mutate: vi.fn(),
     }),
@@ -58,6 +88,7 @@ vi.mock("@/lib/posthog", () => ({
 }));
 
 beforeEach(() => {
+  activeLogs = mockLogs;
   // IntersectionObserver is not implemented in jsdom
   class IO {
     observe() {}
@@ -94,6 +125,31 @@ describe("CommandCenterPage", () => {
     expect(within(feed).getByText("Email")).toBeInTheDocument();
     expect(within(feed).queryByText("fr-001")).toBeNull();
     expect(within(feed).queryByText("email-001")).toBeNull();
+  });
+
+  it("collapses the activity feed to 5 events with a view-all control", async () => {
+    activeLogs = manyLogs; // 9 logs
+    render(<CommandCenterPage />);
+    const feed = screen.getByText("Activity Feed").closest("section")!;
+    // Only the first 5 are shown by default.
+    expect(within(feed).getByText(/inbound_call 0/)).toBeInTheDocument();
+    expect(within(feed).getByText(/inbound_call 4/)).toBeInTheDocument();
+    expect(within(feed).queryByText(/inbound_call 5/)).toBeNull();
+
+    const toggle = within(feed).getByRole("button", { name: /view all 9/i });
+    await userEvent.click(toggle);
+    expect(within(feed).getByText(/inbound_call 8/)).toBeInTheDocument();
+    expect(
+      within(feed).getByRole("button", { name: /show less/i })
+    ).toBeInTheDocument();
+  });
+
+  it("labels unattributed inbound calls by caller, never literal 'Unknown'", () => {
+    activeLogs = [unknownCompanyLog];
+    render(<CommandCenterPage />);
+    const feed = screen.getByText("Activity Feed").closest("section")!;
+    expect(within(feed).getByText(/\+1 203-610-9399/)).toBeInTheDocument();
+    expect(within(feed).queryByText(/— Unknown/)).toBeNull();
   });
 
   it("renders all four pipeline summary cards", () => {

@@ -29,7 +29,11 @@ import {
 } from "@/lib/ops-api";
 import { QUICK_ACTIONS, type SavedFile } from "@/hooks/useChat";
 import { posthog } from "@/lib/posthog";
-import { agentDisplayName, isSuccessStatus } from "@/lib/command-center";
+import {
+  agentDisplayName,
+  isSuccessStatus,
+  logTargetLabel,
+} from "@/lib/command-center";
 
 // TODO: wire real auth -- auth wiring is out of scope through P15b.
 // For now, proxy allows unauthenticated access. When auth lands,
@@ -166,7 +170,10 @@ function ActivityFeedSection({
   mutate: () => void;
   onVisible: (s: string) => void;
 }) {
-  const items = logs.slice(0, 20);
+  const COLLAPSED_COUNT = 5;
+  const [expanded, setExpanded] = useState(false);
+  const items = expanded ? logs : logs.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = logs.length - COLLAPSED_COUNT;
   return (
     <Section
       id="activity_feed"
@@ -206,27 +213,41 @@ function ActivityFeedSection({
           No recent agent activity. The feed will populate as agents process calls, emails, and estimates.
         </p>
       ) : (
-        <ul className="space-y-1">
-          {items.map((log, idx) => (
-            <li
-              key={`${log.agent_id}-${log.created_at}-${idx}`}
-              className="flex items-center gap-3 py-2 border-b last:border-0"
-              style={{ borderColor: "var(--border)" }}
+        <>
+          <ul className="space-y-1">
+            {items.map((log, idx) => {
+              const target = logTargetLabel(log);
+              return (
+                <li
+                  key={`${log.agent_id}-${log.created_at}-${idx}`}
+                  className="flex items-center gap-3 py-2 border-b last:border-0"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <span className="text-[11px] text-[var(--text-muted)] shrink-0 w-14">
+                    {relTime(log.created_at)}
+                  </span>
+                  <span className="text-[13px] text-[var(--text-primary)] font-medium shrink-0 w-24 truncate">
+                    {agentDisplayName(log.agent_id)}
+                  </span>
+                  <span className="text-[13px] text-[var(--text-tertiary)] flex-1 min-w-0 truncate">
+                    {log.action}
+                    {target ? ` — ${target}` : ""}
+                  </span>
+                  <StatusBadge status={log.status} />
+                </li>
+              );
+            })}
+          </ul>
+          {hiddenCount > 0 && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-2 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+              aria-expanded={expanded}
             >
-              <span className="text-[11px] text-[var(--text-muted)] shrink-0 w-14">
-                {relTime(log.created_at)}
-              </span>
-              <span className="text-[13px] text-[var(--text-primary)] font-medium shrink-0 w-24 truncate">
-                {agentDisplayName(log.agent_id)}
-              </span>
-              <span className="text-[13px] text-[var(--text-tertiary)] flex-1 min-w-0 truncate">
-                {log.action}
-                {log.company_name ? ` — ${log.company_name}` : ""}
-              </span>
-              <StatusBadge status={log.status} />
-            </li>
-          ))}
-        </ul>
+              {expanded ? "Show less" : `View all ${logs.length}`}
+            </button>
+          )}
+        </>
       )}
     </Section>
   );
@@ -549,6 +570,8 @@ export default function CommandCenterPage() {
         </span>
       </div>
 
+      <PipelineSummarySection stats={stats} onVisible={onSectionVisible} />
+
       <ActivityFeedSection
         logs={logs}
         isLoading={logsLoading}
@@ -556,8 +579,6 @@ export default function CommandCenterPage() {
         mutate={() => mutate()}
         onVisible={onSectionVisible}
       />
-
-      <PipelineSummarySection stats={stats} onVisible={onSectionVisible} />
 
       <WorkflowHistorySection
         files={files}

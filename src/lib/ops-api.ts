@@ -30,6 +30,7 @@ export interface AgentLog {
   company_name: string;
   result: string;
   status: string;
+  input_data: Record<string, unknown> | null;
   output_data: Record<string, unknown> | null;
   created_at: string;
 }
