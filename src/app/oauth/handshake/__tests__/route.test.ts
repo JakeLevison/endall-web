@@ -59,7 +59,8 @@ describe("/oauth/handshake (R2-8d session_id consumer)", () => {
     // {session_id} body.
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [bridgeUrl, init] = fetchMock.mock.calls[0];
-    expect(bridgeUrl).toBe(
+    // fetch is called with a URL object; normalize before comparing.
+    expect(bridgeUrl.toString()).toBe(
       "https://bridge.test.example/public/oauth/consume-session",
     );
     expect(init.method).toBe("POST");
