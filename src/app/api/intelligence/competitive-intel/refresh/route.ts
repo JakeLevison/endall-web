@@ -1,41 +1,22 @@
 import { NextResponse } from "next/server";
-import {
-  resolveTenantFromSession,
-  tenantUnresolvedResponse,
-} from "@/lib/tenant-server";
-
-const BRIDGE_URL =
-  process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
+import { bridgeFetch } from "@/lib/bridge-fetch";
 
 // POST /api/intelligence/competitive-intel/refresh
 //
 // Proxies to bridge POST /intelligence/competitive-intel/{tenant_id}/refresh.
-// Tenant is resolved from the SSR session and embedded into the bridge path.
-// The bridge returns 202 Accepted; response is surfaced verbatim.
+// bridgeFetch resolves the tenant from the SSR session and embeds it in the
+// bridge path. The bridge returns 202 Accepted; response surfaced verbatim.
 export async function POST() {
-  const resolved = await resolveTenantFromSession();
-  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
-
-  try {
-    const url = new URL(BRIDGE_URL);
-    url.pathname = `/intelligence/competitive-intel/${encodeURIComponent(
-      resolved.tenant_id,
-    )}/refresh`;
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "X-Tenant-Id": resolved.tenant_id },
-      cache: "no-store",
-    });
-    const text = await resp.text();
-    return new NextResponse(text, {
-      status: resp.status,
-      headers: {
-        "Content-Type":
-          resp.headers.get("content-type") || "application/json",
-      },
-    });
-  } catch (err) {
-    console.error("competitive-intel refresh proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
-  }
+  const resp = await bridgeFetch(
+    (tenantId) =>
+      `/intelligence/competitive-intel/${encodeURIComponent(tenantId)}/refresh`,
+    { method: "POST" },
+  );
+  const text = await resp.text();
+  return new NextResponse(text, {
+    status: resp.status,
+    headers: {
+      "Content-Type": resp.headers.get("content-type") || "application/json",
+    },
+  });
 }

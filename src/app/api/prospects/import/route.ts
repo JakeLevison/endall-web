@@ -1,45 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  resolveTenantFromSession,
-  tenantUnresolvedResponse,
-} from "@/lib/tenant-server";
-
-const BRIDGE_URL =
-  process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
+import { bridgeFetch } from "@/lib/bridge-fetch";
 
 // POST /api/prospects/import
 //
-// Proxies to bridge POST /prospects/{tenant_id}/import. Expects a JSON
-// body matching ProspectImportRequest ({ rows } or { csv }). The dashboard
-// upload flow reads the file client-side and posts JSON, which keeps the
-// proxy boundary-agnostic and avoids a second multipart round-trip.
+// Proxies to bridge POST /prospects/{tenant_id}/import. Expects a JSON body
+// matching ProspectImportRequest ({ rows } or { csv }). bridgeFetch resolves
+// the tenant from the SSR session and embeds it in the bridge path.
 export async function POST(req: NextRequest) {
-  const resolved = await resolveTenantFromSession();
-  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
-
-  try {
-    const body = await req.text();
-    const url = new URL(BRIDGE_URL);
-    url.pathname = `/prospects/${encodeURIComponent(resolved.tenant_id)}/import`;
-    const resp = await fetch(url, {
+  const body = await req.text();
+  const resp = await bridgeFetch(
+    (tenantId) => `/prospects/${encodeURIComponent(tenantId)}/import`,
+    {
       method: "POST",
-      headers: {
-        "X-Tenant-Id": resolved.tenant_id,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body,
-      cache: "no-store",
-    });
-    const text = await resp.text();
-    return new NextResponse(text, {
-      status: resp.status,
-      headers: {
-        "Content-Type":
-          resp.headers.get("content-type") || "application/json",
-      },
-    });
-  } catch (err) {
-    console.error("prospects import proxy failed:", err);
-    return NextResponse.json({ error: "bridge unavailable" }, { status: 502 });
-  }
+    },
+  );
+  const text = await resp.text();
+  return new NextResponse(text, {
+    status: resp.status,
+    headers: {
+      "Content-Type": resp.headers.get("content-type") || "application/json",
+    },
+  });
 }
