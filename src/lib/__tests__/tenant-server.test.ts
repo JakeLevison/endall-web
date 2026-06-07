@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 let mockUser: { id: string } | null = null;
+let mockSession: { access_token: string } | null = null;
 let mockMemberRows: Array<{ tenant_id: string; created_at: string }> = [];
 let mockMemberError: { message: string } | null = null;
 
@@ -8,6 +9,7 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: {
       getUser: vi.fn(async () => ({ data: { user: mockUser } })),
+      getSession: vi.fn(async () => ({ data: { session: mockSession } })),
     },
     from: () => ({
       select: () => ({
@@ -34,6 +36,7 @@ import {
 describe("resolveTenantFromSession", () => {
   beforeEach(() => {
     mockUser = null;
+    mockSession = null;
     mockMemberRows = [];
     mockMemberError = null;
   });
@@ -50,14 +53,16 @@ describe("resolveTenantFromSession", () => {
     expect(result).toEqual({ ok: false, code: "NO_TENANT_MEMBERSHIP" });
   });
 
-  it("returns ok + tenant_id when user has a membership", async () => {
+  it("returns ok + tenant_id + access_token when user has a membership", async () => {
     mockUser = { id: "user-1" };
+    mockSession = { access_token: "tok-1" };
     mockMemberRows = [{ tenant_id: "tenant-a", created_at: "2025-01-01" }];
     const result = await resolveTenantFromSession();
     expect(result).toEqual({
       ok: true,
       tenant_id: "tenant-a",
       user_id: "user-1",
+      access_token: "tok-1",
     });
   });
 

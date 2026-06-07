@@ -1,32 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { bridgeFetch } from "@/lib/bridge-fetch";
 
 // Proxy for the ask-endall-bridge /settings/company endpoint.
-// Keeping the bridge URL server-side avoids CORS + keeps Railway URL
-// out of client-side code.
+// bridgeFetch resolves the tenant from the SSR session and forwards the
+// verified bearer token + X-Tenant-Id. (Previously this route sent
+// company_id=default with no auth, relying on the bridge marketing-default
+// fallback -- that path is now removed.)
 
-function bridgeUrl(): string {
-  return (
-    process.env.ASK_ENDALL_BRIDGE_URL?.replace(/\/$/, "") ||
-    "http://localhost:8101"
-  );
-}
-
-export async function GET(request: NextRequest) {
-  const companyId =
-    request.nextUrl.searchParams.get("company_id") || "default";
-  try {
-    const url = new URL(bridgeUrl());
-    url.pathname = "/settings/company";
-    url.searchParams.set("company_id", companyId);
-    const resp = await fetch(url, { cache: "no-store" });
-    const body = await resp.json();
-    return NextResponse.json(body, { status: resp.status });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "bridge unreachable", detail: String(err) },
-      { status: 502 }
-    );
-  }
+export async function GET() {
+  const resp = await bridgeFetch("/settings/company");
+  const body = await resp.json().catch(() => ({}));
+  return NextResponse.json(body, { status: resp.status });
 }
 
 export async function PUT(request: NextRequest) {
@@ -36,20 +20,11 @@ export async function PUT(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
-  try {
-    const url = new URL(bridgeUrl());
-    url.pathname = "/settings/company";
-    const resp = await fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const respBody = await resp.json();
-    return NextResponse.json(respBody, { status: resp.status });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "bridge unreachable", detail: String(err) },
-      { status: 502 }
-    );
-  }
+  const resp = await bridgeFetch("/settings/company", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const respBody = await resp.json().catch(() => ({}));
+  return NextResponse.json(respBody, { status: resp.status });
 }

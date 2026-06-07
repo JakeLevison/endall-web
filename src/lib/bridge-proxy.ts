@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  resolveTenantFromSession,
-  tenantUnresolvedResponse,
-} from "@/lib/tenant-server";
+import { resolveBridgeAuth, bridgeUnresolvedResponse } from "@/lib/bridge-fetch";
 
 const BRIDGE_URL =
   process.env.ASK_ENDALL_BRIDGE_URL || "http://localhost:8101";
@@ -13,15 +10,18 @@ const BRIDGE_URL =
 // Why this exists: the bridge sends no CORS header, so the command center's
 // client-direct fetches are blocked by the browser. Routing them through a
 // same-origin proxy fixes that AND keeps tenant resolution server-side — the
-// proxy resolves tenant from the SSR session, forwards only the allowlisted
-// client query params, and never trusts a client-supplied tenant_id.
+// proxy resolves tenant + access token from the SSR session, forwards only the
+// allowlisted client query params, and never trusts a client-supplied
+// tenant_id. It now also forwards the Supabase bearer token (+ the service-token
+// soak fallback) so the bridge can verify identity server-side; see
+// bridge-fetch.ts.
 export async function proxyBridgeQuery(
   request: Request,
   bridgePath: string,
   forward: string[] = [],
 ): Promise<Response> {
-  const resolved = await resolveTenantFromSession();
-  if (!resolved.ok) return tenantUnresolvedResponse(resolved.code);
+  const auth = await resolveBridgeAuth();
+  if (!auth.ok) return bridgeUnresolvedResponse(auth.code);
 
   try {
     const url = new URL(BRIDGE_URL);
@@ -32,11 +32,18 @@ export async function proxyBridgeQuery(
       if (value != null) url.searchParams.set(key, value);
     }
     // Server-injected tenant overrides any client-supplied value.
-    url.searchParams.set("tenant_id", resolved.tenant_id);
+    url.searchParams.set("tenant_id", auth.tenant_id);
+
+    const serviceToken = process.env.INTERNAL_WEBHOOK_SECRET;
+    const headers: Record<string, string> = { "X-Tenant-Id": auth.tenant_id };
+    if (auth.access_token) {
+      headers["Authorization"] = `Bearer ${auth.access_token}`;
+    }
+    if (serviceToken) headers["X-Internal-Service-Token"] = serviceToken;
 
     const resp = await fetch(url, {
       method: "GET",
-      headers: { "X-Tenant-Id": resolved.tenant_id },
+      headers,
       cache: "no-store",
     });
     const text = await resp.text();
