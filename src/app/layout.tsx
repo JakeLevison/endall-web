@@ -7,26 +7,44 @@ import ScrollRestoration from "@/components/shared/ScrollRestoration";
 import PostHogProvider from "@/components/providers/PostHogProvider";
 import "./globals.css";
 
+const TITLE = "Endall: AI Ops Team for MEP Contractors";
+const DESCRIPTION =
+  "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.";
+
 export const metadata: Metadata = {
-  title: "Endall: AI Ops Team for MEP Contractors",
-  description:
-    "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
+  metadataBase: new URL("https://endall.ai"),
+  title: TITLE,
+  description: DESCRIPTION,
+  // favicon.ico is wired automatically by the app/favicon.ico file convention.
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/site.webmanifest",
   openGraph: {
-    title: "Endall: AI Ops Team for MEP Contractors",
-    description:
-      "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "https://endall.ai",
     siteName: "Endall",
     type: "website",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Endall: AI Ops Team for MEP Contractors",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Endall",
-    description:
-      "Call answering, estimates, proposals, competitive intelligence, and daily ops briefings. One AI ops team for MEP contractors.",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og.png"],
   },
 };
 
