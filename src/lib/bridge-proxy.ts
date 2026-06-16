@@ -12,9 +12,9 @@ const BRIDGE_URL =
 // same-origin proxy fixes that AND keeps tenant resolution server-side — the
 // proxy resolves tenant + access token from the SSR session, forwards only the
 // allowlisted client query params, and never trusts a client-supplied
-// tenant_id. It now also forwards the Supabase bearer token (+ the service-token
-// soak fallback) so the bridge can verify identity server-side; see
-// bridge-fetch.ts.
+// tenant_id. It also forwards the Supabase bearer token so the bridge can
+// verify identity server-side; see bridge-fetch.ts. (The service-token soak
+// fallback was retired 2026-06-16; bearer is the only credential now.)
 export async function proxyBridgeQuery(
   request: Request,
   bridgePath: string,
@@ -34,12 +34,10 @@ export async function proxyBridgeQuery(
     // Server-injected tenant overrides any client-supplied value.
     url.searchParams.set("tenant_id", auth.tenant_id);
 
-    const serviceToken = process.env.INTERNAL_WEBHOOK_SECRET;
     const headers: Record<string, string> = { "X-Tenant-Id": auth.tenant_id };
     if (auth.access_token) {
       headers["Authorization"] = `Bearer ${auth.access_token}`;
     }
-    if (serviceToken) headers["X-Internal-Service-Token"] = serviceToken;
 
     const resp = await fetch(url, {
       method: "GET",
