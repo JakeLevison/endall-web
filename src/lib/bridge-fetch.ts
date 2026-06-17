@@ -14,20 +14,18 @@ import {
  * the web app, every server-side bridge call must forward the caller's verified
  * session token. This wrapper is the single chokepoint that does so.
  *
- * Each call attaches three headers, resolved from the SSR session (never from
+ * Each call attaches two headers, resolved from the SSR session (never from
  * client input):
- *   - `Authorization: Bearer <access_token>`  -> the target (bearer) path
+ *   - `Authorization: Bearer <access_token>`  -> the bridge verifies this token
+ *                                                and derives tenant from
+ *                                                tenant_members
  *   - `X-Tenant-Id: <tenant_id>`              -> a CLAIM the bridge validates
  *                                                against the token's memberships
- *   - `X-Internal-Service-Token: <secret>`    -> web SOAK fallback only
  *
- * SOAK NOTE / REMOVAL TRIGGER: `X-Internal-Service-Token` carries the
- * server-only INTERNAL_WEBHOOK_SECRET so a call still resolves if the bearer
- * token is briefly unavailable during rollout. It is a server-to-server secret,
- * never exposed to the browser. The bridge logs `service_token_auth_path` every
- * time it resolves via this header. Remove this header here AND the
- * service-token branch in the bridge once that log shows zero hits across a full
- * 72-hour prod soak. Tracked in `vault/Endall/UPDATE_SITES_FOLLOWUPS.md`.
+ * The web service-token soak fallback (`X-Internal-Service-Token`) was retired
+ * 2026-06-16 after the bridge's `service_token_auth_path` log showed zero hits;
+ * the bridge now accepts the bearer path only. (INTERNAL_WEBHOOK_SECRET still
+ * exists, but only to sign the triggers webhook in demo-submit -- unrelated.)
  *
  * The verified tenant overrides any client-supplied tenant on both the header
  * and the `tenant_id` query param, so a client cannot assert another tenant.
@@ -85,8 +83,6 @@ export async function bridgeFetch(
   // client can never assert a tenant via the query string.
   url.searchParams.delete("tenant_id");
 
-  const serviceToken = process.env.INTERNAL_WEBHOOK_SECRET;
-
   // Caller headers first; auth/tenant headers last so they cannot be
   // overridden. Plain record (not Headers) so callers and tests can read keys
   // by exact name; all callers pass plain-object headers.
@@ -97,7 +93,6 @@ export async function bridgeFetch(
     headers["Authorization"] = `Bearer ${auth.access_token}`;
   }
   headers["X-Tenant-Id"] = auth.tenant_id;
-  if (serviceToken) headers["X-Internal-Service-Token"] = serviceToken;
 
   try {
     return await fetch(url, {
