@@ -61,7 +61,6 @@ const PUBLIC_PREFIXES = [
   "/features",
   "/onboarding",
   "/privacy",
-  "/team",
   "/terms",
   "/ask",
 ];
