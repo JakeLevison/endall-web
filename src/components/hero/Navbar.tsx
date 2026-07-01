@@ -137,6 +137,23 @@ export default function Navbar() {
             How it Works
           </a>
           <a
+            href="/about"
+            className="nav-link-hover"
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "16px",
+              color: "var(--text-tertiary)",
+              textDecoration: "none",
+              transition: "color 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+            onFocus={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+            onBlur={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          >
+            About
+          </a>
+          <a
             href="/contact"
             className="nav-link-hover"
             style={{
@@ -323,6 +340,21 @@ export default function Navbar() {
             }}
           >
             How it Works
+          </a>
+          <a
+            href="/about"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              fontFamily: "var(--font-sans), sans-serif",
+              fontSize: "16px",
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              minHeight: "44px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            About
           </a>
           <a
             href="/contact"
