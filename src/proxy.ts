@@ -55,6 +55,7 @@ const PUBLIC_ROUTES = [
 // never reach these paths because they do not exist outside (tenant).
 const TENANT_PATH_PREFIXES = ["/approve", "/booking", "/invoice", "/tech"];
 const PUBLIC_PREFIXES = [
+  "/about",
   "/contact",
   "/demo",
   "/discovery",

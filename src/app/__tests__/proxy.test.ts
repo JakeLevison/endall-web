@@ -245,6 +245,7 @@ describe("proxy", () => {
   // someone adds a marketing page and forgets the allowlist, this should
   // be the test that fails.
   const PUBLIC_PATHS = [
+    "/about",
     "/contact",
     "/demo",
     "/demo/request",
