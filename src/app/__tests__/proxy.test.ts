@@ -253,7 +253,6 @@ describe("proxy", () => {
     "/discovery",
     "/features",
     "/privacy",
-    "/team",
     "/terms",
     "/ask",
     "/oauth/handshake",
